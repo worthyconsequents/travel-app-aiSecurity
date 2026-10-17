@@ -1,0 +1,33 @@
+{
+  "verified_at": "2026-10-17T19:23:11.793626+00:00",
+  "implementations": [
+    "http://localhost:8080/monitor",
+    "http://localhost:8081/monitor"
+  ],
+  "unit_tests": {
+    "passed_per_implementation": 104
+  },
+  "production_frontend_build": "passed",
+  "checks": [
+    "unauthenticated monitoring rejected",
+    "customer and synthetic admin cannot bypass password",
+    "password tampering, expiry and rotation",
+    "AWS provider caching and fail-closed errors with mocks",
+    "secret values excluded from responses and frontend HTML",
+    "six saved attack results with unchanged bookings",
+    "denied policy flow stops before dispatch",
+    "allowed flow records dispatch and completion",
+    "chat and offline inference request/response correlation",
+    "logout and no-store responses",
+    "chatbot and public app regression checks",
+    "private .env mode 0600 and gitignored",
+    "generic AWS deploy plan without network calls"
+  ],
+  "aws_resources_created": 0,
+  "paid_model_calls": 0,
+  "evidence_limits": [
+    "Local reference policy and offline AgentCore contract simulation only",
+    "Injection fixture forces a malicious tool request; no real-model susceptibility claim",
+    "AWS apply and live secret retrieval not exercised against AWS"
+  ]
+}

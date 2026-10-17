@@ -1,0 +1,393 @@
+# Stargate Helm chart — lean defaults.
+# Full schema docs: the chart's README.md (`helm show readme`).
+
+# -- Container image registry + path. Final ref is <registry>/<repository>/<service>:<tag>.
+# Defaults target the public gallery, which is anonymously pullable. Internal
+# builds override image.registry alone — see examples/kind-local.yaml.
+image:
+  registry: public.ecr.aws/trendmicro/ai-security
+  repository: ai-gateway
+  pullPolicy: IfNotPresent
+  # tag defaults to .Chart.AppVersion when empty
+  tag: ""
+
+# Public gallery images need no credentials.
+imagePullSecrets: []
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+# admin gates the admin API (the gateway proxies admin requests to the server)
+# and the admin UI login with a master key for self hosted server. The chart 
+# puts the key in a Secret mounted read-only on the gateway; the gateway leader
+# patches it on POST /admin/key/regenerate. The self-hosted server chart mounts
+# this same Secret via admin.masterKey.existingSecret. Disabled leaves the
+# admin surface open (cluster-internal only).
+admin:
+  masterKey:
+    enabled: false
+    # value seeds the Secret on a fresh install. Empty generates a random
+    # sk- key. On upgrade the live value is preserved (never reset).
+    value: ""
+    # existingSecret reuses a pre-existing master-key Secret instead of letting
+    # the chart create one; the chart still mounts it and grants patch RBAC.
+    existingSecret: ""
+    # name overrides the chart-created Secret name (default <release>-master-key).
+    name: ""
+    # mountPath is where the master-key Secret is projected (read-only). The key
+    # lands at <mountPath>/master-key.
+    mountPath: /etc/secrets/ai-gateway-admin
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1
+  runAsGroup: 1
+  fsGroup: 1
+  # RuntimeDefault seccomp blocks ptrace/process_vm_readv at the seccomp layer —
+  # defense-in-depth against reading another process's memory (keys, DEK).
+  seccompProfile:
+    type: RuntimeDefault
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+# ---------------------------------------------------------------------------
+# Gateway — data plane
+# ---------------------------------------------------------------------------
+gateway:
+  enabled: true
+  gatewayName: ""
+  replicaCount: 2
+
+  # Gateway label reported on every heartbeat: gatewayName groups the gateways
+  # that make up one logical deployment (defaults to the release name). The
+  # cluster identity is not configurable — the gateway derives it from the
+  # kube-system namespace UID for itself.
+  gatewayName: ""
+
+  # gatewayKey is the shared X25519 keypair every replica uses to open the DEK
+  # delivered in the catalog feed. For GitOps / `helm template`, provision it
+  # once and set existingSecret (a Secret with a `gateway.key` entry = 32 raw
+  # bytes); the chart mounts it and never generates. Left unset, a plain
+  # `helm install` generates one. Unlike the KEK, regenerating it is
+  # self-healing (the DEK is re-delivered on the next catalog poll).
+  gatewayKey:
+    existingSecret: ""
+    # name overrides the chart-created Secret name (default <gateway>-gateway-key).
+    name: ""
+
+  # Configuration to connect to TrendAI Vision One
+  visionone:
+    # url for Visione One AI Security
+    url: ""
+
+    # authToken configuration for Vision One AI Security
+    authToken: 
+      # name overrides the chart-created Secret name (default <gateway>-auth-token).
+      name: ""
+      # existingSecret reuses an pre-existing device-token Secret instead of
+      # letting the chart create one; the chart still mounts it and grants RBAC.
+      existingSecret: ""
+      # mountPath is where the device-token Secret is projected (read-only). The
+      # token lands at <mountPath>/token, which becomes server.device_token_path.
+      mountPath: /etc/secrets/ai-gateway
+      # bootstrap.token seeds the Secret on a fresh install with the one-time
+      # enrollment token from the server's gateway Setup. The gateway reads it from
+      # the mount, enrolls, and the leader rotates the device token back into this
+      # same Secret. On upgrade the live token is preserved (never reset). Required
+      # on first install unless existingSecret is set.
+      bootstrap:
+        token: ""
+
+  # Rendered verbatim into /etc/ai-gateway/config.yaml.
+  config:
+    log:
+      level: info
+      format: json
+    # secrets_root bounds every file-backed secret the gateway resolves (LLM
+    # provider keys, MCP credentials / OAuth client secrets). A path escaping
+    # it skips that provider/upstream (warn, not boot-fail). Defaults to
+    # /etc/secrets — where every chart secret mount projects. Set to "/" to
+    # admit any path (e.g. a Vault CSI direct mount outside /etc/secrets), or
+    # a specific prefix to confine to that subtree.
+    secrets_root: /etc/secrets
+    server:
+      # Interval of stargate policy refresh
+      policy_refresh_seconds: 30
+    llm_proxy:
+      enabled: true
+      host: "0.0.0.0"
+      port: 8080
+      # Inbound header forwarding: a built-in baseline already allows SDK +
+      # tracing headers and drops hop-by-hop / Authorization / Cookie /
+      # x-api-key. Extend per-deployment:
+      #   forward_extra: ["X-Trace-Internal"]
+      #   block_extra:   ["OpenAI-Beta"]
+      headers:
+        forward_extra: []
+        block_extra: []
+      # Timeouts + buffer budgets. Each falls back to the shown default when
+      # omitted or zero.
+      request_timeout: 60s            # whole-call bound for non-streaming requests
+      stream_first_byte_timeout: 30s  # wait for the upstream's first byte; the stream body is unbounded
+      shutdown_timeout: 120s          # graceful drain budget on SIGTERM
+      max_buffered_stream_bytes: 8388608       # 8 MiB per-request cap for the buffered (deny-capable) path; 502 on overflow
+      max_inflight_buffered_bytes: 268435456   # 256 MiB pod-wide buffered-stream budget; 503 when exhausted (negative disables)
+    mcp_proxy:
+      enabled: true
+      host: "0.0.0.0"
+      port: 8081
+      # Timeouts + limits. Each falls back to the shown default when omitted or zero.
+      shutdown_timeout: 120s          # graceful drain budget on SIGTERM
+      upstream_call_timeout: 120s     # per-call deadline so a hung upstream can't hold the connection
+      max_tool_result_bytes: 0        # reject a tool result larger than this; 0 disables the cap
+      max_inflight_scans: 8           # cap on concurrent content scans; a call beyond it waits (bounded by scan_timeout)
+      scan_timeout: 5s                # wait to acquire a scan slot / single-scan runtime; on timeout the call fails closed
+    manager:
+      host: "0.0.0.0"
+      port: 9090
+    koolaide:
+      enabled: true
+      # modules to load. A module that fails to load is logged and skipped.
+      modules:
+        - prompt_attack_scanner
+        - harmful_scanner
+        - skyeyes_scanner
+      # scan_timeout bounds one per-module scan; a slower scan is dropped (not
+      # blocking). Raise above the engine's worst-case chunking latency. Empty → 5s.
+      scan_timeout: 5s
+    # events: the durable buffer + batching sender behind V1 activity-event
+    # delivery (RestSender, the dispatcher path). No wal.path is set here —
+    # the chart defaults it to the already-mounted /tmp emptyDir (crash/OOM-
+    # restart durability, no extra config needed) unless you set one below.
+    # Point it at a PVC-backed path instead for durability across a pod
+    # reschedule onto another node, not just a container restart; set it to
+    # "" explicitly to opt back into the memory tier (lost on any restart).
+    events:
+      # wal:
+      #   path: /data/aigw-wal.db   # requires mounting a volume there
+      activity:
+        max_events: 50000    # EventLog depth cap; oldest unshipped entry drops beyond it
+        max_bytes: 536870912  # 512 MiB — event content has no upstream size cap, so this (not
+                               # max_events alone) is the real backstop against disk pressure
+      sender:
+        batch_max: 500
+        batch_max_age: 2s
+        backoff_min: 500ms
+        backoff_max: 30s
+        max_attempts: 20   # failed deliveries before an event is dropped instead of retried
+        ingress_buffer: 1024 # events held before the durable write; the window a SIGKILL can lose
+        drain_timeout: 5s  # final ship attempt at shutdown; keep inside terminationGracePeriodSeconds
+    # auth_mode selects the inbound authenticator. "vk" (default) requires
+    # every request to carry a valid virtual key via Authorization: Bearer
+    # or x-api-key. "passthrough" skips the check — only suitable for dev,
+    # CI, or playground deployments.
+    auth_mode: vk
+
+  # secretsDir mounts ONE shared Secret as a directory — each key becomes a
+  # file at <mountPath>/<key>, reference it from the catalog. Secret keys are
+  # flat (no "/"), so prefix by kind to keep names distinct:
+  #
+  #   provider-<name>   → <mountPath>/provider-openai      api_key.file
+  #   mcp-<name>        → <mountPath>/mcp-github           credential.file
+  #
+  # Add one: put the key in the Secret + reference the file in the catalog —
+  # no helm upgrade. Kubelet swaps in new keys (~60s); the gateway reads them
+  # live, no pod restart. See docs/v1alpha/user-guide/install/kubernetes.md
+  # for the full key spec.
+  #
+  # mountPath must NOT be /etc/secrets itself — the gateway's own system keys
+  # (resp-id-key, gateway-key, admin, per-provider) mount there.
+  secretsDir:
+    existingSecret: ""              # shared Secret holding all gateway file-backed secrets
+    mountPath: /etc/secrets/gateway
+
+  # gateway.secrets wires per-entry k8s Secret references, one entry per catalog
+  # value. Reference the value from the catalog by the entry name:
+  #
+  #   env mode  (set envVar) → api_key:  { env: <envVar> }
+  #   file mode (no envVar)  → api_key.file: /etc/secrets/gateway/<name>
+  #                            (or the entry's mountPath)
+  #
+  # Fields:
+  #   existingSecret  (required) — name of the k8s Secret
+  #   key             — key within the Secret; defaults to the entry name
+  #   envVar          — env var name; presence selects env mode over file mode
+  #   mountPath       — file-mode mount point; default /etc/secrets/gateway/<name>
+  #
+  # Examples:
+  #   secrets:
+  #     openai:                # env mode → reference api_key.env: OPENAI_API_KEY
+  #       existingSecret: stargate-llm-keys
+  #       key: openai-api-key
+  #       envVar: OPENAI_API_KEY
+  #     mcp-atlassian:         # file mode → /etc/secrets/gateway/mcp-atlassian
+  #       existingSecret: stargate-mcp-secrets
+  #       key: atlassian-token
+  #     rdsec:                 # file mode at a custom path
+  #       existingSecret: stargate-rdsec
+  #       key: api-key
+  #       mountPath: /etc/secrets/rdsec/api-key
+  secrets: {}
+
+  # Escape hatch for custom secret mounts (e.g. Vault CSI / secrets-store CSI
+  # SecretProviderClass mounted directly, no intermediate k8s Secret). Point
+  # the catalog's api_key.file at the mount path.
+  extraVolumes: []
+  extraVolumeMounts: []
+
+  resources:
+    requests:
+      cpu: 250m
+      # koolaide loads its ONNX scanner models (~590 MiB int8) plus the ORT
+      # runtime and skyeyes stack into memory at startup — steady-state RSS is
+      # ~1.6 GiB with scanners on. Request 1 GiB and cap at 3 GiB; a 1 GiB limit
+      # OOM-kills the pod mid-load (exit 137 → CrashLoop → never Ready). Lower
+      # both when running with koolaide.enabled=false.
+      memory: 1Gi
+    limits:
+      cpu: "2"
+      memory: 3Gi
+
+  # timeoutSeconds is set explicitly: the kubelet default of 1s causes spurious
+  # probe failures (and pod restarts / removal from endpoints) under load.
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: manager
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 3
+  readinessProbe:
+    httpGet:
+      path: /readyz
+      port: manager
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+  startupProbe:
+    httpGet:
+      path: /health
+      port: manager
+    # koolaide loads each scanner's ONNX model serially at boot (tens of seconds
+    # on a constrained node); the window must cover the slowest cold start or the
+    # pod is killed mid-load and never goes Ready. 90 × 2s = 3m.
+    failureThreshold: 90
+    periodSeconds: 2
+    timeoutSeconds: 3
+
+  # preStop sleep lets the pod leave Service endpoints before SIGTERM lands.
+  # Budget = preStop (15s) + the proxy ShutdownTimeout (120s default) + buffer,
+  # so in-flight LLM streams drain fully instead of being cut at the old 5s.
+  terminationGracePeriodSeconds: 140
+  lifecycle:
+    preStop:
+      exec:
+        command:
+          - /bin/sh
+          - -c
+          - "sleep 15"
+
+  service:
+    type: ClusterIP
+    sessionAffinity: None
+    ports:
+      llmProxy: 8080
+      mcpProxy: 8081
+      manager: 9090
+    annotations: {}
+
+  ingress:
+    enabled: false
+    className: ""
+    # SSE streaming requires the controller to NOT buffer responses and to allow
+    # long-lived connections. Set the equivalents for your controller, e.g. nginx:
+    #   nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    #   nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    annotations: {}
+    hosts: []
+    # Example:
+    # hosts:
+    #   - host: llm.example.com
+    #     paths: [{path: /v1, pathType: Prefix, port: llmProxy}]
+    #   - host: mcp.example.com
+    #     paths: [{path: /, pathType: Prefix, port: mcpProxy}]
+    tls: []
+
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    behavior:
+      scaleDown:
+        stabilizationWindowSeconds: 300
+        policies:
+          - type: Percent
+            value: 50
+            periodSeconds: 60
+
+  # Enabled by default so a node drain / rolling update can't evict every
+  # replica at once and cut all in-flight streams. With replicaCount 2,
+  # minAvailable 1 keeps one serving throughout.
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+
+  serviceMonitor:
+    enabled: false
+    interval: 30s
+    scrapeTimeout: 10s
+    additionalLabels: {}
+
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  topologySpreadConstraints: []
+
+  # Redis backs the gateway's catalog store + cross-pod pub/sub. Bundled for
+  # self-contained deployments; disable and set gateway.config.store.redis.address
+  # to bring your own (managed Redis, in-cluster Bitnami chart, etc.).
+  redis:
+    enabled: true
+    image:
+      repository: redis
+      tag: "7-alpine"
+      pullPolicy: IfNotPresent
+    service:
+      port: 6379
+    # Persistence keeps the catalog across pod restarts. Disable for ephemeral
+    # environments where a re-sync on boot is fast enough.
+    persistence:
+      enabled: true
+      storageClass: ""
+      accessMode: ReadWriteOnce
+      size: 1Gi
+    resources:
+      requests:
+        cpu: 50m
+        memory: 64Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+    podSecurityContext:
+      runAsNonRoot: true
+      runAsUser: 999
+      runAsGroup: 999
+      fsGroup: 999
+      seccompProfile:
+        type: RuntimeDefault
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop:
+          - ALL

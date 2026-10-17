@@ -1,0 +1,109 @@
+# Production — cloud LoadBalancer (no Ingress controller in front).
+#
+# When to choose this over production-ha.yaml:
+#   - Cluster has no Ingress controller (or you don't want one as a dependency).
+#   - Cloud LB handles TLS termination + DNS itself (AWS NLB + ACM cert,
+#     GCP L7 LB + managed cert, Azure App Gateway).
+#   - You want one Service ⇄ one external endpoint, no host-based routing.
+#
+# Cost tradeoff: one cloud LB per surface (1 for gateway, 1 for admin UI if
+# externalized) vs. one Ingress controller fronting both with host routing.
+# At small scale that's a wash; at scale Ingress wins on LB cost. Pick based
+# on what your platform team already operates.
+#
+# Assumes:
+#   - External V1 server already running (gateway.visionone.url set).
+#   - LB controller / cloud integration installed in the cluster
+#     (AWS Load Balancer Controller, GCP CCM, Azure CCM — whatever your
+#     provider needs to provision the LB from a Service of type LoadBalancer).
+#   - TLS cert exists in the cloud account, referenced by ARN / cert ID in
+#     the annotations below. Annotations vary by provider — examples are
+#     AWS NLB; swap for GCP `cloud.google.com/...` or Azure
+#     `service.beta.kubernetes.io/azure-...` as needed.
+
+gateway:
+  replicaCount: 3
+
+  visionone:
+    url: "https://stargate-v1.example.com"
+    # Paste the enrollment bootstrap token from the server's gateway Setup
+    # (or set authToken.existingSecret to manage it yourself).
+    authToken:
+      bootstrap:
+        token: "<paste-bootstrap-token-from-Setup>"
+
+  config:
+    log:
+      level: info
+      format: json
+
+  resources:
+    requests: { cpu: "500m", memory: "512Mi" }
+    limits:   { cpu: "4",    memory: "2Gi"   }
+
+  secrets:
+    openai:
+      existingSecret: stargate-llm-keys
+      key: openai      # mounted at /etc/secrets/gateway/openai
+
+  # Cloud LB Service. NLB terminates TLS via ACM; pod stays plain HTTP on
+  # the cluster network. Annotations are AWS-specific — see top-of-file
+  # note for GCP / Azure equivalents.
+  service:
+    type: LoadBalancer
+    sessionAffinity: None
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: nlb
+      service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+      service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+      service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-east-1:123456789012:certificate/REPLACE-ME
+      service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "llm-proxy,mcp-proxy"
+      service.beta.kubernetes.io/aws-load-balancer-backend-protocol: tcp
+
+  ingress:
+    enabled: false
+
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 30
+    targetCPUUtilizationPercentage: 65
+    behavior:
+      scaleDown:
+        stabilizationWindowSeconds: 300
+        policies:
+          - { type: Percent, value: 25, periodSeconds: 60 }
+      scaleUp:
+        stabilizationWindowSeconds: 30
+        policies:
+          - { type: Percent, value: 100, periodSeconds: 60 }
+          - { type: Pods,    value: 4,   periodSeconds: 60 }
+
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 2
+
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: topology.kubernetes.io/zone
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/component: gateway
+
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/component: gateway
+
+server:
+  enabled: false

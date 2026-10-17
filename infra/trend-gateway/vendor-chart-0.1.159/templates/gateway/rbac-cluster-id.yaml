@@ -1,0 +1,34 @@
+{{- if and .Values.gateway.enabled .Values.serviceAccount.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "ai-gateway.gateway.fullname" . }}-cluster-id
+  labels:
+    {{- include "ai-gateway.labels" . | nindent 4 }}
+    app.kubernetes.io/component: gateway
+rules:
+  # The gateway reads the kube-system namespace UID as its cluster identity for
+  # heartbeats. Pinned to that one namespace so the SA can identify the cluster
+  # and nothing else.
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    resourceNames:
+      - kube-system
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "ai-gateway.gateway.fullname" . }}-cluster-id
+  labels:
+    {{- include "ai-gateway.labels" . | nindent 4 }}
+    app.kubernetes.io/component: gateway
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "ai-gateway.gateway.fullname" . }}-cluster-id
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "ai-gateway.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}

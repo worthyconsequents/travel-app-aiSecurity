@@ -1,0 +1,81 @@
+{{- if .Values.gateway.redis.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "ai-gateway.fullname" . }}-redis
+  labels:
+    {{- include "ai-gateway.labels" . | nindent 4 }}
+    app.kubernetes.io/component: redis
+spec:
+  serviceName: {{ include "ai-gateway.fullname" . }}-redis
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "ai-gateway.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: redis
+  template:
+    metadata:
+      labels:
+        {{- include "ai-gateway.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: redis
+    spec:
+      securityContext:
+        {{- toYaml .Values.gateway.redis.podSecurityContext | nindent 8 }}
+      containers:
+        - name: redis
+          image: "{{ .Values.gateway.redis.image.repository }}:{{ .Values.gateway.redis.image.tag }}"
+          imagePullPolicy: {{ .Values.gateway.redis.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.gateway.redis.securityContext | nindent 12 }}
+          command:
+            - redis-server
+            - --save
+            - "60"
+            - "1"
+            - --dir
+            - /data
+            {{- if .Values.gateway.redis.persistence.enabled }}
+            - --appendonly
+            - "yes"
+            {{- end }}
+          ports:
+            - name: redis
+              containerPort: 6379
+              protocol: TCP
+          livenessProbe:
+            exec:
+              command: ["redis-cli", "ping"]
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command: ["redis-cli", "ping"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            {{- toYaml .Values.gateway.redis.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      {{- if not .Values.gateway.redis.persistence.enabled }}
+      # No PVC: back /data with an emptyDir so Redis has a writable data dir
+      # while the container rootfs stays read-only.
+      volumes:
+        - name: data
+          emptyDir: {}
+      {{- end }}
+  {{- if .Values.gateway.redis.persistence.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - {{ .Values.gateway.redis.persistence.accessMode }}
+        {{- if .Values.gateway.redis.persistence.storageClass }}
+        storageClassName: {{ .Values.gateway.redis.persistence.storageClass }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.gateway.redis.persistence.size }}
+  {{- end }}
+{{- end }}

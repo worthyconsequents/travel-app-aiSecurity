@@ -1,0 +1,21 @@
+# Optional private network link for the locally installed Trend Kubernetes gateway.
+# Start only the link: docker compose -f compose.yaml -f compose.trend.yaml up -d trend-mcp-bridge
+services:
+  trend-mcp-bridge:
+    image: nginxinc/nginx-unprivileged:1.28-alpine
+    volumes:
+      - ./infra/trend-gateway/mcp-bridge.conf:/etc/nginx/conf.d/default.conf:ro
+    networks: [private, trend-kind]
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:8082/health]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+networks:
+  trend-kind:
+    external: true
+    name: kind

@@ -1,0 +1,42 @@
+{{- if .Values.gateway.enabled -}}
+{{- $isNodePort := eq .Values.gateway.service.type "NodePort" -}}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ai-gateway.gateway.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ai-gateway.labels" . | nindent 4 }}
+    app.kubernetes.io/component: gateway
+  {{- with .Values.gateway.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.gateway.service.type }}
+  sessionAffinity: {{ .Values.gateway.service.sessionAffinity }}
+  selector:
+    {{- include "ai-gateway.gateway.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: llm-proxy
+      port: {{ .Values.gateway.service.ports.llmProxy }}
+      targetPort: llm-proxy
+      protocol: TCP
+      {{- if and $isNodePort (gt (int (dig "nodePorts" "llmProxy" 0 .Values.gateway.service)) 0) }}
+      nodePort: {{ dig "nodePorts" "llmProxy" 0 .Values.gateway.service }}
+      {{- end }}
+    - name: mcp-proxy
+      port: {{ .Values.gateway.service.ports.mcpProxy }}
+      targetPort: mcp-proxy
+      protocol: TCP
+      {{- if and $isNodePort (gt (int (dig "nodePorts" "mcpProxy" 0 .Values.gateway.service)) 0) }}
+      nodePort: {{ dig "nodePorts" "mcpProxy" 0 .Values.gateway.service }}
+      {{- end }}
+    - name: manager
+      port: {{ .Values.gateway.service.ports.manager }}
+      targetPort: manager
+      protocol: TCP
+      {{- if and $isNodePort (gt (int (dig "nodePorts" "manager" 0 .Values.gateway.service)) 0) }}
+      nodePort: {{ dig "nodePorts" "manager" 0 .Values.gateway.service }}
+      {{- end }}
+{{- end }}

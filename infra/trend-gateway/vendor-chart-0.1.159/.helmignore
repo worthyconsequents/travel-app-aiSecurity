@@ -1,0 +1,19 @@
+.DS_Store
+.git/
+.gitignore
+.idea/
+.vscode/
+*.tmproj
+.editorconfig
+.project
+.tgz
+README.md.gotmpl
+/tests/
+
+# Internal-only example values. These pin the JFrog registry and/or drive the
+# self-hosted server (its own chart), so they are meaningless to a customer
+# pulling from the public gallery. They stay in the repo — CI still lints and
+# templates every file in examples/ — they just don't ship.
+examples/kind-local.yaml
+examples/sg0-standalone.yaml
+examples/gitops.yaml

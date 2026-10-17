@@ -1,0 +1,224 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Boring Travel AgentCore interceptor foundation. REVIEW ONLY; deployment incurs AWS charges.",
+  "Parameters": {
+    "ArtifactBucket": {
+      "Type": "String",
+      "Description": "Approved private S3 bucket containing the interceptor ZIP"
+    },
+    "ArtifactKey": {
+      "Type": "String",
+      "Description": "Versioned interceptor ZIP object key"
+    },
+    "AIGuardSecretArn": {
+      "Type": "String",
+      "Description": "Existing Secrets Manager secret ARN; NEVER supply a token here"
+    },
+    "AIGuardUrl": {
+      "Type": "String",
+      "Default": "https://api.xdr.trendmicro.com/v3.0/aiSecurity/applyGuardrails"
+    },
+    "SecretKmsKeyArn": {
+      "Type": "String",
+      "Default": "",
+      "Description": "Optional customer-managed key encrypting the secret"
+    }
+  },
+  "Conditions": {
+    "UsesCustomKms": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "SecretKmsKeyArn"
+            },
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "Resources": {
+    "InterceptorRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "ReadOneSecretAndWriteOwnLogs",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "secretsmanager:GetSecretValue"
+                  ],
+                  "Resource": {
+                    "Ref": "AIGuardSecretArn"
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": {
+                    "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${AWS::StackName}-inspector:*"
+                  }
+                },
+                {
+                  "Fn::If": [
+                    "UsesCustomKms",
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "kms:Decrypt"
+                      ],
+                      "Resource": {
+                        "Ref": "SecretKmsKeyArn"
+                      }
+                    },
+                    {
+                      "Ref": "AWS::NoValue"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "InspectorLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Sub": "/aws/lambda/${AWS::StackName}-inspector"
+        },
+        "RetentionInDays": 7
+      }
+    },
+    "Inspector": {
+      "Type": "AWS::Lambda::Function",
+      "DependsOn": "InspectorLogGroup",
+      "Properties": {
+        "FunctionName": {
+          "Fn::Sub": "${AWS::StackName}-inspector"
+        },
+        "Runtime": "python3.12",
+        "Handler": "services.agentcore.interceptor.lambda_handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "InterceptorRole",
+            "Arn"
+          ]
+        },
+        "Timeout": 15,
+        "MemorySize": 256,
+        "ReservedConcurrentExecutions": 5,
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ArtifactBucket"
+          },
+          "S3Key": {
+            "Ref": "ArtifactKey"
+          }
+        },
+        "Environment": {
+          "Variables": {
+            "AI_GUARD_MODE": "real",
+            "AI_GUARD_SECRET_ARN": {
+              "Ref": "AIGuardSecretArn"
+            },
+            "AI_GUARD_URL": {
+              "Ref": "AIGuardUrl"
+            },
+            "AI_GUARD_APPLICATION_NAME": "boring-travel-agentcore"
+          }
+        }
+      }
+    },
+    "GatewayRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "bedrock-agentcore.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole",
+              "Condition": {
+                "StringEquals": {
+                  "aws:SourceAccount": {
+                    "Ref": "AWS::AccountId"
+                  }
+                },
+                "ArnLike": {
+                  "aws:SourceArn": {
+                    "Fn::Sub": "arn:${AWS::Partition}:bedrock-agentcore:${AWS::Region}:${AWS::AccountId}:gateway/*"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "InvokeOnlyInspector",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "lambda:InvokeFunction"
+                  ],
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "Inspector",
+                      "Arn"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "InterceptorArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "Inspector",
+          "Arn"
+        ]
+      }
+    },
+    "GatewayRoleArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "GatewayRole",
+          "Arn"
+        ]
+      }
+    }
+  }
+}

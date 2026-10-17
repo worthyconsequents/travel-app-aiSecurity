@@ -1,0 +1,18 @@
+apiVersion: v2
+appVersion: lts-0.1.159
+description: AI security gateway for LLM and MCP traffic
+keywords:
+- ai
+- llm
+- mcp
+- security
+- gateway
+kubeVersion: '>=1.27.0-0'
+maintainers:
+- email: support@trendmicro.com
+  name: Trend AI Security
+name: ai-gateway
+sources:
+- https://github.com/trend-ai-security/stargate
+type: application
+version: 0.1.159

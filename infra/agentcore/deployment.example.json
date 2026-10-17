@@ -1,0 +1,33 @@
+{
+  "region": "us-west-2",
+  "account_id": "123456789012",
+  "interceptor_arn": "arn:aws:lambda:us-west-2:123456789012:function:boring-travel-inspector",
+  "gateway_role_arn": "arn:aws:iam::123456789012:role/boring-travel-gateway",
+  "inference_gateway_id": "REPLACE-INFERENCE-ID",
+  "tool_gateway_id": "REPLACE-TOOL-ID",
+  "vpc_id": "vpc-REPLACE",
+  "private_subnet_ids": [
+    "subnet-REPLACE-A",
+    "subnet-REPLACE-B"
+  ],
+  "security_group_ids": [
+    "sg-REPLACE"
+  ],
+  "tool_targets": {
+    "travel-discovery": {
+      "endpoint": "https://travel-discovery.internal.example.com/mcp",
+      "api_key_provider_arn": "arn:aws:bedrock-agentcore:us-west-2:123456789012:token-vault/default/apikeycredentialprovider/travel-discovery"
+    },
+    "reservations": {
+      "endpoint": "https://reservations.internal.example.com/mcp",
+      "api_key_provider_arn": "arn:aws:bedrock-agentcore:us-west-2:123456789012:token-vault/default/apikeycredentialprovider/reservations"
+    },
+    "customer-payments": {
+      "endpoint": "https://customer-payments.internal.example.com/mcp",
+      "api_key_provider_arn": "arn:aws:bedrock-agentcore:us-west-2:123456789012:token-vault/default/apikeycredentialprovider/customer-payments"
+    }
+  },
+  "policy_engine_arn": "arn:aws:bedrock-agentcore:us-west-2:123456789012:policy-engine/REPLACE",
+  "policy_engine_id": "REPLACE-POLICY-ENGINE-ID",
+  "tool_gateway_arn": "arn:aws:bedrock-agentcore:us-west-2:123456789012:gateway/REPLACE"
+}

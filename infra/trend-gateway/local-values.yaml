@@ -1,0 +1,30 @@
+# Local-only data plane; registration settings come from AI_Gateway/overrides.yaml.
+# Single replica avoids running bundled Redis alongside the travel app.
+admin:
+  masterKey:
+    enabled: true
+gateway:
+  replicaCount: 1
+  redis:
+    enabled: false
+  autoscaling:
+    enabled: false
+  ingress:
+    enabled: false
+  service:
+    type: ClusterIP
+  config:
+    auth_mode: vk
+    llm_proxy:
+      enabled: false
+    mcp_proxy:
+      enabled: true
+    koolaide:
+      enabled: true
+  resources:
+    requests:
+      cpu: 250m
+      memory: 1Gi
+    limits:
+      cpu: "2"
+      memory: 3Gi

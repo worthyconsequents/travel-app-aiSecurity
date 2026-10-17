@@ -1,0 +1,36 @@
+# Select with a DIFFERENT project name so the original stack remains untouched.
+services:
+  api:
+    environment:
+      SESSION_COOKIE_NAME: boring_travel_agentcore_session
+      DEPLOYMENT_PROFILE: agentcore-offline
+      MODEL_MODE: mock
+      AWS_EC2_METADATA_DISABLED: 'true'
+    depends_on:
+      agentcore-offline: {condition: service_healthy}
+  gateway:
+    environment:
+      DEPLOYMENT_PROFILE: agentcore-offline
+      AWS_EC2_METADATA_DISABLED: 'true'
+    depends_on:
+      agentcore-offline: {condition: service_healthy}
+  agentcore-offline:
+    build:
+      context: .
+      dockerfile: Dockerfile.python
+    command: [uvicorn, services.agentcore.offline_gateway:app, --host, 0.0.0.0, --port, '8000']
+    environment:
+      DEPLOYMENT_PROFILE: local
+      APP_MODE: local
+      AI_GUARD_MODE: offline
+      AWS_EC2_METADATA_DISABLED: 'true'
+    networks: [private]
+    depends_on:
+      travel-discovery: {condition: service_healthy}
+      reservations: {condition: service_healthy}
+      customer-payments: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 30

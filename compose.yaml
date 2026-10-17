@@ -1,0 +1,95 @@
+name: travel-agent-security-demo
+x-python: &python
+  build:
+    context: .
+    dockerfile: Dockerfile.python
+  environment: &env
+    DATABASE_URL: postgresql+psycopg://travel_demo:${POSTGRES_PASSWORD:-local-synthetic-only}@db:5432/travel_demo
+    MODEL_MODE: ${MODEL_MODE:-mock}
+    APP_MODE: local
+  healthcheck:
+    test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+    interval: 5s
+    timeout: 3s
+    retries: 30
+  networks: [private]
+  depends_on:
+    db: {condition: service_healthy}
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: travel_demo
+      POSTGRES_DB: travel_demo
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local-synthetic-only}
+    volumes: ["postgres-data:/var/lib/postgresql/data"]
+    networks: [private]
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U travel_demo -d travel_demo"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  api:
+    <<: *python
+    command: [uvicorn, services.api:app, --host, 0.0.0.0, --port, '8000']
+    networks: [private]
+    environment:
+      <<: *env
+      GATEWAY_URL: http://gateway:8000
+      AWS_REGION: ${AWS_REGION:-us-west-2}
+      BEDROCK_MODEL_ID: ${BEDROCK_MODEL_ID:-}
+      MONITOR_PASSWORD: ${MONITOR_PASSWORD:-}
+      MONITOR_PASSWORD_SOURCE: ${MONITOR_PASSWORD_SOURCE:-env}
+      MONITOR_SECRET_ARN: ${MONITOR_SECRET_ARN:-}
+      ENABLE_AWS_MONITOR_SECRET: ${ENABLE_AWS_MONITOR_SECRET:-false}
+      MONITOR_COOKIE_SECURE: ${MONITOR_COOKIE_SECURE:-false}
+  gateway:
+    <<: *python
+    command: [uvicorn, services.gateway:app, --host, 0.0.0.0, --port, '8000']
+  travel-discovery:
+    <<: *python
+    command: [python, -m, services.mcp_server]
+    environment:
+      <<: *env
+      SERVICE: travel-discovery
+  reservations:
+    <<: *python
+    command: [python, -m, services.mcp_server]
+    environment:
+      <<: *env
+      SERVICE: reservations
+  customer-payments:
+    <<: *python
+    command: [python, -m, services.mcp_server]
+    environment:
+      <<: *env
+      SERVICE: customer-payments
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    networks: [edge]
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+  nginx:
+    image: nginxinc/nginx-unprivileged:1.28-alpine
+    ports: ["127.0.0.1:${PUBLIC_PORT:-8080}:8080"]
+    volumes: ["./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro"]
+    networks: [edge, private]
+    depends_on:
+      api: {condition: service_healthy}
+      frontend: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:8080/health]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+volumes:
+  postgres-data:
+networks:
+  edge:
+  private:
+    internal: true

@@ -1,0 +1,17 @@
+.git
+.venv
+**/node_modules
+**/.next
+**/__pycache__
+.env
+**/*.db
+
+AI_Gateway
+
+AI-gateway
+
+infra/trend-gateway/private
+
+build
+
+infra/agentcore/deployment.local.json

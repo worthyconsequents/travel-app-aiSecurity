@@ -1,0 +1,44 @@
+{
+  "phase": "AgentCore local/offline alternative and unapplied AWS foundation",
+  "date": "2026-10-17",
+  "original_url": "http://localhost:8080",
+  "alternative_url": "http://localhost:8081",
+  "unit_tests": {
+    "passed": 61,
+    "failed": 0
+  },
+  "integration": {
+    "real_mcp_http": true,
+    "namespaced_tool_count": 10,
+    "approved_booking_and_cancel": true,
+    "single_use_approval_and_idempotency": true,
+    "six_reference_authorization_fixtures": true,
+    "model_tool_model_loop": true,
+    "input_response_interception": true,
+    "request_block_prevents_dispatch": true,
+    "inspection_outage_fails_closed": true,
+    "stopped_gateway_blocks_approved_mutation": true,
+    "stopped_gateway_chat_status": 503,
+    "no_booking_changes_during_outage": true,
+    "gateway_restored": true,
+    "original_proxy_session_and_owned_bookings": true,
+    "alternative_proxy_session_and_owned_bookings": true
+  },
+  "static_validation": {
+    "ruff_check": "PASS",
+    "ruff_format": "PASS",
+    "cloudformation_cfn_lint": "PASS",
+    "botocore_request_shape_validation": "PASS",
+    "lambda_zip_contents": "PASS"
+  },
+  "aws_resources_created": 0,
+  "paid_model_calls": 0,
+  "live_trend_detection_calls": 0,
+  "limitations": [
+    "Local simulator is not AWS AgentCore or real Trend detection",
+    "Six authorization fixtures exercise reference policy; no live Cedar enforcement test",
+    "Cloud foundation is not complete VPC/MCP/database hosting or production authentication",
+    "Live AI Guard API credentials, policy and response schema still need validation",
+    "SDK request shape and cfn-lint passes do not prove service-side deployment compatibility"
+  ]
+}

@@ -1,0 +1,207 @@
+{{- if .Values.gateway.enabled -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "ai-gateway.gateway.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ai-gateway.labels" . | nindent 4 }}
+    app.kubernetes.io/component: gateway
+spec:
+  {{- if not .Values.gateway.autoscaling.enabled }}
+  replicas: {{ .Values.gateway.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "ai-gateway.gateway.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include "ai-gateway.gateway.configYAML" . | sha256sum }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- include "ai-gateway.gateway.selectorLabels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "ai-gateway.serviceAccountName" . }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      terminationGracePeriodSeconds: {{ .Values.gateway.terminationGracePeriodSeconds }}
+      containers:
+        - name: gateway
+          image: {{ include "ai-gateway.gateway.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          args:
+            - --config=/etc/ai-gateway/config.yaml
+          ports:
+            - name: llm-proxy
+              containerPort: {{ .Values.gateway.config.llm_proxy.port }}
+              protocol: TCP
+            - name: mcp-proxy
+              containerPort: {{ .Values.gateway.config.mcp_proxy.port }}
+              protocol: TCP
+            - name: manager
+              containerPort: {{ .Values.gateway.config.manager.port }}
+              protocol: TCP
+          env:
+            - name: AIGW_CONFIG_PATH
+              value: /etc/ai-gateway/config.yaml
+            # Shared gateway keypair mount: every replica loads the same private
+            # key so any of them can open the customer DEK sealed to it.
+            - name: AIGW_GATEWAY_KEY_PATH
+              value: {{ include "ai-gateway.gateway.gatewayKeyFile" . | quote }}
+            # Gateway label + chart provenance, reported on every heartbeat so
+            # the console can group gateways and tell which chart rendered them.
+            # The cluster identity is derived from the kube-system namespace UID,
+            # not configured here.
+            - name: AIGW_GATEWAY_NAME
+              value: {{ default .Release.Name .Values.gateway.gatewayName | quote }}
+            - name: AIGW_CHART_VERSION
+              value: {{ .Chart.Version | quote }}
+            {{- if .Values.admin.masterKey.enabled }}
+            - name: AIGW_MASTER_KEY_FILE
+              value: {{ include "ai-gateway.admin.masterKeyFile" . | quote }}
+            - name: AIGW_MASTER_KEY_SECRET
+              value: {{ include "ai-gateway.admin.masterKeySecretName" . | quote }}
+            {{- end }}
+            {{- range $name, $sec := .Values.gateway.secrets }}
+            {{- if $sec.envVar }}
+            - name: {{ $sec.envVar | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $sec.existingSecret | quote }}
+                  key: {{ default $name $sec.key | quote }}
+            {{- end }}
+            {{- end }}
+          livenessProbe:
+            {{- toYaml .Values.gateway.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.gateway.readinessProbe | nindent 12 }}
+          startupProbe:
+            {{- toYaml .Values.gateway.startupProbe | nindent 12 }}
+          lifecycle:
+            {{- toYaml .Values.gateway.lifecycle | nindent 12 }}
+          resources:
+            {{- toYaml .Values.gateway.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/ai-gateway
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+            {{- range $name, $sec := .Values.gateway.secrets }}
+            {{- if not $sec.envVar }}
+            {{- $path := default (printf "/etc/secrets/gateway/%s" $name) $sec.mountPath }}
+            - name: gateway-secret-{{ $name }}
+              mountPath: {{ include "ai-gateway.gateway.secretMountDir" $path | quote }}
+              readOnly: true
+            {{- end }}
+            {{- end }}
+            {{- with .Values.gateway.secretsDir }}
+            {{- if .existingSecret }}
+            - name: secrets-dir
+              mountPath: {{ .mountPath | default "/etc/secrets/gateway" | quote }}
+              readOnly: true
+            {{- end }}
+            {{- end }}
+            {{- with .Values.gateway.extraVolumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+            - name: auth-token
+              mountPath: {{ .Values.gateway.visionone.authToken.mountPath | quote }}
+              readOnly: true
+            {{- if .Values.admin.masterKey.enabled }}
+            - name: master-key
+              mountPath: {{ include "ai-gateway.admin.masterKeyMountPath" . | quote }}
+              readOnly: true
+            {{- end }}
+            - name: resp-id-key
+              mountPath: {{ include "ai-gateway.gateway.respIDKeyMountPath" . | quote }}
+            - name: gateway-key
+              mountPath: {{ include "ai-gateway.gateway.gatewayKeyMountPath" . | quote }}
+              readOnly: true
+              readOnly: true
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "ai-gateway.gateway.fullname" . }}-config
+        - name: tmp
+          # sizeLimit is a hard backstop, not the primary control: the WAL's
+          # own events.activity.max_bytes (512 MiB default) should always
+          # evict first
+          emptyDir:
+            sizeLimit: 1Gi
+        {{- range $name, $sec := .Values.gateway.secrets }}
+        {{- if not $sec.envVar }}
+        {{- $path := default (printf "/etc/secrets/gateway/%s" $name) $sec.mountPath }}
+        - name: gateway-secret-{{ $name }}
+          secret:
+            secretName: {{ $sec.existingSecret | quote }}
+            items:
+              - key: {{ default $name $sec.key | quote }}
+                path: {{ include "ai-gateway.gateway.secretMountFile" $path | quote }}
+        {{- end }}
+        {{- end }}
+        {{- with .Values.gateway.secretsDir }}
+        {{- if .existingSecret }}
+        - name: secrets-dir
+          secret:
+            secretName: {{ .existingSecret | quote }}
+        {{- end }}
+        {{- end }}
+        {{- with .Values.gateway.extraVolumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        - name: auth-token
+          secret:
+            secretName: {{ include "ai-gateway.gateway.authTokenSecretName" . }}
+            items:
+              - key: token
+                path: token
+        {{- if .Values.admin.masterKey.enabled }}
+        - name: master-key
+          secret:
+            secretName: {{ include "ai-gateway.admin.masterKeySecretName" . }}
+            items:
+              - key: master-key
+                path: master-key
+        {{- end }}
+        - name: resp-id-key
+          secret:
+            secretName: {{ include "ai-gateway.gateway.respIDKeySecretName" . }}
+            items:
+              - key: resp-id-key
+                path: resp-id-key
+        - name: gateway-key
+          secret:
+            secretName: {{ include "ai-gateway.gateway.gatewayKeySecretName" . }}
+            items:
+              - key: gateway.key
+                path: gateway.key
+      {{- with .Values.gateway.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.gateway.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.gateway.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.gateway.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

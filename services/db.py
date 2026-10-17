@@ -1,0 +1,129 @@
+import os
+import time
+import uuid
+
+from sqlalchemy import JSON, Boolean, Float, Integer, String, create_engine
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
+
+engine = create_engine(os.getenv("DATABASE_URL", "sqlite:///travel.db"), pool_pre_ping=True)
+Session = sessionmaker(engine, expire_on_commit=False)
+
+
+class Base(DeclarativeBase):
+    pass
+
+
+class Hotel(Base):
+    __tablename__ = "hotels"
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    name: Mapped[str]
+    destination: Mapped[str]
+    description: Mapped[str]
+    price: Mapped[int] = mapped_column(Integer)
+    rating: Mapped[float] = mapped_column(Float)
+    theme: Mapped[str]
+
+
+class Login(Base):
+    __tablename__ = "sessions"
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    human: Mapped[str]
+    agent: Mapped[str]
+    expires: Mapped[float]
+
+
+class Quote(Base):
+    __tablename__ = "quotes"
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    human: Mapped[str]
+    hotel_id: Mapped[str]
+    check_in: Mapped[str]
+    check_out: Mapped[str]
+    guests: Mapped[int]
+    amount: Mapped[int]
+    expires: Mapped[float]
+
+
+class Approval(Base):
+    __tablename__ = "approvals"
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    human: Mapped[str]
+    tool: Mapped[str]
+    resource: Mapped[str]
+    amount: Mapped[int]
+    expires: Mapped[float]
+    used: Mapped[bool] = mapped_column(Boolean, default=False)
+
+
+class Booking(Base):
+    __tablename__ = "bookings"
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    human: Mapped[str]
+    hotel_id: Mapped[str]
+    check_in: Mapped[str]
+    check_out: Mapped[str]
+    guests: Mapped[int]
+    amount: Mapped[int]
+    status: Mapped[str] = mapped_column(default="confirmed")
+    approval_id: Mapped[str] = mapped_column(String, unique=True)
+
+
+class Audit(Base):
+    __tablename__ = "audit"
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    at: Mapped[float] = mapped_column(default=time.time)
+    correlation_id: Mapped[str]
+    human: Mapped[str]
+    agent: Mapped[str]
+    tool: Mapped[str]
+    server: Mapped[str]
+    resource: Mapped[str]
+    decision: Mapped[str]
+    reason_code: Mapped[str]
+    policy_id: Mapped[str]
+    approval_state: Mapped[str]
+    arguments: Mapped[dict] = mapped_column(JSON)
+    downstream: Mapped[bool] = mapped_column(Boolean, default=False)
+    outcome: Mapped[str] = mapped_column(default="not_dispatched")
+
+
+class Activity(Base):
+    __tablename__ = "activity"
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    at: Mapped[float] = mapped_column(default=time.time)
+    correlation_id: Mapped[str] = mapped_column(String, index=True)
+    stage: Mapped[str]
+    human: Mapped[str]
+    agent: Mapped[str]
+    tool: Mapped[str]
+    audit_id: Mapped[str]
+    details: Mapped[dict] = mapped_column(JSON)
+
+
+class AttackRun(Base):
+    __tablename__ = "attack_runs"
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    started: Mapped[float] = mapped_column(default=time.time)
+    finished: Mapped[float | None]
+    profile: Mapped[str]
+    status: Mapped[str]
+    result: Mapped[dict] = mapped_column(JSON)
+
+
+class Receipt(Base):
+    __tablename__ = "receipts"
+    key: Mapped[str] = mapped_column(String, primary_key=True)
+    fingerprint: Mapped[str]
+    result: Mapped[dict] = mapped_column(JSON)
+
+
+def uid():
+    return uuid.uuid4().hex
+
+
+def record(row):
+    return {c.name: getattr(row, c.name) for c in row.__table__.columns}
+
+
+def init():
+    Base.metadata.create_all(engine)

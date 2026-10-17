@@ -1,0 +1,24 @@
+{{- if and .Values.gateway.enabled .Values.gateway.serviceMonitor.enabled -}}
+{{- if .Capabilities.APIVersions.Has "monitoring.coreos.com/v1" -}}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "ai-gateway.gateway.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ai-gateway.labels" . | nindent 4 }}
+    app.kubernetes.io/component: gateway
+    {{- with .Values.gateway.serviceMonitor.additionalLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "ai-gateway.gateway.selectorLabels" . | nindent 6 }}
+  endpoints:
+    - port: manager
+      path: /metrics
+      interval: {{ .Values.gateway.serviceMonitor.interval }}
+      scrapeTimeout: {{ .Values.gateway.serviceMonitor.scrapeTimeout }}
+{{- end }}
+{{- end }}

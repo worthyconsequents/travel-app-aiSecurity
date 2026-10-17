@@ -1,0 +1,35 @@
+{{- if and .Values.gateway.enabled .Values.serviceAccount.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "ai-gateway.gateway.fullname" . }}-auth-token
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ai-gateway.labels" . | nindent 4 }}
+    app.kubernetes.io/component: gateway
+rules:
+  # The leader patches the shared device-token Secret; pinned to that one
+  # Secret so the gateway can read/rotate its token and nothing else.
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames:
+      - {{ include "ai-gateway.gateway.authTokenSecretName" . | quote }}
+    verbs: ["get", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "ai-gateway.gateway.fullname" . }}-auth-token
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ai-gateway.labels" . | nindent 4 }}
+    app.kubernetes.io/component: gateway
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "ai-gateway.gateway.fullname" . }}-auth-token
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "ai-gateway.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}

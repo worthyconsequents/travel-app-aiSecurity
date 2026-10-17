@@ -1,0 +1,25 @@
+# External V1 server — gateway points at a V1 backend the chart doesn't manage.
+# Production-shaped default.
+
+gateway:
+  replicaCount: 2
+  visionone:
+    url: "https://stargate-v1.example.com"
+    # Paste the enrollment bootstrap token from the server's gateway Setup
+    # (or set authToken.existingSecret to manage it yourself).
+    authToken:
+      bootstrap:
+        token: "<paste-bootstrap-token-from-Setup>"
+
+  secrets:
+    openai:
+      existingSecret: stargate-llm-keys
+      key: openai-api-key
+      envVar: OPENAI_API_KEY        # envVar set → env mode (secretKeyRef)
+    anthropic:
+      existingSecret: stargate-llm-keys
+      key: anthropic-api-key
+      # no envVar → file mode, mounted at /etc/secrets/gateway/anthropic
+
+server:
+  enabled: false

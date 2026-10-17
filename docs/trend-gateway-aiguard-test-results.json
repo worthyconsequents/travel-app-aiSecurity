@@ -1,0 +1,25 @@
+{
+  "credential_file": "AI_Gateway/visionOneAIguard.txt",
+  "credential_extraction": "Single JWT from surrounding text; file contents not executed or displayed.",
+  "ready": true,
+  "checks": [
+    {
+      "check": "missing_key",
+      "http_status": 401,
+      "mcp_initialized": false
+    },
+    {
+      "check": "invalid_key",
+      "http_status": 401,
+      "mcp_initialized": false
+    },
+    {
+      "check": "saved_aiguard_key",
+      "http_status": 401,
+      "mcp_initialized": false
+    }
+  ],
+  "paid_model_calls": 0,
+  "authentication_passed": false,
+  "attack_policy_tests": "Not run; authenticated tool routing must be established first."
+}

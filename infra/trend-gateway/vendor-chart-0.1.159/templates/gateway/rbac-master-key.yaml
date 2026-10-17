@@ -1,0 +1,35 @@
+{{- if and .Values.gateway.enabled .Values.admin.masterKey.enabled .Values.serviceAccount.create -}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "ai-gateway.gateway.fullname" . }}-master-key
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ai-gateway.labels" . | nindent 4 }}
+    app.kubernetes.io/component: gateway
+rules:
+  # The leader patches the shared master-key Secret on regenerate; pinned to
+  # that one Secret so the gateway can rotate the key and nothing else.
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames:
+      - {{ include "ai-gateway.admin.masterKeySecretName" . | quote }}
+    verbs: ["get", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "ai-gateway.gateway.fullname" . }}-master-key
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "ai-gateway.labels" . | nindent 4 }}
+    app.kubernetes.io/component: gateway
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "ai-gateway.gateway.fullname" . }}-master-key
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "ai-gateway.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}

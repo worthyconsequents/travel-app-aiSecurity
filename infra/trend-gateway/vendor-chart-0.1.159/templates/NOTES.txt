@@ -1,0 +1,27 @@
+Stargate {{ .Chart.AppVersion }} installed as {{ .Release.Name }} in {{ .Release.Namespace }}.
+
+{{- if .Values.gateway.enabled }}
+
+Gateway:
+  Service: {{ include "ai-gateway.gateway.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+  Ports:   llm-proxy={{ .Values.gateway.service.ports.llmProxy }}  mcp-proxy={{ .Values.gateway.service.ports.mcpProxy }}  manager={{ .Values.gateway.service.ports.manager }}
+
+  Check readiness:
+    kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "ai-gateway.gateway.fullname" . }} {{ .Values.gateway.service.ports.manager }}:{{ .Values.gateway.service.ports.manager }}
+    curl http://localhost:{{ .Values.gateway.service.ports.manager }}/readyz
+{{- end }}
+
+Policy source: {{ include "ai-gateway.serverURL" . | quote }}
+  The gateway polls this URL every {{ .Values.gateway.config.server.policy_refresh_seconds }}s for policy + version updates.
+
+{{- if .Values.gateway.secrets }}
+
+Gateway secrets configured ({{ len .Values.gateway.secrets }}): {{ keys .Values.gateway.secrets | join ", " }}
+  Reference them from the catalog by <name> (api_key.env / api_key.file); see gateway.secrets in values.yaml.
+{{- end }}
+
+Hot-reload note: Kubernetes ConfigMap remount latency is ~30–90s depending on kubelet sync_period.
+The binary's fsnotify catches changes correctly when they arrive — but expect a 30–90s window
+between `helm upgrade` and the new config landing inside the pod.
+
+Documentation: `helm show readme` for this chart, `helm show values` for the full schema.

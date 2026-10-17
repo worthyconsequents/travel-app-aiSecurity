@@ -1,0 +1,59 @@
+{
+  "scope": "Local Trend MCP gateway only; no LLM calls",
+  "checks": [
+    {
+      "check": "readiness",
+      "http_status": 200,
+      "ready": true,
+      "scanners": [
+        {
+          "name": "prompt_attack_scanner",
+          "loaded": true
+        },
+        {
+          "name": "harmful_scanner",
+          "loaded": true
+        },
+        {
+          "name": "skyeyes_scanner",
+          "loaded": true
+        }
+      ]
+    },
+    {
+      "check": "missing_key",
+      "http_status": 401,
+      "mcp_initialized": false
+    },
+    {
+      "check": "invalid_key",
+      "http_status": 401,
+      "mcp_initialized": false
+    },
+    {
+      "check": "saved_key",
+      "http_status": 401,
+      "mcp_initialized": false
+    }
+  ],
+  "version": "v0.1.159",
+  "modules": [
+    "mcp-proxy",
+    "policy"
+  ],
+  "paid_model_calls": 0,
+  "catalog_diagnostics": [
+    {
+      "event": "catalog_applied",
+      "llm_providers": 0,
+      "virtual_keys": 1
+    }
+  ],
+  "authenticated_attack_tests": {
+    "status": "BLOCKED",
+    "reason": "Saved credential receives HTTP 401; no tool policy decisions can be attributed to Trend.",
+    "fixture_count": 6
+  },
+  "vendor_helm_test": "PASSED",
+  "passed": false
+}
