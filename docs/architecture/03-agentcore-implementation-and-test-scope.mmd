@@ -1,0 +1,19 @@
+flowchart TB
+    subgraph offline["Implemented offline AgentCore alternative: localhost:8081"]
+        app["NGINX / Next.js / FastAPI; demo sessions and bounded mock tool loop"] -->|Inference| sim["Offline contract simulator: shared interceptor code and marker-based inspection; no AWS or Trend calls"]
+        app --> ownership["Reference policy gateway: ownership and approvals"]
+        ownership -->|Signed tool calls| sim
+        sim --> services["Three real private local MCP services"]
+        services --> db[("Isolated PostgreSQL")]
+        ownership --> db
+    end
+    subgraph historical["AWS test completed 18 Oct 2026; all test assets subsequently removed"]
+        cli["CLI client using IAM / SigV4"] --> gateway["AWS AgentCore MCP gateway"]
+        gateway --> request["Request inspection: real Lambda + AI Guard"]
+        request --> fixture["Fixed read-only hotel Lambda; no customer/booking access"]
+        fixture --> response["Response inspection: same Lambda + AI Guard"]
+        response --> gateway
+        support["Dedicated AWS secret, regional Trend API and structured CloudWatch evidence"]
+    end
+    finding["Verified: routing, auth, malformed-input rejection, outage recovery. Finding: Trend allowed synthetic injection. No real model or full hosted app tested."]
+    style finding fill:#fff1dd,stroke:#a75a16

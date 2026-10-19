@@ -1,0 +1,28 @@
+# Architecture diagrams
+
+The diagrams describe repository code and recorded evidence as of 19 October 2026. They separate what is implemented from planned integrations and historical infrastructure.
+
+| Diagram | Scope | Preview | Editable files |
+| --- | --- | --- | --- |
+| Non-AgentCore local deployment | Implemented local Compose app on port 8080; reference authorization gateway | [PNG](01-non-agentcore-local.png) | [SVG](01-non-agentcore-local.svg), [Mermaid](01-non-agentcore-local.mmd) |
+| AgentCore target design | Intended full AWS architecture; not deployed | [PNG](02-agentcore-target-design.png) | [SVG](02-agentcore-target-design.svg), [Mermaid](02-agentcore-target-design.mmd) |
+| AgentCore implementation and test scope | Implemented offline alternative on port 8081 versus completed and removed AWS test slice | [PNG](03-agentcore-implementation-and-test-scope.png) | [SVG](03-agentcore-implementation-and-test-scope.svg), [Mermaid](03-agentcore-implementation-and-test-scope.mmd) |
+
+PNG previews and SVGs share the approved visual layout. Mermaid files preserve the logical relationships for editing or GitHub rendering; their automatic layout can differ. Request and data flows are shown at a high level; return responses generally follow the same path unless response inspection is illustrated explicitly.
+
+## Evidence boundaries
+
+- The standalone local Trend AI Gateway installation is separate from the original app's active reference-gateway path.
+- The offline AgentCore simulator uses shared interception code and deterministic marker fixtures; it makes no AWS or Trend detection calls.
+- The full AgentCore design retains application ownership and approval checks. Content inspection and Cedar policies do not replace that authorization boundary. The diagram does not choose a compute-hosting service that the repository has not implemented.
+- The historical AWS test verified gateway routing, real inspection, malformed-input rejection and inspector outage/recovery with a fixed read-only hotel tool. The synthetic injection was allowed by Trend. No successful real content block, live model or full hosted app was demonstrated. All test-created AWS resources were torn down and verified absent.
+- Local monitoring displays application records. A unified view of cloud Lambda logs and application events is not implemented.
+
+## Source references
+
+- [Local architecture decision](../adr-001.md), [base Compose configuration](../../compose.yaml), [NGINX routing](../../nginx/default.conf)
+- [Application API](../../services/api.py), [reference enforcement gateway](../../services/gateway.py)
+- [AgentCore overlay](../../compose.agentcore.yaml), [agent loop](../../services/agentcore/agent.py), [offline gateway](../../services/agentcore/offline_gateway.py)
+- [AgentCore implementation and handoff](../agentcore-alternative.md), [offline cloud planner](../../scripts/agentcore_plan.py)
+- [AWS test and teardown](../aws-test-deployment.md), [redacted verification evidence](../aws-cloud-test-verification.json)
+- [Separate Trend gateway installation](../../infra/trend-gateway/README.md)

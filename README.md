@@ -2,6 +2,36 @@
 
 A local travel website with destination photography, a scripted travel assistant, protected MCP tools, and a separate password-locked operations dashboard. All travelers, hotels, bookings, payments and attack fixtures are synthetic. The build makes no paid model calls and does not deploy AWS resources automatically.
 
+## Architecture diagrams
+
+These diagrams distinguish the implemented local application, the intended full AgentCore deployment, and the limited AWS test that was completed and torn down. The full cloud application and effective Trend content blocking remain unverified.
+
+### Non-AgentCore local deployment
+
+The app uses its reference enforcement gateway. The separately installed Trend AI Gateway is not on this application request path.
+
+![Implemented non-AgentCore local architecture](docs/architecture/01-non-agentcore-local.png)
+
+[Editable SVG](docs/architecture/01-non-agentcore-local.svg) · [Mermaid source](docs/architecture/01-non-agentcore-local.mmd)
+
+### AgentCore target design — planned
+
+This is the intended full deployment, not a claim of deployed infrastructure. Dashed connections represent intended integrations; cloud hosting, user authentication, private tool ingress and model integration still need work.
+
+![Planned AgentCore deployment architecture](docs/architecture/02-agentcore-target-design.png)
+
+[Editable SVG](docs/architecture/02-agentcore-target-design.svg) · [Mermaid source](docs/architecture/02-agentcore-target-design.mmd)
+
+### AgentCore implementation and AWS test scope
+
+The offline implementation and the historical AWS test are different environments. The AWS test used real AgentCore and Trend inspection with one read-only fixture; it did not host the full app or invoke a model. Trend allowed the tested injection, and all test-created AWS resources were subsequently removed.
+
+![Offline AgentCore implementation compared with the completed AWS test](docs/architecture/03-agentcore-implementation-and-test-scope.png)
+
+[Editable SVG](docs/architecture/03-agentcore-implementation-and-test-scope.svg) · [Mermaid source](docs/architecture/03-agentcore-implementation-and-test-scope.mmd)
+
+See the [diagram index](docs/architecture/README.md), [AgentCore implementation notes](docs/agentcore-alternative.md), and [recorded AWS test results](docs/aws-test-deployment.md).
+
 ## Run locally
 
 Requires Docker Desktop with Compose, Make, and Python 3 for host-side verification scripts.

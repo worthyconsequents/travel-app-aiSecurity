@@ -1,0 +1,18 @@
+flowchart LR
+    browser["Browser: travel UI and private monitor"] --> nginx["NGINX: localhost:8080"]
+    subgraph local["Implemented local Docker Compose"]
+        nginx -->|Pages| ui["Next.js frontend"]
+        nginx -->|API requests| api["FastAPI: demo sessions, scripted assistant, independent operator auth"]
+        api --> policy["Reference enforcement gateway: ownership, permissions, approvals, schema, idempotency"]
+        policy -->|Signed capability| discovery["Travel discovery MCP"]
+        policy -->|Signed capability| reservations["Reservations MCP"]
+        policy -->|Signed capability| payments["Customer / payments MCP"]
+        discovery --> db[("Shared PostgreSQL: inventory, bookings, approvals, audit, attack runs")]
+        reservations --> db
+        payments --> db
+        policy -->|Policy context and audit| db
+        api -.->|Monitoring and application records| db
+    end
+    trend["Separate local Trend AI Gateway: installed but not on app request path; integration pending"]
+    style policy fill:#e5f4f1,stroke:#087f80
+    style trend fill:#fff1dd,stroke:#a75a16

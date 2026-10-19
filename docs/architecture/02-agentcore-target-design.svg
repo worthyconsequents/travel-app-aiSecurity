@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1370" viewBox="0 0 1800 1370">
+<title>the boring-travel company — architecture review</title>
+<desc>Architecture documentation. Implemented, planned, and removed test infrastructure are labeled explicitly.</desc>
+<rect width="1800" height="1370" fill="#F6F7F9"/>
+<text x="65" y="38" font-family="Arial, sans-serif" font-size="19" font-weight="700" fill="#087F80" dominant-baseline="text-before-edge">THE BORING-TRAVEL COMPANY  /  ARCHITECTURE</text>
+<text x="65" y="82" font-family="Arial, sans-serif" font-size="43" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">AgentCore architecture — target design</text>
+<text x="65" y="140" font-family="Arial, sans-serif" font-size="23" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Full application design • adapters / templates exist • complete cloud deployment remains unfinished</text>
+<rect x="1390" y="35" width="166" height="34" rx="17" fill="#FFF1DD" stroke="#FFF1DD" stroke-width="1"/>
+<text x="1405" y="43" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#A75A16" dominant-baseline="text-before-edge">DESIGN TARGET</text>
+<text x="65" y="1334" font-family="Arial, sans-serif" font-size="16" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">DIAGRAM 02  •  19 OCT 2026  •  IMPLEMENTATION STATUS IS LABELED EXPLICITLY</text>
+<rect x="300" y="195" width="1120" height="950" rx="22" fill="#EFF3F6" stroke="#BFCED8" stroke-width="2" stroke-dasharray="9 7"/>
+<text x="325" y="218" font-family="Arial, sans-serif" font-size="21" font-weight="700" fill="#536879" dominant-baseline="text-before-edge">PROPOSED AWS APPLICATION BOUNDARY  ·  NOT DEPLOYED</text>
+<rect x="45" y="460" width="210" height="130" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="45" y="469" width="7" height="112" rx="3" fill="#336DB8"/>
+<text x="66" y="480" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">Browser</text>
+<text x="66" y="519" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Travel UI + chat</text>
+<text x="66" y="546" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Operator access</text>
+<rect x="350" y="275" width="320" height="110" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="350" y="284" width="7" height="92" rx="3" fill="#A75A16"/>
+<text x="371" y="295" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">Verified sign-in</text>
+<text x="371" y="334" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Cognito / JWT work required</text>
+<rect x="350" y="465" width="320" height="160" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="350" y="474" width="7" height="142" rx="3" fill="#336DB8"/>
+<text x="371" y="485" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">Next.js + FastAPI</text>
+<text x="371" y="524" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">App hosting pending</text>
+<text x="371" y="551" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Server-verified identity</text>
+<text x="371" y="578" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Workload IAM credentials</text>
+<rect x="760" y="295" width="300" height="135" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="760" y="304" width="7" height="117" rx="3" fill="#336DB8"/>
+<text x="781" y="315" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">AgentCore</text>
+<text x="781" y="346" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">inference gateway</text>
+<text x="781" y="384" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">IAM-signed model requests</text>
+<rect x="1110" y="295" width="270" height="135" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="1110" y="304" width="7" height="117" rx="3" fill="#336DB8"/>
+<text x="1131" y="315" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">Bedrock model</text>
+<text x="1131" y="354" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Bounded text inference</text>
+<text x="1131" y="381" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Not live-tested</text>
+<rect x="780" y="500" width="270" height="125" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="780" y="509" width="7" height="107" rx="3" fill="#7854A5"/>
+<text x="801" y="520" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">Shared Lambda</text>
+<text x="801" y="551" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">interceptor</text>
+<text x="801" y="589" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Request + response</text>
+<rect x="1130" y="500" width="250" height="125" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="1130" y="509" width="7" height="107" rx="3" fill="#7854A5"/>
+<text x="1151" y="520" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">Secrets Manager</text>
+<text x="1151" y="558" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">AI Guard API key</text>
+<text x="1151" y="585" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Scoped secret access</text>
+<rect x="1460" y="445" width="300" height="235" rx="20" fill="#F0EAF8" stroke="#D9CDE9" stroke-width="2"/>
+<text x="1482" y="465" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#7854A5" dominant-baseline="text-before-edge">EXTERNAL TREND SERVICE</text>
+<rect x="1480" y="505" width="260" height="115" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="1480" y="514" width="7" height="97" rx="3" fill="#7854A5"/>
+<text x="1501" y="525" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">Trend AI Guard</text>
+<text x="1501" y="563" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Regional detection API</text>
+<text x="1501" y="590" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Assigned AI Policy</text>
+<text x="1480" y="700" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#7854A5" dominant-baseline="text-before-edge">Allow / Block decision</text>
+<rect x="400" y="765" width="320" height="155" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="400" y="774" width="7" height="137" rx="3" fill="#087F80"/>
+<text x="421" y="785" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">Application</text>
+<text x="421" y="816" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">authorization boundary</text>
+<text x="421" y="854" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Ownership + approvals</text>
+<text x="421" y="881" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Signed tool capabilities</text>
+<rect x="780" y="765" width="270" height="145" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="780" y="774" width="7" height="127" rx="3" fill="#336DB8"/>
+<text x="801" y="785" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">AgentCore</text>
+<text x="801" y="816" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">MCP tool gateway</text>
+<text x="801" y="854" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">IAM-signed tool requests</text>
+<rect x="1110" y="765" width="270" height="145" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="1110" y="774" width="7" height="127" rx="3" fill="#336DB8"/>
+<text x="1131" y="785" font-family="Arial, sans-serif" font-size="23" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">Private MCP targets</text>
+<text x="1131" y="822" font-family="Arial, sans-serif" font-size="18" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Discovery / reservations</text>
+<text x="1131" y="849" font-family="Arial, sans-serif" font-size="18" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Customer / payments</text>
+<text x="1131" y="876" font-family="Arial, sans-serif" font-size="18" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">TLS + key checks needed</text>
+<rect x="780" y="965" width="270" height="105" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="780" y="974" width="7" height="87" rx="3" fill="#A75A16"/>
+<text x="801" y="985" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">Cedar policy engine</text>
+<text x="801" y="1023" font-family="Arial, sans-serif" font-size="18" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">ENFORCE templates only</text>
+<rect x="1110" y="965" width="270" height="105" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="1110" y="974" width="7" height="87" rx="3" fill="#087F80"/>
+<text x="1131" y="985" font-family="Arial, sans-serif" font-size="23" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">Private PostgreSQL</text>
+<text x="1131" y="1022" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Cloud hosting pending</text>
+<polyline points="255,525 350,525" fill="none" stroke="#647C8D" stroke-width="3" stroke-linejoin="round" stroke-dasharray="9 8"/>
+<polygon points="350.0,525.0 338.0,520.0 338.0,530.0" fill="#647C8D"/>
+<polyline points="510,385 510,465" fill="none" stroke="#A75A16" stroke-width="3" stroke-linejoin="round" stroke-dasharray="9 8"/>
+<polygon points="510.0,465.0 515.0,453.0 505.0,453.0" fill="#A75A16"/>
+<polyline points="670,515 710,515 710,362 760,362" fill="none" stroke="#647C8D" stroke-width="3" stroke-linejoin="round" stroke-dasharray="9 8"/>
+<polygon points="760.0,362.0 748.0,357.0 748.0,367.0" fill="#647C8D"/>
+<text x="684" y="442" font-family="Arial, sans-serif" font-size="18" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">SigV4</text>
+<polyline points="1060,362 1110,362" fill="none" stroke="#647C8D" stroke-width="3" stroke-linejoin="round" stroke-dasharray="9 8"/>
+<polygon points="1110.0,362.0 1098.0,357.0 1098.0,367.0" fill="#647C8D"/>
+<polyline points="510,625 510,710 560,710 560,765" fill="none" stroke="#647C8D" stroke-width="3" stroke-linejoin="round" stroke-dasharray="9 8"/>
+<polygon points="560.0,765.0 565.0,753.0 555.0,753.0" fill="#647C8D"/>
+<text x="350" y="675" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Tool requests</text>
+<polyline points="720,840 780,840" fill="none" stroke="#647C8D" stroke-width="3" stroke-linejoin="round" stroke-dasharray="9 8"/>
+<polygon points="780.0,840.0 768.0,835.0 768.0,845.0" fill="#647C8D"/>
+<polyline points="1050,840 1110,840" fill="none" stroke="#647C8D" stroke-width="3" stroke-linejoin="round" stroke-dasharray="9 8"/>
+<polygon points="1110.0,840.0 1098.0,835.0 1098.0,845.0" fill="#647C8D"/>
+<polyline points="915,430 915,500" fill="none" stroke="#7854A5" stroke-width="3" stroke-linejoin="round" stroke-dasharray="9 8"/>
+<polygon points="915.0,500.0 920.0,488.0 910.0,488.0" fill="#7854A5"/>
+<polyline points="780,835 745,835 745,560 780,560" fill="none" stroke="#7854A5" stroke-width="3" stroke-linejoin="round" stroke-dasharray="9 8"/>
+<polygon points="780.0,560.0 768.0,555.0 768.0,565.0" fill="#7854A5"/>
+<text x="598" y="716" font-family="Arial, sans-serif" font-size="18" font-weight="400" fill="#7854A5" dominant-baseline="text-before-edge">Inspection hooks</text>
+<polyline points="1050,560 1130,560" fill="none" stroke="#7854A5" stroke-width="3" stroke-linejoin="round" stroke-dasharray="9 8"/>
+<polygon points="1130.0,560.0 1118.0,555.0 1118.0,565.0" fill="#7854A5"/>
+<polyline points="925,625 925,660 1600,660 1600,620" fill="none" stroke="#7854A5" stroke-width="3" stroke-linejoin="round" stroke-dasharray="9 8"/>
+<polygon points="1600.0,620.0 1595.0,632.0 1605.0,632.0" fill="#7854A5"/>
+<text x="1135" y="679" font-family="Arial, sans-serif" font-size="18" font-weight="400" fill="#7854A5" dominant-baseline="text-before-edge">AI Guard calls</text>
+<polyline points="915,965 915,910" fill="none" stroke="#A75A16" stroke-width="3" stroke-linejoin="round" stroke-dasharray="9 8"/>
+<polygon points="915.0,910.0 910.0,922.0 920.0,922.0" fill="#A75A16"/>
+<polyline points="1245,910 1245,965" fill="none" stroke="#087F80" stroke-width="3" stroke-linejoin="round" stroke-dasharray="9 8"/>
+<polygon points="1245.0,965.0 1250.0,953.0 1240.0,953.0" fill="#087F80"/>
+<polyline points="560,920 560,1100 1075,1100 1075,1020 1110,1020" fill="none" stroke="#087F80" stroke-width="3" stroke-linejoin="round" stroke-dasharray="9 8"/>
+<polygon points="1110.0,1020.0 1098.0,1015.0 1098.0,1025.0" fill="#087F80"/>
+<text x="590" y="1110" font-family="Arial, sans-serif" font-size="19" font-weight="400" fill="#087F80" dominant-baseline="text-before-edge">Ownership / approval context and application audit records</text>
+<rect x="65" y="1170" width="1670" height="90" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<text x="90" y="1188" font-family="Arial, sans-serif" font-size="23" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">Observation paths</text>
+<text x="335" y="1188" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Application records → private /monitor     •     Lambda decisions → CloudWatch</text>
+<text x="90" y="1226" font-family="Arial, sans-serif" font-size="21" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">A unified cloud monitoring view is not implemented. Content inspection does not replace ownership or approval checks.</text>
+<text x="65" y="1280" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Dashed arrows: intended integrations. Full cloud hosting, private tool ingress, user auth and model use require additional work.</text>
+</svg>

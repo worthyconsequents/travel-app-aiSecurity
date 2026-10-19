@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1200" viewBox="0 0 1800 1200">
+<title>the boring-travel company — architecture review</title>
+<desc>Architecture documentation. Implemented, planned, and removed test infrastructure are labeled explicitly.</desc>
+<rect width="1800" height="1200" fill="#F6F7F9"/>
+<text x="65" y="38" font-family="Arial, sans-serif" font-size="19" font-weight="700" fill="#087F80" dominant-baseline="text-before-edge">THE BORING-TRAVEL COMPANY  /  ARCHITECTURE</text>
+<text x="65" y="82" font-family="Arial, sans-serif" font-size="43" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">Non-AgentCore architecture</text>
+<text x="65" y="140" font-family="Arial, sans-serif" font-size="23" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Implemented local application • reference enforcement gateway • synthetic travel data</text>
+<rect x="1390" y="35" width="213" height="34" rx="17" fill="#E5F4F1" stroke="#E5F4F1" stroke-width="1"/>
+<text x="1405" y="43" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#087F80" dominant-baseline="text-before-edge">IMPLEMENTED LOCAL</text>
+<text x="65" y="1164" font-family="Arial, sans-serif" font-size="16" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">DIAGRAM 01  •  19 OCT 2026  •  IMPLEMENTATION STATUS IS LABELED EXPLICITLY</text>
+<rect x="305" y="195" width="1430" height="730" rx="22" fill="#EFF3F6" stroke="#BFCED8" stroke-width="2"/>
+<text x="332" y="218" font-family="Arial, sans-serif" font-size="21" font-weight="700" fill="#536879" dominant-baseline="text-before-edge">LOCAL DOCKER COMPOSE  ·  localhost:8080</text>
+<rect x="65" y="430" width="205" height="140" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="65" y="439" width="7" height="122" rx="3" fill="#336DB8"/>
+<text x="86" y="450" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">Browser</text>
+<text x="86" y="489" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Travel website</text>
+<text x="86" y="516" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Private /monitor</text>
+<rect x="340" y="440" width="180" height="115" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="340" y="449" width="7" height="97" rx="3" fill="#336DB8"/>
+<text x="361" y="460" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">NGINX</text>
+<text x="361" y="499" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">UI + API routes</text>
+<rect x="585" y="290" width="280" height="135" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="585" y="299" width="7" height="117" rx="3" fill="#336DB8"/>
+<text x="606" y="310" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">Next.js frontend</text>
+<text x="606" y="349" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Travel pages</text>
+<text x="606" y="376" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Monitoring sign-in</text>
+<rect x="585" y="500" width="280" height="180" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="585" y="509" width="7" height="162" rx="3" fill="#336DB8"/>
+<text x="606" y="520" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">FastAPI</text>
+<text x="606" y="559" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Demo sessions</text>
+<text x="606" y="586" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Scripted travel assistant</text>
+<text x="606" y="613" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Separate operator auth</text>
+<rect x="945" y="480" width="290" height="195" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="945" y="489" width="7" height="177" rx="3" fill="#087F80"/>
+<text x="966" y="500" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">Reference</text>
+<text x="966" y="531" font-family="Arial, sans-serif" font-size="24" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">enforcement gateway</text>
+<text x="966" y="569" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Ownership + permissions</text>
+<text x="966" y="596" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Single-use approvals</text>
+<text x="966" y="623" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Schema + idempotency</text>
+<rect x="1335" y="300" width="350" height="120" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="1335" y="309" width="7" height="102" rx="3" fill="#336DB8"/>
+<text x="1356" y="320" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">Travel discovery MCP</text>
+<text x="1356" y="359" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Hotels, flights, details</text>
+<rect x="1335" y="455" width="350" height="120" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="1335" y="464" width="7" height="102" rx="3" fill="#336DB8"/>
+<text x="1356" y="475" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">Reservations MCP</text>
+<text x="1356" y="514" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Quotes, bookings, cancels</text>
+<rect x="1335" y="610" width="350" height="120" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="1335" y="619" width="7" height="102" rx="3" fill="#336DB8"/>
+<text x="1356" y="630" font-family="Arial, sans-serif" font-size="23" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">Customer / payments MCP</text>
+<text x="1356" y="667" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Synthetic profiles + payments</text>
+<rect x="945" y="795" width="740" height="100" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="945" y="804" width="7" height="82" rx="3" fill="#087F80"/>
+<text x="966" y="815" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">Shared PostgreSQL</text>
+<text x="966" y="854" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Inventory • bookings • approvals • audits • attack runs</text>
+<polyline points="270,500 340,500" fill="none" stroke="#647C8D" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="340.0,500.0 328.0,495.0 328.0,505.0" fill="#647C8D"/>
+<polyline points="520,470 550,470 550,357 585,357" fill="none" stroke="#647C8D" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="585.0,357.0 573.0,352.0 573.0,362.0" fill="#647C8D"/>
+<text x="552" y="320" font-family="Arial, sans-serif" font-size="17" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">UI</text>
+<polyline points="520,525 550,525 550,590 585,590" fill="none" stroke="#647C8D" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="585.0,590.0 573.0,585.0 573.0,595.0" fill="#647C8D"/>
+<text x="530" y="612" font-family="Arial, sans-serif" font-size="18" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">/api/*</text>
+<polyline points="865,575 945,575" fill="none" stroke="#647C8D" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="945.0,575.0 933.0,570.0 933.0,580.0" fill="#647C8D"/>
+<text x="876" y="530" font-family="Arial, sans-serif" font-size="18" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Tools</text>
+<polyline points="1235,575 1290,575 1290,360 1335,360" fill="none" stroke="#647C8D" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="1335.0,360.0 1323.0,355.0 1323.0,365.0" fill="#647C8D"/>
+<polyline points="1235,575 1290,575 1290,515 1335,515" fill="none" stroke="#647C8D" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="1335.0,515.0 1323.0,510.0 1323.0,520.0" fill="#647C8D"/>
+<polyline points="1235,575 1290,575 1290,670 1335,670" fill="none" stroke="#647C8D" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="1335.0,670.0 1323.0,665.0 1323.0,675.0" fill="#647C8D"/>
+<text x="1240" y="756" font-family="Arial, sans-serif" font-size="19" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Authorized calls carry a signed capability</text>
+<polyline points="1090,675 1090,795" fill="none" stroke="#087F80" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="1090.0,795.0 1095.0,783.0 1085.0,783.0" fill="#087F80"/>
+<text x="1110" y="707" font-family="Arial, sans-serif" font-size="18" font-weight="400" fill="#087F80" dominant-baseline="text-before-edge">Policy context</text>
+<text x="1110" y="732" font-family="Arial, sans-serif" font-size="18" font-weight="400" fill="#087F80" dominant-baseline="text-before-edge">+ audit writes</text>
+<polyline points="725,680 725,845 945,845" fill="none" stroke="#087F80" stroke-width="3" stroke-linejoin="round" stroke-dasharray="9 8"/>
+<polygon points="945.0,845.0 933.0,840.0 933.0,850.0" fill="#087F80"/>
+<text x="585" y="756" font-family="Arial, sans-serif" font-size="19" font-weight="400" fill="#087F80" dominant-baseline="text-before-edge">Protected monitoring</text>
+<text x="585" y="783" font-family="Arial, sans-serif" font-size="19" font-weight="400" fill="#087F80" dominant-baseline="text-before-edge">reads application records</text>
+<polyline points="1685,360 1710,360 1710,845 1685,845" fill="none" stroke="#087F80" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="1685.0,845.0 1697.0,850.0 1697.0,840.0" fill="#087F80"/>
+<polyline points="1685,515 1710,515 1710,845 1685,845" fill="none" stroke="#087F80" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="1685.0,845.0 1697.0,850.0 1697.0,840.0" fill="#087F80"/>
+<polyline points="1685,670 1710,670 1710,845 1685,845" fill="none" stroke="#087F80" stroke-width="2" stroke-linejoin="round"/>
+<polygon points="1685.0,845.0 1697.0,850.0 1697.0,840.0" fill="#087F80"/>
+<rect x="65" y="960" width="1670" height="95" rx="16" fill="#FFF1DD" stroke="#E8CEAA" stroke-width="2"/>
+<text x="90" y="981" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#A75A16" dominant-baseline="text-before-edge">Separate local Trend AI Gateway installation</text>
+<text x="90" y="1019" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#A75A16" dominant-baseline="text-before-edge">Not on the application request path. App-side virtual-key transport and catalog integration remain pending.</text>
+<text x="65" y="1080" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Solid arrows: request / data path. Dashed teal: monitoring reads. Responses return through the same path.</text>
+<text x="65" y="1108" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">No live LLM or AWS dependency in this local deployment. Demo identities are not production authentication.</text>
+</svg>

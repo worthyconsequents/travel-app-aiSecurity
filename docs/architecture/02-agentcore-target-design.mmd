@@ -1,0 +1,24 @@
+flowchart LR
+    browser["Browser: travel UI, chat and operator access"]
+    subgraph aws["Target design only: full AWS app deployment NOT implemented"]
+        identity["Verified sign-in: Cognito / JWT integration required"] --> app["Next.js + FastAPI: hosting and workload identity pending"]
+        browser --> app
+        app -->|SigV4 inference| inference["AgentCore inference gateway"]
+        inference --> model["Bedrock model: bounded inference; no live model test"]
+        app --> ownership["App authorization: ownership, approvals, signed capability"]
+        ownership -->|SigV4 tool call| gateway["AgentCore MCP tool gateway"]
+        gateway --> mcp["Private MCP targets: discovery, reservations, customer/payments; TLS and key checks required"]
+        mcp --> db[("Private PostgreSQL: hosting pending")]
+        ownership -->|Ownership / approval context and audit| db
+        cedar["Cedar policy engine: ENFORCE templates only"] -.-> gateway
+        inference -.->|Request and response hooks| inspector["Shared Lambda inspector"]
+        gateway -.->|Request and response hooks| inspector
+        inspector -.->|Read one credential| secrets["AWS Secrets Manager"]
+        inspector -.->|Structured decisions| logs["CloudWatch"]
+    end
+    inspector -.->|Regional detection API| trend["Trend AI Guard: assigned AI Policy decides Allow / Block"]
+    monitor["Application records feed private /monitor; unified cloud dashboard is not implemented"]
+    style ownership fill:#e5f4f1,stroke:#087f80
+    style inspector fill:#f0eaf8,stroke:#7854a5
+    style trend fill:#f0eaf8,stroke:#7854a5
+    style cedar fill:#fff1dd,stroke:#a75a16
