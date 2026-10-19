@@ -70,7 +70,14 @@ def test_both_contracts_and_directions(namespace, response, text, status):
     before = json.dumps(payload)
     result = handle(payload, None, OfflineInspector())[namespace]
     assert json.dumps(payload) == before, "Inspection must not rewrite signed arguments"
-    assert result.get("transformedGatewayResponse", {}).get("statusCode") == status
+    if status is None and namespace == "mcp" and response:
+        assert result["transformedGatewayResponse"]["statusCode"] == 200
+        assert (
+            result["transformedGatewayResponse"]["body"]
+            == payload["mcp"]["gatewayResponse"]["body"]
+        )
+    else:
+        assert result.get("transformedGatewayResponse", {}).get("statusCode") == status
 
 
 def test_response_null_request_and_tool_call_arguments_are_inspected():
@@ -285,3 +292,31 @@ def test_denied_inspection_is_audited_without_input(capsys):
     )
     log = capsys.readouterr().out
     assert "INSPECTION_UNAVAILABLE" in log and "sensitive-customer-text" not in log
+
+
+@pytest.mark.parametrize(
+    "method", ["tools/list", "ping", "initialize", "notifications/initialized"]
+)
+def test_mcp_protocol_passthrough_preserves_body_without_inspecting_metadata(method):
+    inspector = Mock()
+    payload = event("mcp", method=method)
+    result = handle(payload, None, inspector)["mcp"]
+    assert result["transformedGatewayRequest"] == {"body": payload["mcp"]["gatewayRequest"]["body"]}
+    inspector.inspect.assert_not_called()
+
+
+def test_mcp_allowed_call_preserves_signed_arguments_but_not_headers():
+    payload = event("mcp")
+    packet = payload["mcp"]["gatewayRequest"]
+    packet["headers"] = {"Authorization": "Bearer private-test-token"}
+    result = handle(payload, None, OfflineInspector())["mcp"]["transformedGatewayRequest"]
+    assert result == {"body": packet["body"]}
+    assert "private-test-token" not in json.dumps(result)
+
+
+def test_simulator_does_not_count_successful_response_preservation_as_denial():
+    from services.agentcore.offline_gateway import check, counters
+
+    before = dict(counters)
+    assert check("mcp", "RESPONSE", {"jsonrpc": "2.0", "id": 1, "result": {"ok": True}}) is None
+    assert counters == before

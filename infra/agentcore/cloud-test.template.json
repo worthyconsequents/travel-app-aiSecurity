@@ -1,0 +1,601 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Read-only AgentCore and live Trend AI Guard staging probe; no model, website, database or booking access.",
+  "Parameters": {
+    "ArtifactBucket": {
+      "Type": "String",
+      "Description": "Approved private S3 bucket containing the interceptor ZIP"
+    },
+    "ArtifactKey": {
+      "Type": "String",
+      "Description": "Versioned interceptor ZIP object key"
+    },
+    "AIGuardSecretArn": {
+      "Type": "String",
+      "Description": "Existing Secrets Manager secret ARN; NEVER supply a token here"
+    },
+    "AIGuardUrl": {
+      "Type": "String",
+      "Default": "https://api.xdr.trendmicro.com/v3.0/aiSecurity/applyGuardrails"
+    },
+    "SecretKmsKeyArn": {
+      "Type": "String",
+      "Default": "",
+      "Description": "Optional customer-managed key encrypting the secret"
+    },
+    "ArtifactVersion": {
+      "Type": "String",
+      "Description": "Immutable S3 object version containing the reviewed ZIP"
+    },
+    "ApplicationName": {
+      "Type": "String",
+      "AllowedPattern": "[a-zA-Z0-9-]{1,100}",
+      "Description": "Trend application name; use the approved resource prefix"
+    }
+  },
+  "Conditions": {
+    "UsesCustomKms": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "SecretKmsKeyArn"
+            },
+            ""
+          ]
+        }
+      ]
+    }
+  },
+  "Resources": {
+    "InterceptorRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": {
+              "Fn::Sub": "${AWS::StackName}-inspect"
+            },
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "secretsmanager:GetSecretValue"
+                  ],
+                  "Resource": {
+                    "Ref": "AIGuardSecretArn"
+                  }
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": {
+                    "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${AWS::StackName}-inspector:*"
+                  }
+                },
+                {
+                  "Fn::If": [
+                    "UsesCustomKms",
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "kms:Decrypt"
+                      ],
+                      "Resource": {
+                        "Ref": "SecretKmsKeyArn"
+                      }
+                    },
+                    {
+                      "Ref": "AWS::NoValue"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "RoleName": {
+          "Fn::Sub": "${AWS::StackName}-inspector-role"
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Read one inspection secret and write only inspector logs",
+          "must": [
+            "No model, booking database or production access"
+          ]
+        }
+      }
+    },
+    "InspectorLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Sub": "/aws/lambda/${AWS::StackName}-inspector"
+        },
+        "RetentionInDays": 7
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Bounded diagnostic retention without raw content",
+          "must": [
+            "No model, booking database or production access"
+          ]
+        }
+      }
+    },
+    "Inspector": {
+      "Type": "AWS::Lambda::Function",
+      "DependsOn": "InspectorLogGroup",
+      "Properties": {
+        "FunctionName": {
+          "Fn::Sub": "${AWS::StackName}-inspector"
+        },
+        "Runtime": "python3.12",
+        "Handler": "services.agentcore.interceptor.lambda_handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "InterceptorRole",
+            "Arn"
+          ]
+        },
+        "Timeout": 15,
+        "MemorySize": 256,
+        "ReservedConcurrentExecutions": 2,
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ArtifactBucket"
+          },
+          "S3Key": {
+            "Ref": "ArtifactKey"
+          },
+          "S3ObjectVersion": {
+            "Ref": "ArtifactVersion"
+          }
+        },
+        "Environment": {
+          "Variables": {
+            "AI_GUARD_MODE": "real",
+            "AI_GUARD_SECRET_ARN": {
+              "Ref": "AIGuardSecretArn"
+            },
+            "AI_GUARD_URL": {
+              "Ref": "AIGuardUrl"
+            },
+            "AI_GUARD_APPLICATION_NAME": {
+              "Ref": "ApplicationName"
+            }
+          }
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Reuse the real fail-closed application inspection handler",
+          "must": [
+            "No model, booking database or production access"
+          ]
+        }
+      }
+    },
+    "GatewayRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "bedrock-agentcore.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole",
+              "Condition": {
+                "StringEquals": {
+                  "aws:SourceAccount": {
+                    "Ref": "AWS::AccountId"
+                  }
+                },
+                "ArnLike": {
+                  "aws:SourceArn": {
+                    "Fn::Sub": "arn:${AWS::Partition}:bedrock-agentcore:${AWS::Region}:${AWS::AccountId}:gateway/${AWS::StackName}-*"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": {
+              "Fn::Sub": "${AWS::StackName}-invoke"
+            },
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "lambda:InvokeFunction"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::GetAtt": [
+                        "Inspector",
+                        "Arn"
+                      ]
+                    },
+                    {
+                      "Fn::GetAtt": [
+                        "Probe",
+                        "Arn"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ],
+        "RoleName": {
+          "Fn::Sub": "${AWS::StackName}-gateway-role"
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Only this staging gateway may invoke the inspector and read-only fixture",
+          "must": [
+            "No model, booking database or production access"
+          ]
+        }
+      }
+    },
+    "ProbeLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Retain synthetic probe invocation evidence for seven days",
+          "must": [
+            "No raw arguments or secrets in logs"
+          ]
+        }
+      },
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Sub": "/aws/lambda/${AWS::StackName}-probe"
+        },
+        "RetentionInDays": 7
+      }
+    },
+    "ProbeRole": {
+      "Type": "AWS::IAM::Role",
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Read-only synthetic fixture has no service access beyond its logs",
+          "must": [
+            "Do not grant database, network credential or model permissions"
+          ]
+        }
+      },
+      "Properties": {
+        "RoleName": {
+          "Fn::Sub": "${AWS::StackName}-probe-role"
+        },
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": {
+              "Fn::Sub": "${AWS::StackName}-probe-logs"
+            },
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": {
+                    "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${AWS::StackName}-probe:*"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "Probe": {
+      "Type": "AWS::Lambda::Function",
+      "DependsOn": "ProbeLogGroup",
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Exercise the gateway using a single fixed hotel, without exposing the local app",
+          "must": [
+            "Synthetic read-only fixture; do not use this as the application backend"
+          ]
+        }
+      },
+      "Properties": {
+        "FunctionName": {
+          "Fn::Sub": "${AWS::StackName}-probe"
+        },
+        "Runtime": "python3.12",
+        "Handler": "services.agentcore.cloud_probe.lambda_handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "ProbeRole",
+            "Arn"
+          ]
+        },
+        "Timeout": 3,
+        "MemorySize": 128,
+        "ReservedConcurrentExecutions": 2,
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ArtifactBucket"
+          },
+          "S3Key": {
+            "Ref": "ArtifactKey"
+          },
+          "S3ObjectVersion": {
+            "Ref": "ArtifactVersion"
+          }
+        }
+      }
+    },
+    "Gateway": {
+      "Type": "AWS::BedrockAgentCore::Gateway",
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Validate real AWS MCP request and response interception before hosting the app",
+          "must": [
+            "AWS_IAM only; request headers excluded; no inference targets"
+          ]
+        }
+      },
+      "Properties": {
+        "Name": {
+          "Ref": "AWS::StackName"
+        },
+        "AuthorizerType": "AWS_IAM",
+        "ProtocolType": "MCP",
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "GatewayRole",
+            "Arn"
+          ]
+        },
+        "InterceptorConfigurations": [
+          {
+            "InterceptionPoints": [
+              "REQUEST",
+              "RESPONSE"
+            ],
+            "InputConfiguration": {
+              "PassRequestHeaders": false
+            },
+            "Interceptor": {
+              "Lambda": {
+                "Arn": {
+                  "Fn::GetAtt": [
+                    "Inspector",
+                    "Arn"
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "InspectorPermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Bind service invocation to this gateway and account",
+          "must": [
+            "Keep both source conditions"
+          ]
+        }
+      },
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Ref": "Inspector"
+        },
+        "Principal": "bedrock-agentcore.amazonaws.com",
+        "SourceAccount": {
+          "Ref": "AWS::AccountId"
+        },
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "Gateway",
+            "GatewayArn"
+          ]
+        }
+      }
+    },
+    "ProbePermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Bind service invocation to this gateway and account",
+          "must": [
+            "Keep both source conditions"
+          ]
+        }
+      },
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Ref": "Probe"
+        },
+        "Principal": "bedrock-agentcore.amazonaws.com",
+        "SourceAccount": {
+          "Ref": "AWS::AccountId"
+        },
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "Gateway",
+            "GatewayArn"
+          ]
+        }
+      }
+    },
+    "ProbeTarget": {
+      "Type": "AWS::BedrockAgentCore::GatewayTarget",
+      "DependsOn": [
+        "ProbePermission",
+        "InspectorPermission"
+      ],
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Expose only the synthetic read-only hotel probe",
+          "must": [
+            "No mutations, payments, user records or model access"
+          ]
+        }
+      },
+      "Properties": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-fixture"
+        },
+        "GatewayIdentifier": {
+          "Ref": "Gateway"
+        },
+        "CredentialProviderConfigurations": [
+          {
+            "CredentialProviderType": "GATEWAY_IAM_ROLE"
+          }
+        ],
+        "TargetConfiguration": {
+          "Mcp": {
+            "Lambda": {
+              "LambdaArn": {
+                "Fn::GetAtt": [
+                  "Probe",
+                  "Arn"
+                ]
+              },
+              "ToolSchema": {
+                "InlinePayload": [
+                  {
+                    "Name": "get_test_hotel",
+                    "Description": "Return a fixed synthetic hotel for security integration testing. No booking or customer access.",
+                    "InputSchema": {
+                      "Type": "object",
+                      "Properties": {
+                        "query": {
+                          "Type": "string",
+                          "Description": "Synthetic inspection test text, at most 2000 characters."
+                        }
+                      },
+                      "Required": [
+                        "query"
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "InterceptorArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "Inspector",
+          "Arn"
+        ]
+      },
+      "Description": "Staging resource ARN"
+    },
+    "GatewayRoleArn": {
+      "Value": {
+        "Fn::GetAtt": [
+          "GatewayRole",
+          "Arn"
+        ]
+      },
+      "Description": "Staging resource ARN"
+    },
+    "GatewayId": {
+      "Description": "Staging gateway identifier",
+      "Value": {
+        "Ref": "Gateway"
+      }
+    },
+    "GatewayUrl": {
+      "Description": "IAM-signed MCP test endpoint",
+      "Value": {
+        "Fn::GetAtt": [
+          "Gateway",
+          "GatewayUrl"
+        ]
+      }
+    },
+    "GatewayArn": {
+      "Description": "Exact gateway for scoped caller permission",
+      "Value": {
+        "Fn::GetAtt": [
+          "Gateway",
+          "GatewayArn"
+        ]
+      }
+    },
+    "ProbeFunctionName": {
+      "Description": "Read-only fixture function",
+      "Value": {
+        "Ref": "Probe"
+      }
+    }
+  },
+  "Metadata": {
+    "AWSToolsMetrics": {
+      "AWSAgentToolkit": "aws-cloudformation@3"
+    },
+    "com.aws.cloudformation.Context": {
+      "ref": [
+        {
+          "at": "docs/aws-test-deployment.md",
+          "has": "Scope, cost assumptions, deployment and teardown"
+        }
+      ],
+      "must": [
+        "IAM authentication; real inspection only; no model permissions or production data"
+      ]
+    }
+  }
+}

@@ -1,0 +1,205 @@
+{
+  "verified_local_date": "2026-10-18",
+  "region": "us-east-1",
+  "deployment_prefix": "dannytran-travel-test",
+  "scope": "Isolated AWS MCP gateway with real Trend AI Guard and synthetic read-only Lambda fixture. Website remains local. No LLM calls.",
+  "overall": "FUNCTIONAL_WITH_BLOCKING_FINDING",
+  "unit_tests_passed": 128,
+  "local_template_schema": "cfn-lint 1.57.2: zero findings",
+  "project_security_rules": "CloudFormation Guard 3.2.1: PASS; project-specific baseline, not a comprehensive compliance audit",
+  "model_calls": 0,
+  "gateway_requests_total": 17,
+  "latest_gateway_cases": [
+    {
+      "case": "unsigned_access",
+      "http_status": 401,
+      "passed": true
+    },
+    {
+      "case": "tool_discovery",
+      "http_status": 200,
+      "tools": [
+        "dannytran-travel-test-fixture___get_test_hotel"
+      ],
+      "passed": true
+    },
+    {
+      "case": "benign_hotel_lookup",
+      "started_ms": 1792387076568,
+      "finished_ms": 1792387077311,
+      "http_status": 200,
+      "fixture_returned": true,
+      "reason_code": null,
+      "trend_blocked": false,
+      "passed": true
+    },
+    {
+      "case": "synthetic_injection",
+      "started_ms": 1792387077311,
+      "finished_ms": 1792387078109,
+      "http_status": 200,
+      "fixture_returned": true,
+      "reason_code": null,
+      "trend_blocked": false,
+      "passed": false
+    },
+    {
+      "case": "malformed_tool_arguments",
+      "started_ms": 1792387078109,
+      "finished_ms": 1792387078634,
+      "http_status": 400,
+      "reason_code": "UNSUPPORTED_PAYLOAD",
+      "passed": true
+    }
+  ],
+  "outage": {
+    "started_ms": 1792387020995,
+    "restored": true,
+    "request_started_ms": 1792387024227,
+    "http_status": 500,
+    "fixture_returned": false,
+    "request_finished_ms": 1792387026012,
+    "blocked": true,
+    "recovery_passed": true,
+    "passed": true,
+    "probe_events_during_request": 0
+  },
+  "flow_evidence": [
+    {
+      "case": "benign_hotel_lookup",
+      "events": [
+        {
+          "source": "inspector",
+          "timestamp_ms": 1792387077029,
+          "event_id": "39971567501962809920570014463126373128192713853379608584",
+          "stage": "REQUEST",
+          "contract": "mcp",
+          "decision": "ALLOW",
+          "reason_code": "CONTENT_ALLOWED",
+          "reason_count": 1,
+          "invocation_id": "25312e7b-d247-4be7-8591-1bee870fab18"
+        },
+        {
+          "source": "probe",
+          "timestamp_ms": 1792387077101,
+          "event_id": "39971567503568463574864219330249918178713625473090650113",
+          "stage": "PROBE",
+          "invocation_id": "e141c4de-bb1a-4d1b-b281-1df7439416e2"
+        },
+        {
+          "source": "inspector",
+          "timestamp_ms": 1792387077289,
+          "event_id": "39971567507761003672187976479925659879081287844934516748",
+          "stage": "RESPONSE",
+          "contract": "mcp",
+          "decision": "ALLOW",
+          "reason_code": "CONTENT_ALLOWED",
+          "reason_count": 1,
+          "invocation_id": "537d67d9-52e8-4299-8f2e-a350d2632e37"
+        }
+      ]
+    },
+    {
+      "case": "synthetic_injection",
+      "events": [
+        {
+          "source": "inspector",
+          "timestamp_ms": 1792387077754,
+          "event_id": "39971567518130850189504716240739768875862775945215410192",
+          "stage": "REQUEST",
+          "contract": "mcp",
+          "decision": "ALLOW",
+          "reason_code": "CONTENT_ALLOWED",
+          "reason_count": 1,
+          "invocation_id": "3b33047a-52b8-43c8-97aa-ac16c246c030"
+        },
+        {
+          "source": "probe",
+          "timestamp_ms": 1792387077818,
+          "event_id": "39971567519558097882210676122731028180202500672878608389",
+          "stage": "PROBE",
+          "invocation_id": "9f320c0c-4bb2-4532-927a-e149f89f25a3"
+        },
+        {
+          "source": "inspector",
+          "timestamp_ms": 1792387078011,
+          "event_id": "39971567523862141705527086388114448471933404852252377108",
+          "stage": "RESPONSE",
+          "contract": "mcp",
+          "decision": "ALLOW",
+          "reason_code": "CONTENT_ALLOWED",
+          "reason_count": 1,
+          "invocation_id": "27c2134d-6089-4b8d-aeea-b234008493ed"
+        }
+      ]
+    },
+    {
+      "case": "malformed_tool_arguments",
+      "events": [
+        {
+          "source": "inspector",
+          "timestamp_ms": 1792387078420,
+          "event_id": "39971567532983146491726111253002557245446584708198367256",
+          "stage": "REQUEST",
+          "contract": "mcp",
+          "decision": "DENY",
+          "reason_code": "UNSUPPORTED_PAYLOAD",
+          "reason_count": 0,
+          "invocation_id": "1d0532cd-e122-4810-a137-7ab8b35957f6"
+        },
+        {
+          "source": "inspector",
+          "timestamp_ms": 1792387078580,
+          "event_id": "39971567536551265723491010955648272169070322549155233820",
+          "stage": "RESPONSE",
+          "contract": "mcp",
+          "decision": "ALLOW",
+          "reason_code": "CONTENT_ALLOWED",
+          "reason_count": 1,
+          "invocation_id": "3e9d123f-9216-43bc-8d7b-98823384e861"
+        }
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "TREND-INJECTION-ALLOW",
+      "severity": "Needs policy review before claiming content protection",
+      "observed": "Trend returned Allow for synthetic injection text; read-only fixture ran. No customer or payment access exists in this fixture.",
+      "cause": "Not determined; verify the assigned AI Policy and detections for the staging application."
+    }
+  ],
+  "limits": [
+    "No real AI model or exploitation susceptibility tested",
+    "No full website, database, production identity, private MCP deployment or Cedar policy tested",
+    "No successful real Trend block observed",
+    "Billing estimate only; actual bill not queried"
+  ],
+  "resources": "All test-created AWS resources verified absent after user-authorized teardown. CloudFormation deletion history and existing account audit logs may remain; no test resources retained.",
+  "teardown": {
+    "complete": true,
+    "verified_at_utc": "2026-10-19T05:26:23.297451+00:00",
+    "checks": {
+      "test_stack_id": true,
+      "artifact_stack_id": true,
+      "gateway_absent": true,
+      "inspector_absent": true,
+      "inspector_logs_absent": true,
+      "probe_absent": true,
+      "probe_logs_absent": true,
+      "inspector-role_absent": true,
+      "probe-role_absent": true,
+      "gateway-role_absent": true,
+      "bucket_absent": true,
+      "secret_absent": true
+    },
+    "secret_recovery_window": "none; dedicated copy force-deleted with explicit user authorization",
+    "scope": "Only manifest-recorded test resources; existing AWS workloads and original local credentials preserved"
+  },
+  "final_offline_verification": {
+    "unit_tests_passed": 130,
+    "lint": "PASS",
+    "template_schema": "PASS",
+    "project_security_rules": "PASS"
+  }
+}

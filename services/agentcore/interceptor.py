@@ -111,6 +111,17 @@ def audit(context, namespace, stage, decision, reason_code, reason_count=0):
     )
 
 
+def passthrough(namespace, stage, packet):
+    if namespace == "http":
+        return {"interceptorOutputVersion": "1.0", "http": {}}
+    # MCP requires explicit body preservation; an empty MCP output becomes an empty response.
+    key = "transformedGatewayRequest" if stage == "REQUEST" else "transformedGatewayResponse"
+    value = {"body": packet["body"]}
+    if stage == "RESPONSE":
+        value["statusCode"] = packet.get("statusCode", 200)
+    return {"interceptorOutputVersion": "1.0", "mcp": {key: value}}
+
+
 def handle(event, context, inspector):
     namespace = "mcp" if isinstance(event, dict) and "mcp" in event else "http"
     stage, rpc_id = "UNKNOWN", None
@@ -160,7 +171,7 @@ def handle(event, context, inspector):
             if stage == "REQUEST":
                 method = body.get("method")
                 if method in {"initialize", "notifications/initialized", "tools/list", "ping"}:
-                    return {"interceptorOutputVersion": "1.0", "mcp": {}}
+                    return passthrough(namespace, stage, packet)
                 params = body.get("params", {})
                 if (
                     method != "tools/call"
@@ -195,7 +206,7 @@ def handle(event, context, inspector):
     )
     if verdict.action == "block":
         return denied(namespace, "AI_GUARD_BLOCK", 403, rpc_id)
-    return {"interceptorOutputVersion": "1.0", namespace: {}}
+    return passthrough(namespace, stage, packet)
 
 
 _inspector = None

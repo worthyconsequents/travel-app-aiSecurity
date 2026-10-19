@@ -1,5 +1,7 @@
 # AgentCore alternative — local implementation and AWS handoff
 
+Later live milestone: [isolated AWS gateway test](aws-test-deployment.md) on 2026-10-18. Gateway routing, live inspection and fail-closed outage behavior were verified; the synthetic injection was allowed by Trend. The initial offline implementation and evidence below describe the earlier milestone. Full app hosting/model integration remain incomplete. The isolated test resources were subsequently torn down and verified absent; the scripts and recorded results remain available.
+
 The current boring-travel site remains at http://localhost:8080 with its original default transport. The new option is a separate Compose project at http://localhost:8081 with its own network, sessions, inventory, bookings, approvals and audit database. The existing Trend Kubernetes deployment remains separate and unchanged.
 
 ## Start, test and stop

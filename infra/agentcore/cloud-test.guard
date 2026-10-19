@@ -1,0 +1,42 @@
+let buckets = Resources.*[ Type == 'AWS::S3::Bucket' ]
+rule private_encrypted_artifacts when %buckets !empty {
+    %buckets {
+        DeletionPolicy == 'Retain'
+        UpdateReplacePolicy == 'Retain'
+        Properties {
+            PublicAccessBlockConfiguration {
+                BlockPublicAcls == true
+                BlockPublicPolicy == true
+                IgnorePublicAcls == true
+                RestrictPublicBuckets == true
+            }
+            BucketEncryption.ServerSideEncryptionConfiguration[*].ServerSideEncryptionByDefault.SSEAlgorithm == 'AES256'
+            VersioningConfiguration.Status == 'Enabled'
+        }
+    }
+}
+let gateways = Resources.*[ Type == 'AWS::BedrockAgentCore::Gateway' ]
+rule authenticated_gateway when %gateways !empty {
+    %gateways.Properties {
+        AuthorizerType == 'AWS_IAM'
+        ProtocolType == 'MCP'
+        InterceptorConfigurations[*].InputConfiguration.PassRequestHeaders == false
+    }
+}
+let functions = Resources.*[ Type == 'AWS::Lambda::Function' ]
+rule bounded_functions when %functions !empty {
+    %functions.Properties {
+        Runtime == 'python3.12'
+        Timeout <= 15
+        MemorySize <= 256
+        ReservedConcurrentExecutions == 2
+        Code.S3ObjectVersion exists
+    }
+}
+let groups = Resources.*[ Type == 'AWS::Logs::LogGroup' ]
+rule short_log_retention when %groups !empty {
+    %groups.Properties.RetentionInDays == 7
+}
+rule real_inspection when Resources.Inspector exists {
+    Resources.Inspector.Properties.Environment.Variables.AI_GUARD_MODE == 'real'
+}

@@ -45,9 +45,9 @@ def check(namespace, stage, body, path="/inference/v1/messages", correlation="of
         inspector,
     )
     denial = result[namespace].get("transformedGatewayResponse")
-    if denial:
+    if denial and denial.get("statusCode", 200) >= 400:
         counters["request_denials" if stage == "REQUEST" else "response_denials"] += 1
-    return denial
+    return denial if denial and denial.get("statusCode", 200) >= 400 else None
 
 
 async def dispatch(tool, args, capability):
