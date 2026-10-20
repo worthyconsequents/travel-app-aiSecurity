@@ -88,7 +88,13 @@ def login(body: LoginRequest, response: Response):
     with Session.begin() as db:
         db.add(row)
     response.set_cookie(
-        session_cookie_name(), row.id, httponly=True, samesite="strict", max_age=8 * 3600, path="/"
+        session_cookie_name(),
+        row.id,
+        httponly=True,
+        samesite="strict",
+        max_age=8 * 3600,
+        path="/",
+        secure=os.getenv("APP_MODE") == "aws-demo",
     )
     return {"id": row.human, **IDENTITIES[row.human]}
 

@@ -76,6 +76,10 @@ def mcp_route(server):
     prefix = server + "___"
     if profile == "agentcore-offline":
         return "http://agentcore-offline:8000/tools/mcp", prefix, None
+    target_prefix = os.getenv("AGENTCORE_TARGET_PREFIX", "")
+    if target_prefix and not re.fullmatch(r"[a-z][a-z0-9-]{1,50}-", target_prefix):
+        raise ValueError("Invalid per-deployment target prefix")
+    prefix = target_prefix + prefix
     url = aws_url(os.environ["AGENTCORE_TOOL_GATEWAY_URL"])
     if urlsplit(url).path != "/mcp":
         raise ValueError("Tool gateway URL must end in /mcp")

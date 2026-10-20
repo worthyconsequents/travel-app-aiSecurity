@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-19",
+  "scope": "AWS fleet deployment option, offline verification only",
+  "aws_api_calls_performed": false,
+  "aws_resources_created": false,
+  "paid_model_calls": 0,
+  "unit_tests": {"passed": 156, "failed": 0},
+  "ruff": "passed",
+  "cloudformation": {
+    "cfn_lint": "passed, no findings for seven rendered three-copy templates",
+    "cfn_guard": "passed project fleet rules",
+    "optional_paid_template": "schema and guard checks passed with fictitious project/model references",
+    "service_side_validation": "not run"
+  },
+  "containers": {
+    "python": "linux/amd64 image built successfully from sanitized context",
+    "frontend": "linux/amd64 image built successfully from sanitized context",
+    "aws_runtime_imports": "passed with dummy credentials and networking disabled",
+    "nginx": "cached image validated generated configuration with networking disabled"
+  },
+  "remaining": [
+    "Approve regional resource inventory and costs before deployment",
+    "Supply real domain, issued wildcard certificate, operator CIDR and image digests",
+    "Perform service-side validation and a one-copy AWS deployment",
+    "Verify Cognito login, private MCP routing, shared-secret access and cross-copy isolation",
+    "Confirm assigned Trend detection policy actually blocks synthetic attacks",
+    "Verify paid inference only under a separately approved model trial"
+  ]
+}

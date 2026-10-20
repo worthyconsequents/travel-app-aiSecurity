@@ -2,6 +2,10 @@
 
 A local travel website with destination photography, a scripted travel assistant, protected MCP tools, and a separate password-locked operations dashboard. All travelers, hotels, bookings, payments and attack fixtures are synthetic. The build makes no paid model calls and does not deploy AWS resources automatically.
 
+For development or agent continuation, start with [AGENTS.md](AGENTS.md) and the
+[agent handoff](docs/AGENT_HANDOFF.md). The [test and validation inventory](docs/test-validation-matrix.md)
+lists completed checks, exact unit cases, evidence limits and pending AWS acceptance tests.
+
 ## Architecture diagrams
 
 These diagrams distinguish the implemented local application, the intended full AgentCore deployment, and the limited AWS test that was completed and torn down. The full cloud application and effective Trend content blocking remain unverified.
@@ -16,7 +20,7 @@ The app uses its reference enforcement gateway. The separately installed Trend A
 
 ### AgentCore target design — planned
 
-This is the intended full deployment, not a claim of deployed infrastructure. Dashed connections represent intended integrations; cloud hosting, user authentication, private tool ingress and model integration still need work.
+This is the intended full deployment, not a claim of deployed infrastructure. The new AWS fleet option supplies hosting, operator login, private tool ingress and gateway templates; live end-to-end verification remains pending.
 
 ![Planned AgentCore deployment architecture](docs/architecture/02-agentcore-target-design.png)
 
@@ -31,6 +35,21 @@ The offline implementation and the historical AWS test are different environment
 [Editable SVG](docs/architecture/03-agentcore-implementation-and-test-scope.svg) · [Mermaid source](docs/architecture/03-agentcore-implementation-and-test-scope.mmd)
 
 See the [diagram index](docs/architecture/README.md), [AgentCore implementation notes](docs/agentcore-alternative.md), and [recorded AWS test results](docs/aws-test-deployment.md).
+
+## Multiple isolated AWS deployments
+
+The [AWS fleet option](docs/aws-multi-deployment.md) creates complete, separate copies driven by `DEPLOYMENT_COUNT` in `.env`, named `dannytran-travel-lab01-01`, `-02`, and so on. Each copy has its own VPC, private Fargate application, RDS database, Cognito operator login, HTTPS URLs, monitoring password, AgentCore gateways and inspector. Only the inspectors share the existing Trend AI Guard detection secret. Reducing the count never deletes copies; teardown selects one exact copy and preserves the shared key.
+
+![AWS copies with one shared Trend AI Guard key](docs/architecture/04-aws-multi-deployment.png)
+
+[Editable SVG](docs/architecture/04-aws-multi-deployment.svg) · [Mermaid source](docs/architecture/04-aws-multi-deployment.mmd) · [Configuration, deployment and teardown](docs/aws-multi-deployment.md)
+
+```sh
+# Offline preview; no AWS credentials or calls required.
+uv run --frozen --extra aws-deploy python -m scripts.aws_fleet plan --env-file .env
+```
+
+This deployment code is locally validated and has **not been deployed to AWS**. All AWS writes require explicit apply/cost flags and matching account configuration. Paid inference defaults to disabled. Each copy has recurring hosting costs; teardown snapshots the database and retains application secrets/logs for explicit cleanup. The default cloud chatbot is scripted and uses real AgentCore tool routing. Live model behavior and effective Trend attack blocking remain unverified.
 
 ## Run locally
 

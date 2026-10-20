@@ -61,8 +61,13 @@ def data(limit: int = Query(default=100, ge=1, le=500)):
         runs = db.scalars(select(AttackRun).order_by(AttackRun.started.desc()).limit(20)).all()
         return {
             "profile": deployment_profile(),
-            "evidence": "Local reference enforcement; offline AgentCore interception where configured. "
-            "Not live Trend detection or real-model susceptibility evidence.",
+            "evidence": (
+                "Application authorization and activity for this AWS copy. Inspector decisions "
+                "are recorded separately in CloudWatch. Successful calls alone do not prove attack blocking."
+                if deployment_profile() == "agentcore-aws"
+                else "Local reference enforcement; offline AgentCore interception where configured. "
+                "Not live Trend detection or real-model susceptibility evidence."
+            ),
             "model": os.getenv("MODEL_MODE", "mock"),
             "totals": counts,
             "audits": [record(row) for row in rows],

@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1850" viewBox="0 0 1800 1850">
+<title>the boring-travel company — architecture review</title>
+<desc>Review draft. Implemented, planned, and removed test infrastructure are labeled explicitly.</desc>
+<rect width="1800" height="1850" fill="#F6F7F9"/>
+<text x="65" y="38" font-family="Arial, sans-serif" font-size="19" font-weight="700" fill="#087F80" dominant-baseline="text-before-edge">THE BORING-TRAVEL COMPANY  /  ARCHITECTURE REVIEW</text>
+<text x="65" y="82" font-family="Arial, sans-serif" font-size="43" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">AWS deployments — one shared AI Guard key</text>
+<text x="65" y="140" font-family="Arial, sans-serif" font-size="23" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Proposed full-app design • three copies illustrate X • one AWS account and Region</text>
+<rect x="1390" y="35" width="193" height="34" rx="17" fill="#FFF1DD" stroke="#FFF1DD" stroke-width="1"/>
+<text x="1405" y="43" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#A75A16" dominant-baseline="text-before-edge">PROPOSED DESIGN</text>
+<text x="65" y="1814" font-family="Arial, sans-serif" font-size="16" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">DRAFT 04  •  19 OCT 2026  •  FOR REVIEW — NOT YET ADDED TO THE REPOSITORY</text>
+<rect x="65" y="195" width="1670" height="145" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<text x="90" y="215" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">LOCAL DEPLOYMENT SETTINGS (.env)  ·  STORE THE SECRET ARN, NOT THE KEY VALUE</text>
+<text x="90" y="260" font-family="Arial, sans-serif" font-size="21" font-weight="700" fill="#087F80" dominant-baseline="text-before-edge">DEPLOYMENT_COUNT=3</text>
+<text x="470" y="260" font-family="Arial, sans-serif" font-size="21" font-weight="400" fill="#152D40" dominant-baseline="text-before-edge">DEPLOYMENT_PREFIX=dannytran-travel</text>
+<text x="1110" y="260" font-family="Arial, sans-serif" font-size="21" font-weight="400" fill="#152D40" dominant-baseline="text-before-edge">DEPLOYMENT_ENV=lab01</text>
+<text x="90" y="299" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">AWS_REGION=us-east-1</text>
+<text x="470" y="299" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">AI_GUARD_SECRET_ARN=&lt;shared secret ARN&gt;</text>
+<text x="1110" y="299" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">DEPLOYMENT_TARGET=aws</text>
+<rect x="35" y="365" width="1730" height="1140" rx="24" fill="#EFF3F6" stroke="#BFCED8" stroke-width="2" stroke-dasharray="9 7"/>
+<text x="65" y="390" font-family="Arial, sans-serif" font-size="23" font-weight="700" fill="#536879" dominant-baseline="text-before-edge">ONE AWS ACCOUNT / REGION  ·  SEPARATE DEPLOYMENT STACKS</text>
+<text x="500" y="431" font-family="Arial, sans-serif" font-size="21" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">dannytran-travel-lab01-shared</text>
+<rect x="500" y="463" width="800" height="140" rx="20" fill="#E5F4F1" stroke="#AED6D0" stroke-width="2"/>
+<text x="525" y="480" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#087F80" dominant-baseline="text-before-edge">SHARED FOUNDATION  ·  SEPARATE LIFECYCLE</text>
+<text x="525" y="516" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">One Secrets Manager secret</text>
+<text x="525" y="559" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#087F80" dominant-baseline="text-before-edge">One Trend AI Guard key; instance teardown preserves this secret.</text>
+<polyline points="900,603 900,640" fill="none" stroke="#087F80" stroke-width="3" stroke-linejoin="round" stroke-dasharray="9 8"/>
+<polyline points="550,640 1720,640" fill="none" stroke="#087F80" stroke-width="3" stroke-linejoin="round" stroke-dasharray="9 8"/>
+<text x="675" y="614" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#087F80" dominant-baseline="text-before-edge">Distinct inspector IAM roles • GetSecretValue on the same ARN</text>
+<rect x="65" y="685" width="500" height="725" rx="20" fill="#FFFFFF" stroke="#C7D3DC" stroke-width="2"/>
+<text x="90" y="710" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#336DB8" dominant-baseline="text-before-edge">DEPLOYMENT 01</text>
+<text x="90" y="746" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">dannytran-travel-lab01-01</text>
+<text x="90" y="787" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Own HTTPS URL + identity configuration</text>
+<rect x="100" y="835" width="435" height="130" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="100" y="844" width="7" height="112" rx="3" fill="#336DB8"/>
+<text x="121" y="855" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">AgentCore tool +</text>
+<text x="121" y="887" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">inference gateways</text>
+<text x="121" y="926" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Own IAM roles and tool policies</text>
+<rect x="100" y="1010" width="435" height="125" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="100" y="1019" width="7" height="107" rx="3" fill="#7854A5"/>
+<text x="121" y="1030" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">Inspection Lambda</text>
+<text x="121" y="1071" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Own IAM role • own application name</text>
+<text x="121" y="1098" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Shared key read by inspector role only</text>
+<rect x="100" y="1185" width="435" height="195" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="100" y="1194" width="7" height="177" rx="3" fill="#087F80"/>
+<text x="121" y="1205" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">Private application VPC</text>
+<text x="121" y="1244" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Web app + private MCP services</text>
+<text x="121" y="1271" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Separate PostgreSQL database</text>
+<text x="121" y="1298" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Own sessions + /monitor password</text>
+<text x="121" y="1325" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Own DB / signing secrets + logs</text>
+<polyline points="100,1280 85,1280 85,900 100,900" fill="none" stroke="#336DB8" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="100.0,900.0 88.0,895.0 88.0,905.0" fill="#336DB8"/>
+<text x="100" y="1153" font-family="Arial, sans-serif" font-size="18" font-weight="400" fill="#336DB8" dominant-baseline="text-before-edge">App → own gateways (AWS IAM / SigV4)</text>
+<polyline points="317,965 317,1010" fill="none" stroke="#7854A5" stroke-width="3" stroke-linejoin="round" stroke-dasharray="9 8"/>
+<polygon points="317.0,1010.0 322.0,998.0 312.0,998.0" fill="#7854A5"/>
+<text x="335" y="980" font-family="Arial, sans-serif" font-size="17" font-weight="400" fill="#7854A5" dominant-baseline="text-before-edge">Request / response</text>
+<polyline points="550,640 550,1073 535,1073" fill="none" stroke="#087F80" stroke-width="3" stroke-linejoin="round" stroke-dasharray="9 8"/>
+<polygon points="535.0,1073.0 547.0,1078.0 547.0,1068.0" fill="#087F80"/>
+<polyline points="100,1073 75,1073 75,1460" fill="none" stroke="#7854A5" stroke-width="3" stroke-linejoin="round" stroke-dasharray="9 8"/>
+<rect x="650" y="685" width="500" height="725" rx="20" fill="#FFFFFF" stroke="#C7D3DC" stroke-width="2"/>
+<text x="675" y="710" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#336DB8" dominant-baseline="text-before-edge">DEPLOYMENT 02</text>
+<text x="675" y="746" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">dannytran-travel-lab01-02</text>
+<text x="675" y="787" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Own HTTPS URL + identity configuration</text>
+<rect x="685" y="835" width="435" height="130" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="685" y="844" width="7" height="112" rx="3" fill="#336DB8"/>
+<text x="706" y="855" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">AgentCore tool +</text>
+<text x="706" y="887" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">inference gateways</text>
+<text x="706" y="926" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Own IAM roles and tool policies</text>
+<rect x="685" y="1010" width="435" height="125" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="685" y="1019" width="7" height="107" rx="3" fill="#7854A5"/>
+<text x="706" y="1030" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">Inspection Lambda</text>
+<text x="706" y="1071" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Own IAM role • own application name</text>
+<text x="706" y="1098" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Shared key read by inspector role only</text>
+<rect x="685" y="1185" width="435" height="195" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="685" y="1194" width="7" height="177" rx="3" fill="#087F80"/>
+<text x="706" y="1205" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">Private application VPC</text>
+<text x="706" y="1244" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Web app + private MCP services</text>
+<text x="706" y="1271" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Separate PostgreSQL database</text>
+<text x="706" y="1298" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Own sessions + /monitor password</text>
+<text x="706" y="1325" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Own DB / signing secrets + logs</text>
+<polyline points="685,1280 670,1280 670,900 685,900" fill="none" stroke="#336DB8" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="685.0,900.0 673.0,895.0 673.0,905.0" fill="#336DB8"/>
+<text x="685" y="1153" font-family="Arial, sans-serif" font-size="18" font-weight="400" fill="#336DB8" dominant-baseline="text-before-edge">App → own gateways (AWS IAM / SigV4)</text>
+<polyline points="902,965 902,1010" fill="none" stroke="#7854A5" stroke-width="3" stroke-linejoin="round" stroke-dasharray="9 8"/>
+<polygon points="902.0,1010.0 907.0,998.0 897.0,998.0" fill="#7854A5"/>
+<text x="920" y="980" font-family="Arial, sans-serif" font-size="17" font-weight="400" fill="#7854A5" dominant-baseline="text-before-edge">Request / response</text>
+<polyline points="1135,640 1135,1073 1120,1073" fill="none" stroke="#087F80" stroke-width="3" stroke-linejoin="round" stroke-dasharray="9 8"/>
+<polygon points="1120.0,1073.0 1132.0,1078.0 1132.0,1068.0" fill="#087F80"/>
+<polyline points="685,1073 660,1073 660,1460" fill="none" stroke="#7854A5" stroke-width="3" stroke-linejoin="round" stroke-dasharray="9 8"/>
+<rect x="1235" y="685" width="500" height="725" rx="20" fill="#FFFFFF" stroke="#C7D3DC" stroke-width="2"/>
+<text x="1260" y="710" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#336DB8" dominant-baseline="text-before-edge">DEPLOYMENT 03</text>
+<text x="1260" y="746" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">dannytran-travel-lab01-03</text>
+<text x="1260" y="787" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Own HTTPS URL + identity configuration</text>
+<rect x="1270" y="835" width="435" height="130" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="1270" y="844" width="7" height="112" rx="3" fill="#336DB8"/>
+<text x="1291" y="855" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">AgentCore tool +</text>
+<text x="1291" y="887" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">inference gateways</text>
+<text x="1291" y="926" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Own IAM roles and tool policies</text>
+<rect x="1270" y="1010" width="435" height="125" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="1270" y="1019" width="7" height="107" rx="3" fill="#7854A5"/>
+<text x="1291" y="1030" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">Inspection Lambda</text>
+<text x="1291" y="1071" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Own IAM role • own application name</text>
+<text x="1291" y="1098" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Shared key read by inspector role only</text>
+<rect x="1270" y="1185" width="435" height="195" rx="16" fill="#FFFFFF" stroke="#CFD9E1" stroke-width="2"/>
+<rect x="1270" y="1194" width="7" height="177" rx="3" fill="#087F80"/>
+<text x="1291" y="1205" font-family="Arial, sans-serif" font-size="25" font-weight="700" fill="#152D40" dominant-baseline="text-before-edge">Private application VPC</text>
+<text x="1291" y="1244" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Web app + private MCP services</text>
+<text x="1291" y="1271" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Separate PostgreSQL database</text>
+<text x="1291" y="1298" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Own sessions + /monitor password</text>
+<text x="1291" y="1325" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Own DB / signing secrets + logs</text>
+<polyline points="1270,1280 1255,1280 1255,900 1270,900" fill="none" stroke="#336DB8" stroke-width="3" stroke-linejoin="round"/>
+<polygon points="1270.0,900.0 1258.0,895.0 1258.0,905.0" fill="#336DB8"/>
+<text x="1270" y="1153" font-family="Arial, sans-serif" font-size="18" font-weight="400" fill="#336DB8" dominant-baseline="text-before-edge">App → own gateways (AWS IAM / SigV4)</text>
+<polyline points="1487,965 1487,1010" fill="none" stroke="#7854A5" stroke-width="3" stroke-linejoin="round" stroke-dasharray="9 8"/>
+<polygon points="1487.0,1010.0 1492.0,998.0 1482.0,998.0" fill="#7854A5"/>
+<text x="1505" y="980" font-family="Arial, sans-serif" font-size="17" font-weight="400" fill="#7854A5" dominant-baseline="text-before-edge">Request / response</text>
+<polyline points="1720,640 1720,1073 1705,1073" fill="none" stroke="#087F80" stroke-width="3" stroke-linejoin="round" stroke-dasharray="9 8"/>
+<polygon points="1705.0,1073.0 1717.0,1078.0 1717.0,1068.0" fill="#087F80"/>
+<polyline points="1270,1073 1245,1073 1245,1460" fill="none" stroke="#7854A5" stroke-width="3" stroke-linejoin="round" stroke-dasharray="9 8"/>
+<polyline points="75,1460 1245,1460" fill="none" stroke="#7854A5" stroke-width="3" stroke-linejoin="round" stroke-dasharray="9 8"/>
+<polyline points="900,1460 900,1550" fill="none" stroke="#7854A5" stroke-width="3" stroke-linejoin="round" stroke-dasharray="9 8"/>
+<polygon points="900.0,1550.0 905.0,1538.0 895.0,1538.0" fill="#7854A5"/>
+<text x="950" y="1518" font-family="Arial, sans-serif" font-size="20" font-weight="400" fill="#7854A5" dominant-baseline="text-before-edge">Inspected content → regional vendor API</text>
+<rect x="65" y="1550" width="1670" height="105" rx="20" fill="#F0EAF8" stroke="#D9CDE9" stroke-width="2"/>
+<text x="90" y="1570" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#7854A5" dominant-baseline="text-before-edge">External Trend Vision One / AI Guard API</text>
+<text x="90" y="1614" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#7854A5" dominant-baseline="text-before-edge">Same key on every copy • unique TMV1-Application-Name per deployment provides attribution, not access control.</text>
+<text x="65" y="1683" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Isolated per copy: application data, sessions, monitoring passwords, IAM roles, gateways, network and logs.</text>
+<text x="65" y="1720" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#A75A16" dominant-baseline="text-before-edge">Shared dependency: rotating or revoking the AI Guard key affects every deployment. Bedrock access still uses AWS IAM.</text>
+<text x="65" y="1757" font-family="Arial, sans-serif" font-size="21" font-weight="400" fill="#536879" dominant-baseline="text-before-edge">Design only: full-app AWS hosting and multi-instance automation are not implemented. No cloud resources were created.</text>
+</svg>

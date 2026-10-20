@@ -32,7 +32,18 @@ def current(request: Request):
 
 
 def require_local():
-    if os.getenv("APP_MODE", "local") != "local":
+    mode = os.getenv("APP_MODE", "local")
+    if mode == "aws-demo":
+        # A hosted lab for authenticated operators, who may select synthetic personas.
+        # The generated stack restricts task ingress to its authenticating ALB.
+        if (
+            os.getenv("AWS_DEMO_EDGE_AUTH") != "cognito-alb"
+            or len(os.getenv("MCP_SIGNING_KEY", "")) < 32
+            or os.getenv("MONITOR_COOKIE_SECURE") != "true"
+        ):
+            raise RuntimeError("AWS demo requires authenticated edge and isolated secrets")
+        return
+    if mode != "local":
         raise RuntimeError(
             "Demo authentication is disabled outside APP_MODE=local; implement Cognito JWT validation before deployment"
         )

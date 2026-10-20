@@ -3,9 +3,25 @@ import time
 import uuid
 
 from sqlalchemy import JSON, Boolean, Float, Integer, String, create_engine
+from sqlalchemy.engine import URL
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 
-engine = create_engine(os.getenv("DATABASE_URL", "sqlite:///travel.db"), pool_pre_ping=True)
+
+def database_url():
+    if os.getenv("APP_MODE") == "aws-demo":
+        return URL.create(
+            "postgresql+psycopg",
+            username="travel_demo",
+            password=os.environ["DATABASE_PASSWORD"],
+            host=os.environ["DATABASE_HOST"],
+            port=5432,
+            database="travel_demo",
+            query={"sslmode": "verify-full", "sslrootcert": "/app/rds-ca.pem"},
+        )
+    return os.getenv("DATABASE_URL", "sqlite:///travel.db")
+
+
+engine = create_engine(database_url(), pool_pre_ping=True)
 Session = sessionmaker(engine, expire_on_commit=False)
 
 

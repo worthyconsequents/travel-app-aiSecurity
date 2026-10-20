@@ -1,0 +1,179 @@
+# Agent handoff — AI Gateway Travel App
+
+Snapshot: 2026-10-19. Read this with the repository's root `AGENTS.md` and the
+[test/validation matrix](test-validation-matrix.md). This is context and recorded
+state, not authorization to deploy, spend money, delete resources or publish changes.
+Current user instructions determine the authorized work.
+
+## Purpose and user decisions
+
+The product is **the boring-travel company**, a realistic-looking travel website
+with synthetic hotels, travelers, reservations and payments. Keep the public UI
+focused on travel. Security demonstrations, attack results and request flows belong
+in the separate password-protected `/monitor` operator page.
+
+The user approved building a generic AWS multi-deployment option: `.env` selects
+X independent copies, each with separate application state and infrastructure,
+while their inspection Lambdas share one Trend AI Guard detection API credential.
+Use `dannytran-` for created resource names where AWS permits it. Accounts, Regions,
+profiles, domains and credentials must be deployer supplied rather than embedded.
+
+The approved build has been implemented locally. It does not authorize a new paid
+AWS rollout. The earlier $5 allowance was for a completed, removed gateway test.
+No model calls or AWS API operations were made during the fleet implementation.
+
+## Three implementation scopes
+
+| Scope | Actual behavior | Evidence boundary |
+|---|---|---|
+| Original local app | `compose.yaml`; original Compose project; website 8080; reference authorization gateway and three real HTTP MCP services; PostgreSQL | Deterministic assistant; application policy enforcement, no live model |
+| Offline AgentCore alternative | Separate project `boring-travel-agentcore`; `compose.agentcore.yaml`; website 8081; local tool/inference contract simulator and shared interceptor handler | Simulated inference and inspection markers; no AWS/Trend calls |
+| AWS fleet option | Full app hosting/gateway template factories and lifecycle runner; each copy gets Fargate, private RDS, VPC, Cognito-gated HTTPS ALBs, native private MCP targets, policy engine, inspector and secrets | Locally tested/validated; not deployed or verified end to end in AWS |
+
+Do not apply the offline overlay with the original Compose project name. Local
+stacks have separate networks, databases and cookies. Their private Docker service
+networks have no internet egress. The separately installed local Trend AI Gateway
+is not on the original application's active request path.
+
+## Request paths and security boundaries
+
+Original path: browser → NGINX → Next.js/FastAPI → reference business authorization
+gateway → travel-discovery, reservations or customer-payments MCP service → database.
+Authorization checks ownership, workload permissions, argument schemas, approvals,
+single-use approval consumption and idempotency. The gateway signs a short-lived,
+argument-scoped capability that backend tools verify. Model text cannot grant
+identity, authority or approval.
+
+The AWS path retains those business checks, then routes MCP requests through an
+IAM-authenticated AgentCore gateway with request/response inspection and Cedar
+enforcement. Native private targets reach TLS MCP ingress through managed VPC
+Lattice. Per-copy NGINX verifies an additional ingress key before proxying tools.
+
+Each AWS copy contains a single Fargate task with app containers; those containers
+share a task role/network trust boundary. The inspector is a separate Lambda and
+execution role. Copies are in one AWS account/Region, not separate account-level
+security boundaries. Task and gateway roles cannot read the shared detection key;
+only each copy's inspector has exact-secret access, plus scoped KMS decryption if
+needed. The key is externally owned, not copied into each stack or browser.
+
+Each copy has separate database, signing, MCP-ingress and monitoring secrets. RDS
+connections use certificate verification with the AWS CA bundle. A Cognito login
+gates every public route; self-registration is disabled. After login, operators can
+select synthetic personas for scenarios. This is **not** production customer
+identity mapping or Cognito group-based traveler authorization.
+
+Shared credential rotation/revocation affects all inspectors; their token cache is
+up to five minutes. Distinct Trend application names provide attribution, not
+separate credentials, quotas or proof of independent vendor policy configuration.
+A compromised inspector can expose the shared vendor key.
+
+## Fleet configuration and lifecycle
+
+See [deployment instructions](aws-multi-deployment.md) and `.env.example` for the
+complete configuration. Main settings:
+
+```dotenv
+DEPLOYMENT_TARGET=aws
+DEPLOYMENT_PREFIX=dannytran-travel
+DEPLOYMENT_ENV=lab01
+DEPLOYMENT_COUNT=3
+ENABLE_PAID_INFERENCE=false
+```
+
+- Namespace: `dannytran-travel-lab01`; copies: `...-01`, `...-02`, `...-03`.
+- One `...-shared` stack holds retained artifacts/ECR repositories. A copy uses
+  hosting stack `...-01` and AgentCore stack `...-01-agentcore`.
+- Count accepts 1–20. Increasing count adds copies; decreasing it never deletes.
+  Existing indices keep their names. ALB/S3 names use stable shortened hashes.
+  Cedar engine/policy names use `dannytran_` because hyphens are disallowed.
+- `plan` and `render` are offline. `status` contacts AWS read-only. `foundation`,
+  `publish-images`, `deploy` and `teardown` write to AWS and require apply/cost flags.
+- Deployment checks the expected account; reads metadata for the shared secret,
+  certificate, public zone, RDS version and image digests before provisioning the app.
+  It does not read the detection token during this preflight.
+- Deploy serially: shared foundation → hosting → AgentCore targets/policy → bind
+  gateway endpoints. Local locks prevent concurrent operations for the same scope.
+- The account/Region/namespace ledger is ignored under `build/aws-fleet/`. Stack
+  identity and ownership tags are rechecked. Same-config retries resume completed
+  phases. Changed blueprints require a new environment; automatic updates are
+  limited to the initial binding of gateway parameters.
+- Failure/rollback stacks require explicit inspection/remediation. Never delete a
+  ledger to force adoption, overwrite ownership tags or broadly delete by prefix.
+- Teardown selects one exact copy. It deletes AgentCore before hosting, snapshots
+  RDS, retains app secrets/logs, and records retained resources. Other copies,
+  shared artifacts/ECR and the external Trend key remain. Retention still costs
+  money and can cause name conflicts if a deleted namespace is reused.
+
+With paid inference disabled, cloud chat uses the deterministic planner and real
+AgentCore tool routing. No model target or model invocation permission is created.
+Cedar permits five read tools; mutations/refunds/bulk records default to deny.
+The optional paid path uses a Messages-compatible Mantle model, a project-scoped
+role with a model condition, an interceptor model allowlist, buffered responses and
+bounded output tokens/tool iterations. It is not an aggregate spending cap and
+has not been live-tested.
+
+## Evidence and known failures
+
+Latest fleet pass: **156 unit cases passed**, Ruff checks passed, seven generated
+three-copy templates passed cfn-lint and project cfn-guard rules. The optional paid
+template passed static checks with fictitious references. Python/frontend amd64
+images built from sanitized contexts; AWS-configured runtime imports and NGINX
+configuration were checked with networking disabled. See
+[offline verification JSON](aws-fleet-offline-verification.json).
+
+These results do not prove that CloudFormation can deploy in a chosen Region,
+the real MCP ingress/policy integration works, copies are isolated in a live account,
+or a model/vendor detector blocks an attack. No service-side fleet validation,
+full AWS deployment or browser/cloud acceptance run has been performed.
+
+Historical live test on 2026-10-18 was a **different, limited gateway fixture**:
+one read-only fixed hotel Lambda, real AgentCore gateway and Trend inspection.
+Unsigned calls failed, benign lookup/discovery worked, malformed input was rejected,
+and inspector outage failed closed with recovery verified. **Trend allowed the
+synthetic injection; the expected content-blocking test failed.** The cause was
+not established. No live LLM or real booking system was involved. Its 17 gateway
+requests and results are documented in [the historical test report](aws-test-deployment.md).
+All resources created by that test were subsequently removed and absence checked.
+Do not reuse its deleted endpoint as a current deployment.
+
+Application `/monitor` shows saved app activity/audits/results, not CloudWatch log
+ingestion. Inspector decisions are in per-copy CloudWatch logs. The monitor's
+automated scenario runner is local-only and refuses cloud runs. Local injection
+fixtures force an attempted malicious tool request; unprotected outcomes are inert
+illustrations, not actual data exfiltration or proof of model persuasion.
+
+Historical evidence files contain older test counts and earlier milestone limits.
+Preserve them as dated records. One existing FastAPI/Starlette TestClient httpx
+deprecation warning remains; it did not fail the suite.
+
+## Source map
+
+| Area | Main files |
+|---|---|
+| API, personas and sessions | `services/api.py`, `services/auth.py`, `services/settings.py` |
+| Business authorization and capabilities | `services/gateway.py`, `services/policy.py`, `services/capability.py` |
+| MCP discovery/execution and storage | `services/mcp_client.py`, `services/mcp_server.py`, `services/tool_runtime.py`, `services/db.py` |
+| Chat and model routing | `services/agent.py`, `services/travel_assistant.py`, `services/agentcore/agent.py`, `services/agentcore/transport.py` |
+| Interception and vendor secret cache | `services/agentcore/interceptor.py`, `services/agentcore/inspection.py` |
+| Monitor, auth and activity | `services/monitor.py`, `services/monitor_auth.py`, `services/telemetry.py` |
+| Fleet CLI/config/templates/packaging | `scripts/aws_fleet.py`, `scripts/fleet_config.py`, `scripts/fleet_templates.py`, `scripts/fleet_package.py` |
+| Fleet containers/security checks | `infra/aws-fleet/` |
+| Historical gateway fixture and teardown | `scripts/aws_cloud_test.py`, `infra/agentcore/cloud-test*.json` |
+| Approved diagrams | `docs/architecture/`, linked from root README |
+
+## Working state and next action
+
+The user requested that this build be isolated on **`working-edition`**, branched
+from the `main` baseline `7efa23c` (approved architecture diagrams). Keep the fleet
+implementation and these handoff/testing documents on that branch until full
+acceptance testing and an explicit merge decision. Do not merge or push these
+changes to `main` automatically. Inspect `git status`, `git log` and remote state
+for the current commit/publication status; this note is not proof of a push.
+Do not discard or overwrite unrelated user changes.
+
+The next technical acceptance step is an authorized **one-copy AWS trial**, after
+the deployer supplies real domain/certificate/image/secret references and approves
+the current inventory and costs. Start with paid inference off. Follow the pending
+cloud checklist in the test matrix. Verify Trend blocking independently before
+claiming attack prevention; verify teardown and retained costs afterward. Publishing
+to GitHub is a separate user-requested action, not a deployment prerequisite.

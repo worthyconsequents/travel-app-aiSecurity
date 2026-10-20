@@ -1,0 +1,56 @@
+let databases = Resources.*[ Type == 'AWS::RDS::DBInstance' ]
+rule private_database when %databases !empty {
+    %databases {
+        DeletionPolicy == 'Snapshot'
+        UpdateReplacePolicy == 'Snapshot'
+        Properties {
+            PubliclyAccessible == false
+            StorageEncrypted == true
+        }
+    }
+}
+let gateways = Resources.*[ Type == 'AWS::BedrockAgentCore::Gateway' ]
+rule inspected_iam_gateways when %gateways !empty {
+    %gateways.Properties {
+        AuthorizerType == 'AWS_IAM'
+        InterceptorConfigurations[*].InterceptionPoints == ['REQUEST', 'RESPONSE']
+        InterceptorConfigurations[*].InputConfiguration.PassRequestHeaders == false
+    }
+}
+rule real_bounded_inspector when Resources.Inspector exists {
+    Resources.Inspector.Properties {
+        Environment.Variables.AI_GUARD_MODE == 'real'
+        ReservedConcurrentExecutions == 2
+        Code.S3ObjectVersion exists
+        Timeout <= 15
+    }
+}
+rule cognito_edge when Resources.PublicListener exists {
+    Resources.PublicListener.Properties {
+        Protocol == 'HTTPS'
+        DefaultActions[0].Type == 'authenticate-cognito'
+        DefaultActions[0].AuthenticateCognitoConfig.OnUnauthenticatedRequest == 'authenticate'
+    }
+    Resources.Service.Properties.NetworkConfiguration.AwsvpcConfiguration.AssignPublicIp == 'DISABLED'
+    Resources.UserPool.Properties.AdminCreateUserConfig.AllowAdminCreateUserOnly == true
+}
+let ingress = Resources.*[ Type == 'AWS::EC2::SecurityGroup' ].Properties.SecurityGroupIngress[ CidrIp exists ]
+rule no_public_ingress when %ingress !empty {
+    %ingress.CidrIp != '0.0.0.0/0'
+}
+let artifacts = Resources.*[ Type == 'AWS::S3::Bucket' ]
+rule private_artifacts when %artifacts !empty {
+    %artifacts {
+        DeletionPolicy == 'Retain'
+        Properties {
+            VersioningConfiguration.Status == 'Enabled'
+            PublicAccessBlockConfiguration {
+                BlockPublicAcls == true
+                BlockPublicPolicy == true
+                IgnorePublicAcls == true
+                RestrictPublicBuckets == true
+            }
+            BucketEncryption.ServerSideEncryptionConfiguration[*].ServerSideEncryptionByDefault.SSEAlgorithm == 'AES256'
+        }
+    }
+}

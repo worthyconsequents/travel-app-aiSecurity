@@ -2,6 +2,7 @@
 
 import base64
 import json
+import os
 import re
 
 from services.agentcore.inspection import configured_inspector
@@ -141,6 +142,9 @@ def handle(event, context, inspector):
         if namespace == "http":
             body = decode(packet.get("body"))
             if stage == "REQUEST":
+                allowed_model = os.getenv("AI_GUARD_ALLOWED_MODEL")
+                if allowed_model and body.get("model") != allowed_model:
+                    raise ValueError("Model not permitted for this deployment")
                 if packet.get("path") != "/inference/v1/messages" or body.get("stream", False):
                     raise ValueError("Only buffered messages supported")
                 limit = body.get("max_tokens", 400)

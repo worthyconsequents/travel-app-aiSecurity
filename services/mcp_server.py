@@ -7,10 +7,11 @@ from starlette.responses import JSONResponse
 from services.tool_runtime import execute
 
 SERVICE = os.environ["SERVICE"]
+PORT = int(os.getenv("PORT", "8000"))
 mcp = FastMCP(
     SERVICE,
     host="0.0.0.0",
-    port=8000,
+    port=PORT,
     stateless_http=True,
     json_response=True,
     transport_security=TransportSecuritySettings(

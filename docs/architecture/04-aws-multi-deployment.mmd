@@ -1,0 +1,49 @@
+flowchart TB
+    config["Local .env: DEPLOYMENT_TARGET=aws; DEPLOYMENT_COUNT=X; prefix + environment; shared secret ARN only"]
+    config --> provision["Proposed deployment orchestrator: one shared foundation + X independent app stacks"]
+    subgraph aws["One AWS account and Region — design only, not deployed"]
+        subgraph shared["Shared foundation: dannytran-travel-lab01-shared"]
+            secret["One AWS Secrets Manager secret containing the Trend AI Guard API key"]
+        end
+        subgraph one["dannytran-travel-lab01-01 — separate deployment stack"]
+            gw1["Own AgentCore gateways and IAM policies"]
+            lambda1["Own interceptor Lambda / IAM role / application name"]
+            subgraph vpc1["Private application VPC 01"]
+                app1["Own web app, private MCP tools, database, sessions, signing secrets, monitoring password and logs"]
+            end
+            app1 -->|IAM / SigV4| gw1
+            gw1 -.->|Request and response inspection| lambda1
+            gw1 -->|Private tool dispatch| app1
+        end
+        subgraph two["dannytran-travel-lab01-02 — separate deployment stack"]
+            gw2["Own AgentCore gateways and IAM policies"]
+            lambda2["Own interceptor Lambda / IAM role / application name"]
+            subgraph vpc2["Private application VPC 02"]
+                app2["Own web app, private MCP tools, database, sessions, signing secrets, monitoring password and logs"]
+            end
+            app2 -->|IAM / SigV4| gw2
+            gw2 -.->|Request and response inspection| lambda2
+            gw2 -->|Private tool dispatch| app2
+        end
+        subgraph more["dannytran-travel-lab01-03 … X — repeat the same isolation"]
+            gwn["Own AgentCore gateways and IAM policies"]
+            lambdan["Own interceptor Lambda / IAM role / application name"]
+            subgraph vpcn["Private application VPC per copy"]
+                appn["Own web app, private MCP tools, database, sessions, signing secrets, monitoring password and logs"]
+            end
+            appn -->|IAM / SigV4| gwn
+            gwn -.->|Request and response inspection| lambdan
+            gwn -->|Private tool dispatch| appn
+        end
+        lambda1 -.->|GetSecretValue: exact shared ARN| secret
+        lambda2 -.->|GetSecretValue: exact shared ARN| secret
+        lambdan -.->|GetSecretValue: exact shared ARN| secret
+    end
+    lambda1 -->|Same credential; own application name| trend["External Trend AI Guard regional API"]
+    lambda2 -->|Same credential; own application name| trend
+    lambdan -->|Same credential; own application name| trend
+    lifecycle["Shared secret has an independent lifecycle. Deleting one instance must not delete it. Key rotation/revocation affects all copies."]
+    secret -.-> lifecycle
+    style secret fill:#e5f4f1,stroke:#087f80
+    style trend fill:#f0eaf8,stroke:#7854a5
+    style lifecycle fill:#fff1dd,stroke:#a75a16

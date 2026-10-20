@@ -7,6 +7,7 @@ The diagrams describe repository code and recorded evidence as of 19 October 202
 | Non-AgentCore local deployment | Implemented local Compose app on port 8080; reference authorization gateway | [PNG](01-non-agentcore-local.png) | [SVG](01-non-agentcore-local.svg), [Mermaid](01-non-agentcore-local.mmd) |
 | AgentCore target design | Intended full AWS architecture; not deployed | [PNG](02-agentcore-target-design.png) | [SVG](02-agentcore-target-design.svg), [Mermaid](02-agentcore-target-design.mmd) |
 | AgentCore implementation and test scope | Implemented offline alternative on port 8081 versus completed and removed AWS test slice | [PNG](03-agentcore-implementation-and-test-scope.png) | [SVG](03-agentcore-implementation-and-test-scope.svg), [Mermaid](03-agentcore-implementation-and-test-scope.mmd) |
+| Multiple AWS copies and shared key | Approved isolation model; [fleet deployment code](../aws-multi-deployment.md) is locally validated, not cloud-tested | [PNG](04-aws-multi-deployment.png) | [SVG](04-aws-multi-deployment.svg), [Mermaid](04-aws-multi-deployment.mmd) |
 
 PNG previews and SVGs share the approved visual layout. Mermaid files preserve the logical relationships for editing or GitHub rendering; their automatic layout can differ. Request and data flows are shown at a high level; return responses generally follow the same path unless response inspection is illustrated explicitly.
 
@@ -14,7 +15,7 @@ PNG previews and SVGs share the approved visual layout. Mermaid files preserve t
 
 - The standalone local Trend AI Gateway installation is separate from the original app's active reference-gateway path.
 - The offline AgentCore simulator uses shared interception code and deterministic marker fixtures; it makes no AWS or Trend detection calls.
-- The full AgentCore design retains application ownership and approval checks. Content inspection and Cedar policies do not replace that authorization boundary. The diagram does not choose a compute-hosting service that the repository has not implemented.
+- The full AgentCore design retains application ownership and approval checks. Content inspection and Cedar policies do not replace that authorization boundary. The newer fleet option selects Fargate/RDS hosting; its implementation and remaining live validation are described in the fleet guide. The shared-key illustration remains a conceptual deployment model.
 - The historical AWS test verified gateway routing, real inspection, malformed-input rejection and inspector outage/recovery with a fixed read-only hotel tool. The synthetic injection was allowed by Trend. No successful real content block, live model or full hosted app was demonstrated. All test-created AWS resources were torn down and verified absent.
 - Local monitoring displays application records. A unified view of cloud Lambda logs and application events is not implemented.
 
