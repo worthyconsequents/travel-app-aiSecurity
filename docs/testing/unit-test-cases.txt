@@ -154,3 +154,17 @@ tests/unit/test_travel_assistant.py::test_chat_contract_disallows_identity_and_a
 tests/unit/test_travel_assistant.py::test_api_binds_response_to_the_verified_session
 tests/unit/test_travel_assistant.py::test_offline_fixture_uses_the_same_read_only_planner
 tests/unit/test_travel_assistant.py::test_each_deployment_can_keep_its_own_session_cookie
+tests/unit/test_trend_transport.py::test_explicit_activation_and_local_only
+tests/unit/test_trend_transport.py::test_url_confinement[http://untrusted.example/]
+tests/unit/test_trend_transport.py::test_url_confinement[http://trend-gateway-link:8081/mcp]
+tests/unit/test_trend_transport.py::test_url_confinement[https://user:pass@example.com/]
+tests/unit/test_trend_transport.py::test_url_confinement[https://example.com/?key=secret]
+tests/unit/test_trend_transport.py::test_url_confinement[https://example.com/#fragment]
+tests/unit/test_trend_transport.py::test_url_confinement[file:///tmp/key]
+tests/unit/test_trend_transport.py::test_virtual_key_uses_bearer_and_refreshes_file
+tests/unit/test_trend_transport.py::test_catalog_maps_exact_names_and_hides_capability
+tests/unit/test_trend_transport.py::test_missing_duplicate_or_changed_contract_fails_closed
+tests/unit/test_trend_transport.py::test_ambiguous_unknown_or_partial_mapping_rejected
+tests/unit/test_trend_transport.py::test_trend_dispatch_preserves_capability_and_exact_name
+tests/unit/test_trend_transport.py::test_transport_failure_propagates_without_direct_backend_fallback
+tests/unit/test_trend_transport.py::test_unknown_tool_and_wrong_server_never_dispatch

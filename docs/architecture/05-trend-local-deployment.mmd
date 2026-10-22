@@ -1,0 +1,14 @@
+flowchart TB
+  browser[Browser :8082 / scripted travel assistant] --> auth[Application authorization / signed capability]
+  auth --> link[Private Compose to kind MCP return link]
+  link --> trend[Local Trend MCP gateway / virtual-key authentication / request and response inspection]
+  vision[Vision One catalog, policy and Events] -.-> trend
+  trend --> bridge[Authenticated private bridge / three exact MCP paths]
+  bridge --> discovery[Discovery MCP / verify capability]
+  bridge --> reservations[Reservations MCP / verify capability]
+  bridge --> payments[Customer-payments MCP / verify capability]
+  discovery & reservations & payments --> db[(Separate synthetic PostgreSQL)]
+  status[ACCEPTANCE BLOCKED: legitimate signed requests currently denied] -.-> trend
+  preserved[Original :8080 and offline AgentCore :8081 remain unchanged]
+  classDef blocked fill:#FFF1DD,stroke:#A75A16,color:#152D40
+  class status blocked

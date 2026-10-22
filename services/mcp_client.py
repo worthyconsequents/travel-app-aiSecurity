@@ -4,7 +4,7 @@ import httpx
 from mcp import ClientSession
 from mcp.client.streamable_http import streamable_http_client
 
-from services.agentcore.transport import mcp_route
+from services.agentcore.transport import deployment_profile, mcp_route
 
 
 async def with_session(server, operation):
@@ -25,6 +25,10 @@ async def with_session(server, operation):
 async def discover(server):
     async def operation(session):
         result = await session.list_tools()
+        if deployment_profile() == "trend-gateway":
+            from services.trend_transport import canonical_catalog
+
+            return canonical_catalog(server, result.tools)
         tools = []
         _, prefix, _ = mcp_route(server)
         for t in result.tools:
@@ -51,7 +55,13 @@ async def discover(server):
 async def invoke(server, tool, args):
     async def operation(session):
         _, prefix, _ = mcp_route(server)
-        result = await session.call_tool(prefix + tool, args)
+        if deployment_profile() == "trend-gateway":
+            from services.trend_transport import tool_map
+
+            remote = tool_map(server)[tool]
+        else:
+            remote = prefix + tool
+        result = await session.call_tool(remote, args)
         if result.isError:
             raise ValueError("MCP tool rejected the request")
         if result.structuredContent is not None:

@@ -1,0 +1,83 @@
+# Separate local test project: never apply this overlay to the original project.
+services:
+  api:
+    user: "${TREND_LOCAL_UID:?Set TREND_LOCAL_UID to id -u}:${TREND_LOCAL_GID:?Set TREND_LOCAL_GID to id -g}"
+    environment:
+      DEPLOYMENT_PROFILE: trend-gateway
+      SESSION_COOKIE_NAME: boring_travel_trend_session
+      MODEL_MODE: mock
+      MCP_SIGNING_KEY: ${TREND_MCP_SIGNING_KEY:?Set a private test signing key}
+      ENABLE_TREND_GATEWAY: 'true'
+      TREND_MCP_URL: http://trend-gateway-link:8081/
+      TREND_VIRTUAL_KEY_FILE: /run/secrets/trend_virtual_key
+      TREND_TOOL_MAP_FILE: /run/secrets/trend_tool_map
+      AWS_EC2_METADATA_DISABLED: 'true'
+    secrets: [trend_virtual_key, trend_tool_map]
+  gateway:
+    user: "${TREND_LOCAL_UID:?Set TREND_LOCAL_UID to id -u}:${TREND_LOCAL_GID:?Set TREND_LOCAL_GID to id -g}"
+    environment:
+      DEPLOYMENT_PROFILE: trend-gateway
+      MODEL_MODE: mock
+      MCP_SIGNING_KEY: ${TREND_MCP_SIGNING_KEY:?Set a private test signing key}
+      ENABLE_TREND_GATEWAY: 'true'
+      TREND_MCP_URL: http://trend-gateway-link:8081/
+      TREND_VIRTUAL_KEY_FILE: /run/secrets/trend_virtual_key
+      TREND_TOOL_MAP_FILE: /run/secrets/trend_tool_map
+      AWS_EC2_METADATA_DISABLED: 'true'
+    secrets: [trend_virtual_key, trend_tool_map]
+  travel-discovery:
+    environment:
+      MCP_SIGNING_KEY: ${TREND_MCP_SIGNING_KEY:?Set a private test signing key}
+  reservations:
+    environment:
+      MCP_SIGNING_KEY: ${TREND_MCP_SIGNING_KEY:?Set a private test signing key}
+  customer-payments:
+    environment:
+      MCP_SIGNING_KEY: ${TREND_MCP_SIGNING_KEY:?Set a private test signing key}
+  trend-mcp-bridge:
+    user: "${TREND_LOCAL_UID:?Set TREND_LOCAL_UID to id -u}:${TREND_LOCAL_GID:?Set TREND_LOCAL_GID to id -g}"
+    image: nginxinc/nginx-unprivileged:1.28-alpine
+    entrypoint: [/bin/sh, -ec]
+    command:
+      - 'umask 077; export MCP_SERVICE_KEY="$$(cat /run/secrets/trend_upstream_key)"; envsubst ''$${MCP_SERVICE_KEY}'' < /etc/bridge.template > /tmp/bridge.conf; exec nginx -c /etc/trend-nginx.conf -g ''daemon off;'''
+    volumes:
+      - ./infra/trend-gateway/test-bridge.conf.template:/etc/bridge.template:ro
+      - ./infra/trend-gateway/test-nginx-main.conf:/etc/trend-nginx.conf:ro
+    secrets: [trend_upstream_key]
+    networks:
+      private:
+      trend-kind:
+        aliases: [dannytran-trend-upstream]
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    depends_on:
+      travel-discovery: {condition: service_healthy}
+      reservations: {condition: service_healthy}
+      customer-payments: {condition: service_healthy}
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:8082/health]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  trend-gateway-link:
+    image: nginxinc/nginx-unprivileged:1.28-alpine
+    volumes:
+      - ./infra/trend-gateway/test-return-link.conf:/etc/nginx/conf.d/default.conf:ro
+    networks: [private, trend-kind]
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+networks:
+  trend-kind:
+    external: true
+    name: kind
+secrets:
+  trend_virtual_key:
+    file: ./infra/trend-gateway/private/travel-virtual-key
+  trend_tool_map:
+    file: ./build/trend/tool-map.json
+  trend_upstream_key:
+    file: ./infra/trend-gateway/private/travel-upstream-key

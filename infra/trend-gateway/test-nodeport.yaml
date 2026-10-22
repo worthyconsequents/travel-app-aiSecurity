@@ -1,0 +1,19 @@
+# Private Docker kind network only; the existing kind node has no host port mapping.
+apiVersion: v1
+kind: Service
+metadata:
+  name: dannytran-travel-mcp-test
+  namespace: trendai-gateway
+  labels:
+    app.kubernetes.io/part-of: boring-travel-trend-test
+spec:
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: ai-gateway
+    app.kubernetes.io/instance: trendai-gateway
+    app.kubernetes.io/component: gateway
+  ports:
+    - name: mcp
+      port: 8081
+      targetPort: 8081
+      nodePort: 30081

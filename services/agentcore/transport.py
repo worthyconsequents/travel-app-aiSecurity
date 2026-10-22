@@ -10,7 +10,7 @@ import httpx
 
 def deployment_profile():
     profile = os.getenv("DEPLOYMENT_PROFILE", "local")
-    if profile not in {"local", "agentcore-offline", "agentcore-aws"}:
+    if profile not in {"local", "agentcore-offline", "agentcore-aws", "trend-gateway"}:
         raise ValueError("Unknown deployment profile")
     if profile == "agentcore-aws" and os.getenv("ENABLE_AWS_AGENTCORE") != "true":
         raise RuntimeError(
@@ -71,6 +71,10 @@ def mcp_route(server):
     if server not in set(TOOLS.values()):
         raise ValueError("Unknown MCP server")
     profile = deployment_profile()
+    if profile == "trend-gateway":
+        from services.trend_transport import route
+
+        return route()
     if profile == "local":
         return f"http://{server}:8000/mcp", "", None
     prefix = server + "___"

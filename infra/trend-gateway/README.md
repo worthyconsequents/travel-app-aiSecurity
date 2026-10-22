@@ -20,7 +20,7 @@ Helm release: **trendai-gateway**, namespace **trendai-gateway**. Deployment and
 
 Private service ports: 8081 MCP, 9090 manager. Port 8080 exists in the chart's Service but the LLM proxy module is disabled and does not listen. The MCP proxy uses root `/`, not `/mcp`, and aggregates upstream tools with namespaced names. The current travel client expects per-server `/mcp` endpoints with canonical names, so changing only GATEWAY_URL is not a valid integration.
 
-## Verified results
+## Installation verification — historical 2026-10-17
 
 - Helm lint and offline template rendering passed with placeholder credential references, not the real bootstrap token.
 - Helm install completed, release status deployed, deployment 1/1 ready.
@@ -54,15 +54,41 @@ Restart only the bridge:
 docker compose -f compose.yaml -f compose.trend.yaml up -d --wait trend-mcp-bridge
 ```
 
-## Remaining integration steps
+## Current local integration — 2026-10-22
 
-1. In Vision One, confirm gateway `dtran-test-gateway` is connected. Register the three upstream MCP server URLs in its MCP catalog, using Streamable HTTP. Exact console menus/API contracts were not provided, so their names have not been guessed.
-2. Create a scoped application virtual key for the travel workload and the intended MCP tools. The enrollment/bootstrap token is not an application key. The user supplied `AI_Gateway/visionOneapikey.txt`, now owner-only and excluded from Git/build contexts. The empty `private/travel-virtual-key` placeholder was removed at the user’s request. Confirm this is an AI Gateway application virtual key before using it for MCP authentication; the filename does not establish its type. Do not paste it into chat or commit it.
-3. Implement the app-side Trend MCP transport with virtual-key authentication and an exact catalog-tool-name mapping learned from authenticated `tools/list`. Provide a private return path from Compose to the Kubernetes MCP proxy. Fail closed on unavailable Trend; never silently fall back to direct MCP.
-4. Keep customer ownership and approval consumption in the app enforcement path. Confirm the vendor's supported workload/human identity mapping and policies before attributing those controls to Trend. Do not use unverified model arguments or arbitrary user headers as identity.
-5. Run authenticated allowed/denied tool tests and all six applicable fixtures, showing both Trend policy evidence and unchanged synthetic records. If the local policy rejects first, label it local enforcement. Never claim commercial protection solely because Trend is installed.
+The former transport/key/catalog gaps have been implemented in a separate
+`boring-travel-trend` Compose project on port 8082. The original app and offline
+AgentCore projects retain their existing routes. See [setup and exact test
+results](../../docs/trend-local-test.md).
 
-Application requests have NOT been switched to Trend yet: a virtual key, catalog entries, policy settings and the transport integration above are still required. The website continues working through its reference gateway.
+Three `dannytran-travel-test-*` HTTP upstreams and an independent service account
+with an application virtual key were created in Vision One. The key is stored in
+ignored owner-only local storage. The test bridge requires its own upstream key;
+Kubernetes mounts that credential under the paths referenced by these upstreams.
+Ten actual namespaced tools were discovered through the local gateway and mapped
+explicitly. No direct MCP fallback is used.
+
+A request/response guardrail assignment references existing `Boring-Travel-AI`,
+scoped to only the new identity and three test upstreams. The existing content
+policy itself was not modified. With that assignment active, a synthetic injection
+gets a vendor content-policy denial, but ordinary signed app calls also get request
+prompt-attack denials. Benign calls without a capability reach the backend and
+correctly fail its signature check. This points to a compatibility problem involving
+the signed capability in inspected arguments; exact classifier cause is unconfirmed.
+The app fails closed. Do not call this option fully working or disable either control
+without an explicit reviewed decision.
+
+The console's Discover tools operation still reports a missing platform-secret
+file even though local authenticated `tools/list` returns all ten tools. Its
+Associated tools counts remain zero. Console import and explicit tool access-control
+rules remain unfinished; do not interpret resource registration as a least-privilege
+access policy. The default tenant access behavior allowed this test key to discover
+the catalog before the scoped inspection assignment.
+
+The original bridge addresses documented above are historical. The new isolated
+bridge's current address is discovered from `boring-travel-trend-trend-mcp-bridge-1`;
+it must be rechecked after recreation. Do not register the original application's
+bridge as a substitute.
 
 ## Local administration
 

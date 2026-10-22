@@ -1,0 +1,39 @@
+{
+  "date": "2026-10-22",
+  "base_commit": "d32d9ca",
+  "branch": "working-edition",
+  "scope": "local Trend MCP test only",
+  "unit_tests": {
+    "passed": 170,
+    "warnings": 1
+  },
+  "ruff": "passed",
+  "compose_config": "passed",
+  "catalog_tools": 10,
+  "upstreams_registered": 3,
+  "invalid_virtual_key_http_status": 401,
+  "bridge_invalid_key_http_status": 403,
+  "unknown_bridge_path_http_status": 404,
+  "pre_assignment_chat_smoke": "passed",
+  "pre_assignment_cross_project_sessions": "passed",
+  "unsigned_benign_call": "backend capability rejection",
+  "synthetic_injection": "Trend request content-policy rejection",
+  "vendor_event": {
+    "observed_reason": "prompt_attack.default.classifier (high)",
+    "surface": "request",
+    "assignment": "dannytran-travel-local-mcp-inspection"
+  },
+  "post_assignment_app_smoke": "failed: legitimate signed reads return HTTP 503",
+  "post_assignment_full_integration": "failed at first hotel list read",
+  "capability_false_positive_cause": "suspected; exact classifier cause unconfirmed",
+  "console_tool_import": "failed: platform secret file not found",
+  "explicit_vendor_tool_acl": "not configured",
+  "live_outage_recovery": "not run: benign baseline blocked",
+  "original_site_health": {
+    "8080": 200,
+    "8081": 200
+  },
+  "paid_model_calls": 0,
+  "aws_resources_created": 0,
+  "acceptance": "blocked pending signed-request compatibility fix"
+}

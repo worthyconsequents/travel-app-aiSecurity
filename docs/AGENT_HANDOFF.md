@@ -1,6 +1,6 @@
 # Agent handoff — AI Gateway Travel App
 
-Snapshot: 2026-10-19. Read this with the repository's root `AGENTS.md` and the
+Snapshot: 2026-10-22. Read this with the repository's root `AGENTS.md` and the
 [test/validation matrix](test-validation-matrix.md). This is context and recorded
 state, not authorization to deploy, spend money, delete resources or publish changes.
 Current user instructions determine the authorized work.
@@ -22,12 +22,13 @@ The approved build has been implemented locally. It does not authorize a new pai
 AWS rollout. The earlier $5 allowance was for a completed, removed gateway test.
 No model calls or AWS API operations were made during the fleet implementation.
 
-## Three implementation scopes
+## Implementation scopes
 
 | Scope | Actual behavior | Evidence boundary |
 |---|---|---|
 | Original local app | `compose.yaml`; original Compose project; website 8080; reference authorization gateway and three real HTTP MCP services; PostgreSQL | Deterministic assistant; application policy enforcement, no live model |
 | Offline AgentCore alternative | Separate project `boring-travel-agentcore`; `compose.agentcore.yaml`; website 8081; local tool/inference contract simulator and shared interceptor handler | Simulated inference and inspection markers; no AWS/Trend calls |
+| Local Trend alternative | Separate `boring-travel-trend` project; `compose.trend-test.yaml`; port 8082; virtual-key MCP proxy with exact tool map and authenticated private bridge | Ten tools discovered; scoped inspection active; legitimate signed app requests currently denied, so normal-use acceptance is blocked. See [Trend results](trend-local-test.md) |
 | AWS fleet option | Full app hosting/gateway template factories and lifecycle runner; each copy gets Fargate, private RDS, VPC, Cognito-gated HTTPS ALBs, native private MCP targets, policy engine, inspector and secrets | Locally tested/validated; not deployed or verified end to end in AWS |
 
 Do not apply the offline overlay with the original Compose project name. Local
@@ -114,7 +115,7 @@ has not been live-tested.
 
 ## Evidence and known failures
 
-Latest fleet pass: **156 unit cases passed**, Ruff checks passed, seven generated
+Latest complete unit pass: **170 unit cases passed** (156 prior cases plus 14 Trend transport cases), Ruff checks passed, seven generated
 three-copy templates passed cfn-lint and project cfn-guard rules. The optional paid
 template passed static checks with fictitious references. Python/frontend amd64
 images built from sanitized contexts; AWS-configured runtime imports and NGINX
@@ -177,3 +178,14 @@ the current inventory and costs. Start with paid inference off. Follow the pendi
 cloud checklist in the test matrix. Verify Trend blocking independently before
 claiming attack prevention; verify teardown and retained costs afterward. Publishing
 to GitHub is a separate user-requested action, not a deployment prerequisite.
+
+## Local Trend continuation — 2026-10-22
+
+Read [trend-local-test.md](trend-local-test.md) before operating this profile. The local
+integration is maintained on working-edition. Keep the original 8080/8081 stacks intact.
+No AWS resources or paid model calls were used. Never print private runtime files,
+virtual keys, upstream keys or signed capabilities. Scoped vendor inspection remains
+active; legitimate signed requests currently fail closed. Do not silently fall back
+or bypass inspection to make the site appear healthy. Console tool import, explicit
+least-privilege access policy and full normal-use/outage acceptance remain pending.
+The probe verifies one real content denial, not general attack protection.

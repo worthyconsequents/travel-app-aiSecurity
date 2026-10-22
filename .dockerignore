@@ -4,6 +4,7 @@
 **/.next
 **/__pycache__
 .env
+**/.env.*
 **/*.db
 
 AI_Gateway

@@ -1,0 +1,17 @@
+flowchart TB
+  subgraph unsigned[Benign unsigned probe]
+    u[Kyoto request / no capability] --> ut[Trend permits request]
+    ut --> ub[Backend rejects missing or invalid capability]
+  end
+  subgraph injection[Synthetic injection probe]
+    i[Injected instruction / no capability] --> it[Trend request content-policy denial]
+    it --> ie[Vendor prompt-attack event observed]
+  end
+  subgraph signed[Legitimate app request]
+    s[Ordinary request / app-issued capability] --> st[Trend request denial]
+    st --> se[App fails closed / HTTP 503]
+  end
+  se --> blocker[Compatibility blocker / exact classifier cause unconfirmed]
+  pending[Not established: full normal use, console import, explicit tool ACL, live outage recovery or real-model behavior]
+  classDef blocked fill:#FFF1DD,stroke:#A75A16,color:#152D40
+  class blocker,se blocked

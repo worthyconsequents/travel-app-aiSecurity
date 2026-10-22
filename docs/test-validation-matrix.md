@@ -1,22 +1,23 @@
 # Test and validation inventory
 
-Snapshot: 2026-10-19. This file records cases, how to run them, what was verified,
+Snapshot: 2026-10-22. This file records cases, how to run them, what was verified,
 and what remains untested. It is not permission to incur costs or change cloud
 resources. The [agent handoff](AGENT_HANDOFF.md) supplies architecture/context.
 
 ## Latest result and exact unit inventory
 
-The fleet implementation's latest local run passed **156 unit cases**, plus Ruff,
+The latest complete local run passed **170 unit cases** (156 prior cases plus 14 Trend transport cases), plus Ruff,
 CloudFormation schema/security checks and local image/configuration checks described
 below. One existing TestClient/httpx deprecation warning remained. Machine-readable
 summary: [aws-fleet-offline-verification.json](aws-fleet-offline-verification.json).
 
-[unit-test-cases.txt](testing/unit-test-cases.txt) lists all 156 collected pytest
+[unit-test-cases.txt](testing/unit-test-cases.txt) lists all 170 collected pytest
 node IDs, including parameter variations. It is a discovery snapshot, not a test
 execution log. The source tests and a new run are authoritative after code changes.
 
 | Suite | Cases | Assertions covered |
 |---|---:|---|
+| `tests/unit/test_trend_transport.py` | 14 | Explicit local activation, confined URLs, file-based Bearer auth, exact complete mappings, hidden signed capability, duplicate/schema rejection and no direct fallback |
 | `tests/unit/test_aws_fleet.py` | 26 | Configuration, isolation, IAM/key references, deployment lifecycle and cloud runtime guards; detailed below |
 | `tests/unit/test_agentcore.py` | 44 | Both HTTP/MCP contracts and directions; allowed/blocked/error results; malformed envelopes/encoding/size/media; body preservation; header/credential exclusion; endpoint confinement; token cache; profiles/namespaces; SigV4; no fallback; explicit paid opt-in; output token bounds |
 | `tests/unit/test_agentcore_deployment.py` | 2 | Offline SDK request-shape plan and narrowly scoped interceptor foundation template |
@@ -174,3 +175,22 @@ evidence for each. Do not include tokens, passwords, raw chat prompts or private
 Do not report the full fleet as cloud-verified until the relevant cases have actual
 evidence. Static isolation assertions, mock lifecycle tests and successful image
 builds do not substitute for C01–C16.
+
+## Local Trend integration — 2026-10-22
+
+Exact sequence, evidence boundaries and repeatable commands: [Trend local test](trend-local-test.md).
+
+| Case | Actual result |
+|---|---|
+| Three HTTP upstream registrations | PASS; separate test bridge; console tool import still fails |
+| Application virtual-key auth | PASS; missing/invalid keys return 401 |
+| Authenticated catalog and mapping | PASS; all ten exact names discovered locally |
+| Chat/ownership/no mutations before scoped inspection | PASS; existing chat smoke and session-isolation checks |
+| Benign unsigned call | Backend signature rejection, not vendor content denial |
+| Synthetic injection, scoped inspection active | Vendor request content-policy denial; matching prompt-attack event inspected |
+| Legitimate signed app requests under inspection | FAIL; benign requests denied as prompt_attack; full app acceptance blocked |
+| Full integration runner under inspection | FAIL at first hotel-list read, HTTP 503 |
+| Live Trend outage/recovery test | NOT RUN; benign baseline currently fails; script provided for after compatibility fix |
+| Explicit per-tool vendor least-privilege ACL | NOT CONFIGURED; registration does not establish it |
+| Original local sites | PASS; 8080 and 8081 health endpoints unchanged |
+| Paid models/AWS resources | None used/created |
