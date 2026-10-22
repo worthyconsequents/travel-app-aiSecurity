@@ -115,7 +115,7 @@ has not been live-tested.
 
 ## Evidence and known failures
 
-Latest complete unit pass: **170 unit cases passed** (156 prior cases plus 14 Trend transport cases), Ruff checks passed, seven generated
+Latest complete unit pass: **197 unit cases passed** (170 prior cases plus 27 test-launcher cases), Ruff checks passed, seven generated
 three-copy templates passed cfn-lint and project cfn-guard rules. The optional paid
 template passed static checks with fictitious references. Python/frontend amd64
 images built from sanitized contexts; AWS-configured runtime imports and NGINX
@@ -189,3 +189,19 @@ active; legitimate signed requests currently fail closed. Do not silently fall b
 or bypass inspection to make the site appear healthy. Console tool import, explicit
 least-privilege access policy and full normal-use/outage acceptance remain pending.
 The probe verifies one real content denial, not general attack protection.
+
+## Portable monitoring launcher and current runtime state
+
+The user requested local completion and moved AWS work to another session. Start
+with [AWS_SESSION_HANDOFF.md](AWS_SESSION_HANDOFF.md) and
+[test-launcher.md](test-launcher.md). The suite picker, durable queue, separate
+worker, HTTP API, progress/history, locks, deadlines and redacted traces are built
+and locally validated. APP_MODE=aws-demo and backend=ecs remain disabled for this
+launcher; cloud operator authorization and dispatch are explicit next-session work.
+
+Original local Compose containers/networks were removed, preserving their database
+volumes. The dedicated kind node is stopped, preserving its state. Temporary
+validation stacks/volumes were removed after checks. Private configuration and
+Trend console entries were not deleted. No local web page should be assumed live.
+The user clarified that no AWS login/audit was needed; AWS was not changed or
+freshly verified absent in this session. See the cleanup verification record.

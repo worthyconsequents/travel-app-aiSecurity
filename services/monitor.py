@@ -1,12 +1,14 @@
 import asyncio
 import hmac
 import os
+from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, Response
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import func, select
 
 from services import monitor_auth as auth
+from services import test_jobs
 from services.agentcore.transport import deployment_profile
 from services.db import Activity, AttackRun, Audit, Session, record
 
@@ -76,7 +78,12 @@ def data(limit: int = Query(default=100, ge=1, le=500)):
             "totals": counts,
             "audits": [record(row) for row in rows],
             "activity": [record(row) for row in activity],
-            "runs": [record(row) for row in runs],
+            "runs": sorted(
+                [record(row) for row in runs] + test_jobs.recent(Session),
+                key=lambda row: row["started"],
+                reverse=True,
+            )[:20],
+            "test_runner": test_jobs.capabilities(),
         }
 
 
@@ -111,9 +118,34 @@ def flow(correlation: str):
 async def run():
     if deployment_profile() not in {"local", "agentcore-offline"}:
         raise HTTPException(403, "This control runs local fixtures only")
+    if os.getenv("TEST_RUNNER_ENABLED") == "true":
+        raise HTTPException(409, "Use the durable monitoring test launcher")
     if run_lock.locked():
         raise HTTPException(409, "An attack test run is already in progress")
     from services.scenarios import run_scenarios
 
     async with run_lock:
         return await run_scenarios()
+
+
+class TestLaunch(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    suite: Literal["all", "connectivity", "authorization", "inspection"] = "all"
+
+
+@router.post("/test-runs", status_code=202, dependencies=[Depends(auth.require_monitor)])
+def launch_test(
+    body: TestLaunch,
+    request: Request,
+    idempotency_key: str = Header(pattern=r"^[a-zA-Z0-9-]{16,64}$"),
+):
+    if request.headers.get("X-Monitor-Action") != "run-tests":
+        raise HTTPException(403, "Explicit monitoring action required")
+    return test_jobs.enqueue(body.suite, idempotency_key)
+
+
+@router.get("/test-runs/{job_id}", dependencies=[Depends(auth.require_monitor)])
+def test_run(job_id: str):
+    if len(job_id) != 32 or any(c not in "0123456789abcdef" for c in job_id):
+        raise HTTPException(404, "Test run not found")
+    return test_jobs.get(job_id)

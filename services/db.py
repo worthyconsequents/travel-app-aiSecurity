@@ -143,3 +143,32 @@ def record(row):
 
 def init():
     Base.metadata.create_all(engine)
+
+
+class TestJob(Base):
+    __tablename__ = "operator_test_jobs"
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    scope: Mapped[str] = mapped_column(String, index=True)
+    profile: Mapped[str]
+    suite: Mapped[str]
+    started: Mapped[float] = mapped_column(default=time.time)
+    finished: Mapped[float | None]
+    deadline: Mapped[float]
+    status: Mapped[str]
+    owner: Mapped[str | None]
+    heartbeat: Mapped[float | None]
+    result: Mapped[dict] = mapped_column(JSON)
+
+
+class TestJobLock(Base):
+    __tablename__ = "operator_test_locks"
+    scope: Mapped[str] = mapped_column(String, primary_key=True)
+    job_id: Mapped[str]
+    expires: Mapped[float]
+
+
+class TestWorkerPresence(Base):
+    __tablename__ = "operator_test_workers"
+    scope: Mapped[str] = mapped_column(String, primary_key=True)
+    profile: Mapped[str]
+    at: Mapped[float]

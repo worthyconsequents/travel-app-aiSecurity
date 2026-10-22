@@ -58,6 +58,30 @@ The offline implementation and the historical AWS test are different environment
 
 See the [diagram index](docs/architecture/README.md), [AgentCore implementation notes](docs/agentcore-alternative.md), and [recorded AWS test results](docs/aws-test-deployment.md).
 
+## Monitoring test launcher
+
+The protected monitoring page now launches allowlisted checks through a separate
+worker, with saved progress, request flows, retry protection and a bounded runtime.
+Choose **Connectivity**, **Authorization**, **Inspection** or **All safe checks**.
+Runs survive page refreshes and API restarts. Reference-mode inspection is marked
+unavailable; offline AgentCore inspection is labeled simulation.
+
+```sh
+make runner-up           # localhost:8083/monitor, separate reference test project
+make runner-offline-up   # localhost:8084/monitor, separate offline AgentCore project
+# Sign in using your private MONITOR_PASSWORD, select a suite, click Run tests.
+make runner-down
+make runner-offline-down
+```
+
+See [launcher setup, limits and evidence](docs/test-launcher.md),
+[verification results](docs/test-launcher-verification.json), and the
+[AWS session handoff](docs/AWS_SESSION_HANDOFF.md). **AWS test execution remains
+explicitly disabled** until cloud authorization and dispatch are implemented.
+All local stacks were shut down after validation; the dedicated local Trend cluster
+is stopped. Database volumes and private configuration were preserved. No AWS
+resources, DNS records or paid models were created/used for this work.
+
 ## Multiple isolated AWS deployments
 
 The [AWS fleet option](docs/aws-multi-deployment.md) creates complete, separate copies driven by `DEPLOYMENT_COUNT` in `.env`, named `dannytran-travel-lab01-01`, `-02`, and so on. Each copy has its own VPC, private Fargate application, RDS database, Cognito operator login, HTTPS URLs, monitoring password, AgentCore gateways and inspector. Only the inspectors share the existing Trend AI Guard detection secret. Reducing the count never deletes copies; teardown selects one exact copy and preserves the shared key.
@@ -97,7 +121,7 @@ make lint smoke chat-test monitor-test scenarios
 make agentcore-chat-test agentcore-monitor-test
 ```
 
-`make test` and `make agentcore-test` also run the broader synthetic booking lifecycle tests, which create and cancel test reservations. The focused chat and monitoring checks preserve existing bookings. The latest complete unit suite passes **170 cases**, including 14 Trend transport cases. Earlier local checks verified protected monitoring, all six reference-policy attack fixtures, chat regressions and offline AgentCore contracts. The separate Trend app currently fails normal-use smoke and full integration under active inspection; see [its exact results](docs/trend-local-test.md) and the [test inventory](docs/test-validation-matrix.md). See [monitoring verification](docs/monitoring-verification.json) and [attack vector map](docs/attack-vectors.md).
+`make test` and `make agentcore-test` also run the broader synthetic booking lifecycle tests, which create and cancel test reservations. The focused chat and monitoring checks preserve existing bookings. The latest complete unit suite passes **197 cases**, including 14 Trend transport cases and 27 test-launcher cases. Earlier local checks verified protected monitoring, all six reference-policy attack fixtures, chat regressions and offline AgentCore contracts. The separate Trend app currently fails normal-use smoke and full integration under active inspection; see [its exact results](docs/trend-local-test.md) and the [test inventory](docs/test-validation-matrix.md). See [monitoring verification](docs/monitoring-verification.json) and [attack vector map](docs/attack-vectors.md).
 
 `make down` and `make agentcore-down` stop their respective stacks while preserving data. `make seed` is idempotent. `make demo-reset` deletes the current stack’s synthetic database contents and reseeds them.
 
@@ -111,7 +135,7 @@ This is a local demo. Identity selection and shared database/service credentials
 
 ## Generic AWS deployment preparation
 
-AWS clients, Lambda interceptor packaging, CloudFormation foundation and gateway request templates are included. A separate [isolated AWS gateway test deployment](docs/aws-test-deployment.md) adds explicit account checks, private artifacts, a dedicated secret, live inspection, a synthetic read-only tool and bounded verification commands; it does not host the full application. The test environment has been torn down; its deployment and guarded cleanup commands remain available. The historical staging implementation passed 130 offline unit tests; the current complete suite passes 170. `make agentcore-plan` validates request shapes offline; `make agentcore-package` builds a local Lambda ZIP.
+AWS clients, Lambda interceptor packaging, CloudFormation foundation and gateway request templates are included. A separate [isolated AWS gateway test deployment](docs/aws-test-deployment.md) adds explicit account checks, private artifacts, a dedicated secret, live inspection, a synthetic read-only tool and bounded verification commands; it does not host the full application. The test environment has been torn down; its deployment and guarded cleanup commands remain available. The historical staging implementation passed 130 offline unit tests; the current complete suite passes 197. `make agentcore-plan` validates request shapes offline; `make agentcore-package` builds a local Lambda ZIP.
 
 `make monitor-secret-plan` previews Secrets Manager setup without contacting AWS. To create the monitoring secret, a deployer authenticates separately using their normal AWS workflow and explicitly runs `scripts/deploy_monitor_secret.py --apply` with the project’s Python dependencies installed. The script uses the SDK credential chain; it embeds no account, login flow or access key. It reads the password from private `.env`, creates a new secret, records its ARN, and emits runtime configuration plus a narrowly scoped read policy. See the [AWS secret deployment instructions](docs/monitoring.md#generic-aws-secret-deployment).
 

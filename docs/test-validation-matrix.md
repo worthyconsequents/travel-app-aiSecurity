@@ -6,17 +6,18 @@ resources. The [agent handoff](AGENT_HANDOFF.md) supplies architecture/context.
 
 ## Latest result and exact unit inventory
 
-The latest complete local run passed **170 unit cases** (156 prior cases plus 14 Trend transport cases), plus Ruff,
+The latest complete local run passed **197 unit cases** (170 prior cases plus 27 test-launcher cases), plus Ruff,
 CloudFormation schema/security checks and local image/configuration checks described
 below. One existing TestClient/httpx deprecation warning remained. Machine-readable
 summary: [aws-fleet-offline-verification.json](aws-fleet-offline-verification.json).
 
-[unit-test-cases.txt](testing/unit-test-cases.txt) lists all 170 collected pytest
+[unit-test-cases.txt](testing/unit-test-cases.txt) lists all 197 collected pytest
 node IDs, including parameter variations. It is a discovery snapshot, not a test
 execution log. The source tests and a new run are authoritative after code changes.
 
 | Suite | Cases | Assertions covered |
 |---|---:|---|
+| `tests/unit/test_test_runner.py` | 27 | Operator auth, strict suite schema, action/origin checks, no cloud/paid execution, worker readiness/profile, idempotency, database concurrency, claim ownership, expiry/partial-result fencing, copy isolation, error redaction, source attribution, grouped transport failure and legacy endpoint bypass prevention |
 | `tests/unit/test_trend_transport.py` | 14 | Explicit local activation, confined URLs, file-based Bearer auth, exact complete mappings, hidden signed capability, duplicate/schema rejection and no direct fallback |
 | `tests/unit/test_aws_fleet.py` | 26 | Configuration, isolation, IAM/key references, deployment lifecycle and cloud runtime guards; detailed below |
 | `tests/unit/test_agentcore.py` | 44 | Both HTTP/MCP contracts and directions; allowed/blocked/error results; malformed envelopes/encoding/size/media; body preservation; header/credential exclusion; endpoint confinement; token cache; profiles/namespaces; SigV4; no fallback; explicit paid opt-in; output token bounds |
@@ -194,3 +195,25 @@ Exact sequence, evidence boundaries and repeatable commands: [Trend local test](
 | Explicit per-tool vendor least-privilege ACL | NOT CONFIGURED; registration does not establish it |
 | Original local sites | PASS; 8080 and 8081 health endpoints unchanged |
 | Paid models/AWS resources | None used/created |
+
+## Durable monitoring launcher — 2026-10-22
+
+See [test-launcher-verification.json](test-launcher-verification.json),
+[launcher details](test-launcher.md) and [AWS continuation](AWS_SESSION_HANDOFF.md).
+
+| Case | Result |
+|---|---|
+| Reference live local all-suite | 10 passed, 2 inspection unavailable; overall unavailable; 12 saved traces |
+| Offline AgentCore live all-suite | 12 passed; inspection explicitly simulated; bookings unchanged |
+| Real browser launch / reload / case flow | Passed |
+| Queued run through API restart / fresh client | Passed; connectivity suite recovered and passed |
+| Stopped worker | New launch 503; completed history remains readable |
+| HTTP retry | Same request key returns same durable job |
+| Concurrent launches and claims | Unit tests verify one scope lock and one claimant; PostgreSQL end-to-end normal runs also exercised |
+| Frontend build and TypeScript | Passed inside Docker production build |
+| Live Trend launcher | Not run; gateway stopped; prior compatibility issue remains |
+| AWS worker, DNS, TLS and cloud authorization | Deferred; cloud execution disabled |
+
+Local runtime teardown is recorded separately. A preliminary STS check failed due
+to expired credentials; the user then clarified local teardown only. No successful
+AWS audit or AWS deletion occurred in this session.

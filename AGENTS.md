@@ -5,6 +5,11 @@ implementation state, evidence boundaries and the next work. Use
 [docs/test-validation-matrix.md](docs/test-validation-matrix.md) for test cases,
 commands, recorded results and outstanding acceptance tests.
 
+For the remote test-launcher/AWS continuation, read
+[docs/AWS_SESSION_HANDOFF.md](docs/AWS_SESSION_HANDOFF.md). The latest user deferred
+AWS work and clarified that teardown meant local environments. Do not resume AWS
+login or deployment from older messages without current authorization.
+
 ## Operational defaults
 
 - Preserve both local implementations: original Compose on port 8080 and the

@@ -273,8 +273,8 @@ def events(request: Request, login=Depends(current)):
 async def scenarios(request: Request, login=Depends(current)):
     if login.human != "admin":
         raise HTTPException(403, "Administrator demo identity required")
+    from services.monitor import run as run_monitor_fixtures
     from services.monitor_auth import require_monitor
-    from services.scenarios import run_scenarios
 
     require_monitor(request)
-    return await run_scenarios()
+    return await run_monitor_fixtures()

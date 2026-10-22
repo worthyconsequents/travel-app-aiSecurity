@@ -53,3 +53,20 @@ agentcore-monitor-test:
 	MONITOR_BASE_URL=http://localhost:8081 python3 scripts/monitoring_smoke.py
 monitor-secret-plan:
 	python3 scripts/deploy_monitor_secret.py
+
+# Portable test launcher, with a separate local worker and database per project.
+RUNNER = PUBLIC_PORT=8083 docker compose -p boring-travel-runner -f compose.yaml -f compose.test-runner.yaml
+OFFLINE_RUNNER = PUBLIC_PORT=8084 TEST_PROFILE=agentcore-offline TEST_SESSION_COOKIE_NAME=boring_travel_runner_offline_session docker compose -p boring-travel-runner-offline -f compose.yaml -f compose.agentcore.yaml -f compose.test-runner.yaml
+.PHONY: runner-up runner-down runner-test runner-offline-up runner-offline-down runner-offline-test
+runner-up:
+	$(RUNNER) up --build -d --wait
+runner-down:
+	$(RUNNER) down
+runner-test:
+	TEST_RUNNER_BASE_URL=http://localhost:8083 .venv/bin/python -m scripts.test_runner_smoke
+runner-offline-up:
+	$(OFFLINE_RUNNER) up --build -d --wait
+runner-offline-down:
+	$(OFFLINE_RUNNER) down
+runner-offline-test:
+	TEST_RUNNER_BASE_URL=http://localhost:8084 .venv/bin/python -m scripts.test_runner_smoke

@@ -1,0 +1,11 @@
+# Also requires compose.trend-test.yaml + compose.test-runner.yaml.
+services:
+  api:
+    environment:
+      SESSION_COOKIE_NAME: boring_travel_trend_runner_session
+  test-worker:
+    user: "${TREND_LOCAL_UID:?}:${TREND_LOCAL_GID:?}"
+    environment:
+      DEPLOYMENT_PROFILE: trend-gateway
+      ENABLE_TREND_GATEWAY: 'true'
+    secrets: [trend_virtual_key, trend_tool_map]

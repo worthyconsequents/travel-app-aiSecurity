@@ -1,0 +1,38 @@
+# Add after the desired local deployment overlay. AWS execution remains disabled.
+services:
+  api:
+    environment:
+      SESSION_COOKIE_NAME: ${TEST_SESSION_COOKIE_NAME:-boring_travel_runner_session}
+      TEST_RUNNER_ENABLED: 'true'
+      TEST_RUNNER_BACKEND: local-worker
+      TEST_DEPLOYMENT_ID: ${TEST_DEPLOYMENT_ID:-local-test-runner}
+  test-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.python
+    command: [python, -m, services.test_worker]
+    environment:
+      DATABASE_URL: postgresql+psycopg://travel_demo:${POSTGRES_PASSWORD:-local-synthetic-only}@db:5432/travel_demo
+      APP_MODE: local
+      MODEL_MODE: mock
+      DEPLOYMENT_PROFILE: ${TEST_PROFILE:-local}
+      TEST_RUNNER_ENABLED: 'true'
+      TEST_RUNNER_BACKEND: local-worker
+      TEST_DEPLOYMENT_ID: ${TEST_DEPLOYMENT_ID:-local-test-runner}
+      GATEWAY_URL: http://gateway:8000
+      AWS_EC2_METADATA_DISABLED: 'true'
+      ENABLE_TREND_GATEWAY: ${TEST_ENABLE_TREND:-false}
+      TREND_MCP_URL: http://trend-gateway-link:8081/
+      TREND_VIRTUAL_KEY_FILE: /run/secrets/trend_virtual_key
+      TREND_TOOL_MAP_FILE: /run/secrets/trend_tool_map
+    networks: [private]
+    depends_on:
+      api: {condition: service_healthy}
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    # Worker health means a heartbeat task and polling loop are active.
+    healthcheck:
+      test: [CMD, python, -c, 'from services.test_jobs import capabilities; assert capabilities()["ready"]']
+      interval: 5s
+      timeout: 3s
+      retries: 20

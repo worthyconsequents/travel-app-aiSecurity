@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-22",
+  "scope": "local Docker only, per clarified user request",
+  "compose_projects_removed": [
+    "travel-agent-security-demo",
+    "boring-travel-agentcore",
+    "boring-travel-trend",
+    "boring-travel-runner-check",
+    "boring-travel-runner-offline-check"
+  ],
+  "remaining_app_containers": [],
+  "kind_node": "stopped; cluster state preserved",
+  "original_database_volumes_preserved": [
+    "travel-agent-security-demo_postgres-data",
+    "boring-travel-agentcore_postgres-data",
+    "boring-travel-trend_postgres-data"
+  ],
+  "temporary_test_volumes_removed": true,
+  "private_configuration_preserved": true,
+  "cached_images_retained": true,
+  "global_prune_used": false,
+  "trend_console_objects": "unchanged",
+  "aws": "not changed or freshly audited; no login after user clarification"
+}

@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-22",
+  "scope": "local worker/API/browser only; AWS deferred",
+  "unit_cases": 197,
+  "unit_warnings": 1,
+  "ruff": "passed",
+  "frontend_production_build_and_typescript": "passed",
+  "reference_all_suite": {
+    "passed": 10,
+    "unavailable": 2,
+    "overall": "unavailable",
+    "bookings_unchanged": true,
+    "case_flows": 12
+  },
+  "offline_agentcore_all_suite": {
+    "passed": 12,
+    "overall": "passed",
+    "inspection_source": "offline marker simulation",
+    "bookings_unchanged": true
+  },
+  "browser_launch_refresh_trace": "passed",
+  "queued_job_survived_api_restart": "passed",
+  "fresh_client_recovered_job": "passed",
+  "http_idempotency": "passed",
+  "stopped_worker_launch_status": 503,
+  "cloud_execution": "disabled; not tested",
+  "live_trend_launcher": "not tested; gateway stopped",
+  "paid_model_calls": 0,
+  "aws_resources_created_or_deleted": 0,
+  "initial_aws_identity_check": "failed: expired session; no further AWS operations after clarification"
+}

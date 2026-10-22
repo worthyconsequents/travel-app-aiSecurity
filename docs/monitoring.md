@@ -19,9 +19,23 @@ New chat flows record receipt, completion or failure. Gateway flows record tool 
 
 Raw chat text, passwords, cookies, vendor credentials and freeform tool result bodies are not logged. The audit retains its existing allowlisted resource IDs. Controlled test runs additionally save their fixed synthetic attack arguments and the h04 injection excerpt, rendered as text, not HTML or instructions.
 
-“Run six tests” runs the existing synthetic fixtures, saves the results and connects each result to its actual audit and trace. It verifies expected decisions and unchanged booking records. The injection fixture forces a malicious tool request after checking h04; it does not demonstrate an LLM being persuaded. The unprotected comparison is hypothetical. No paid model calls or live Trend detections are performed. The control refuses to run against the AWS profile.
+The new **Run tests** control uses a suite picker and a separate durable worker.
+See [launcher setup and case inventory](test-launcher.md). It records queued/running
+progress, individual outcomes and traces, and survives browser/API restarts. The
+worker overlay is required; otherwise the button explains that execution is disabled.
+The legacy synchronous six-fixture endpoints remain available only in the original
+local mode without that overlay. They cannot bypass the durable launcher when enabled.
 
-Persistence uses additive `activity` and `attack_runs` tables in the existing Postgres volume; existing bookings are not reset. Historical runs whose results were only printed before this change cannot be reconstructed as saved test runs. An interrupted run can remain marked running; restart and run a new suite rather than treating it as a pass. Log retention is currently manual; volume storage grows with activity.
+Persistence uses additive application event/history tables plus
+`operator_test_jobs`, `operator_test_locks` and `operator_test_workers`. Existing
+bookings are not reset. New queued/running jobs have a 180-second deadline; expired
+runs become errors on polling/claim and preserve partial results. Historical legacy
+runs have no such lease and may still show interrupted running states. Log/result
+retention remains manual. Vendor Events are separate from application traces.
+
+All local environments were shut down after validation on 2026-10-22. Follow the
+launcher guide to start a deliberate new local session. The AWS portion is deferred
+and the new launcher refuses cloud/paid execution until that integration is completed.
 
 ## Generic AWS secret deployment
 
