@@ -106,13 +106,14 @@ sequenceDiagram
 **Result:** the live Trend proxy exposed the added tool and contract changes;
 application authorization rejected the new tool, but a direct gateway call
 executed it. Vision One recorded that call as **Allow**. The console's
-Discovered Tools page remained empty when checked, and active discovery still
-reported a missing secret file. This is an access-control acceptance failure,
+Discovered Tools page was empty in that direct-MCP test. The subsequent
+[model-routing experiment](docs/model-discovery-probe.md) populated it with both
+synthetic tools. Active MCP import still has a separate missing-secret blocker. This is an access-control acceptance failure,
 not a successful vendor blocking test. Notifications are not tested by this
 stateless fixture.
 
 [Setup, cases and evidence](docs/tool-changes.md) ·
-[Why Vision One inventory is still empty](docs/trend-discovery-diagnosis.md) ·
+[Earlier direct-MCP inventory diagnosis](docs/trend-discovery-diagnosis.md) ·
 [Architecture source](docs/architecture/07-dynamic-mcp-tool-tests.mmd) ·
 [Observed-flow source](docs/architecture/08-dynamic-mcp-observed-flow.mmd)
 
@@ -182,7 +183,7 @@ make lint smoke chat-test monitor-test scenarios
 make agentcore-chat-test agentcore-monitor-test
 ```
 
-`make test` and `make agentcore-test` also run the broader synthetic booking lifecycle tests, which create and cancel test reservations. The focused chat and monitoring checks preserve existing bookings. The latest complete unit suite passes **217 cases**, including 14 Trend transport cases and 27 test-launcher cases. Earlier local checks verified protected monitoring, all six reference-policy attack fixtures, chat regressions and offline AgentCore contracts. The separate Trend app currently fails normal-use smoke and full integration under active inspection; see [its exact results](docs/trend-local-test.md) and the [test inventory](docs/test-validation-matrix.md). See [monitoring verification](docs/monitoring-verification.json) and [attack vector map](docs/attack-vectors.md).
+`make test` and `make agentcore-test` also run the broader synthetic booking lifecycle tests, which create and cancel test reservations. The focused chat and monitoring checks preserve existing bookings. The latest complete unit suite passes **227 cases**, including 14 Trend transport cases and 27 test-launcher cases. Earlier local checks verified protected monitoring, all six reference-policy attack fixtures, chat regressions and offline AgentCore contracts. The separate Trend app currently fails normal-use smoke and full integration under active inspection; see [its exact results](docs/trend-local-test.md) and the [test inventory](docs/test-validation-matrix.md). See [monitoring verification](docs/monitoring-verification.json) and [attack vector map](docs/attack-vectors.md).
 
 `make down` and `make agentcore-down` stop their respective stacks while preserving data. `make seed` is idempotent. `make demo-reset` deletes the current stack’s synthetic database contents and reseeds them.
 
@@ -196,7 +197,7 @@ This is a local demo. Identity selection and shared database/service credentials
 
 ## Generic AWS deployment preparation
 
-AWS clients, Lambda interceptor packaging, CloudFormation foundation and gateway request templates are included. A separate [isolated AWS gateway test deployment](docs/aws-test-deployment.md) adds explicit account checks, private artifacts, a dedicated secret, live inspection, a synthetic read-only tool and bounded verification commands; it does not host the full application. The test environment has been torn down; its deployment and guarded cleanup commands remain available. The historical staging implementation passed 130 offline unit tests; the current complete suite passes 217. `make agentcore-plan` validates request shapes offline; `make agentcore-package` builds a local Lambda ZIP.
+AWS clients, Lambda interceptor packaging, CloudFormation foundation and gateway request templates are included. A separate [isolated AWS gateway test deployment](docs/aws-test-deployment.md) adds explicit account checks, private artifacts, a dedicated secret, live inspection, a synthetic read-only tool and bounded verification commands; it does not host the full application. The test environment has been torn down; its deployment and guarded cleanup commands remain available. The historical staging implementation passed 130 offline unit tests; the current complete suite passes 227. `make agentcore-plan` validates request shapes offline; `make agentcore-package` builds a local Lambda ZIP.
 
 `make monitor-secret-plan` previews Secrets Manager setup without contacting AWS. To create the monitoring secret, a deployer authenticates separately using their normal AWS workflow and explicitly runs `scripts/deploy_monitor_secret.py --apply` with the project’s Python dependencies installed. The script uses the SDK credential chain; it embeds no account, login flow or access key. It reads the password from private `.env`, creates a new secret, records its ARN, and emits runtime configuration plus a narrowly scoped read policy. See the [AWS secret deployment instructions](docs/monitoring.md#generic-aws-secret-deployment).
 
@@ -207,3 +208,27 @@ Explicit AWS and paid-inference opt-ins remain required. Local containers do not
 The default app keeps its reference route. A separate local `trend-gateway` profile on port 8082 now routes through the installed Trend MCP proxy, using an application virtual key and exact discovered tool mappings. All ten tools are discovered. **Inspection currently rejects legitimate signed requests**, so this option is not acceptance-tested for normal use. See [local Trend test setup and results](docs/trend-local-test.md). The public chart and local templates are under `infra/trend-gateway/`. Supplied guides, tenant registration overrides, API keys, local cluster credentials and generated runtime files are excluded from Git. See [gateway integration notes](infra/trend-gateway/README.md).
 
 Photography sources and license links are in [the image credits](docs/photography.md) and `frontend/public/photos/credits.json`.
+
+## Verified local model-tool discovery
+
+Vision One now lists both the baseline and newly introduced synthetic tool after
+their definitions pass through the local Trend LLM proxy to an inert mock provider.
+Both tool calls executed through Trend MCP and produced matching receipts. No AWS
+deployment or paid model was needed. This is observed-tool inventory, not automatic
+permission approval or proof of attack blocking.
+
+```mermaid
+flowchart LR
+    P[Fixed local probe] -->|MCP catalog refresh| G[Trend local gateway]
+    G --> F[Inert MCP fixture]
+    F -->|Tool definitions via gateway| P
+    P -->|Model request with tools array| G
+    G -->|Exact test route| M[Inert mock provider]
+    G -->|Tool observations and events| V[Vision One Discovered Tools]
+    M -->|Fixed tool call via gateway| P
+    P -->|MCP tool execution| G
+```
+
+[Setup, evidence, limits and current runtime state](docs/model-discovery-probe.md) ·
+[Sanitized verification](docs/model-discovery-verification.json) ·
+[Editable architecture source](docs/architecture/09-model-tool-discovery.mmd).

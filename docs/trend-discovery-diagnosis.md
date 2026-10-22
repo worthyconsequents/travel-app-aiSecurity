@@ -1,5 +1,9 @@
 # Vision One discovered-tools diagnosis — 2026-10-22
 
+> Subsequent local experiment populated the inventory through model requests carrying
+> MCP-derived definitions. See [the verified follow-up](model-discovery-probe.md).
+> The investigation below is the earlier direct-MCP snapshot, before that experiment.
+
 Runtime MCP discovery and Vision One inventory are separate outcomes. Runtime
 refresh passed, but **Vision One inventory population has not passed**. This
 investigation changed no application code, vendor settings, policies or credentials.

@@ -1,0 +1,9 @@
+flowchart LR
+    P[Fixed local probe] -->|MCP catalog refresh| G[Trend local gateway]
+    G --> F[Inert MCP fixture]
+    F -->|Tool definitions via gateway| P
+    P -->|Model request with tools array| G
+    G -->|Exact test route| M[Inert mock provider]
+    G -->|Tool observations and events| V[Vision One Discovered Tools]
+    M -->|Fixed tool call via gateway| P
+    P -->|MCP tool execution| G

@@ -115,8 +115,9 @@ has not been live-tested.
 
 ## Evidence and known failures
 
-Latest complete unit pass: **217 unit cases passed** (197 prior cases plus 20
-catalog/fixture cases), Ruff and production frontend/TypeScript checks passed.
+Latest complete unit pass: **227 unit cases passed**, including 10 model-probe/setup
+cases added after the prior 217-case baseline. Ruff passed for the current tree;
+production frontend/TypeScript checks passed in the earlier unchanged frontend.
 Current local/live results and running previews are recorded in
 [tool-changes-verification.json](tool-changes-verification.json). Earlier fleet
 validation, not repeated for this local-only change: seven generated
@@ -243,3 +244,17 @@ publishes the preceding monitoring-launcher commit. Keep `main` unchanged. The
 verification JSON files retain their capture-time publication/runtime snapshots;
 use Git history and remote state for current publication status. The pre-push
 check passed 217 unit tests, Ruff lint/format checks and credential/path screening.
+
+## Local model-routing discovery follow-up — 2026-10-22
+
+Read [model-discovery-probe.md](model-discovery-probe.md) and its sanitized JSON.
+Both baseline and added-tool phases passed with independent provider/backend receipts.
+Vision One displayed both tools with one call each; LLM and MCP Allow events matched.
+This supersedes the earlier empty-inventory result only for this new model-request
+path. Direct MCP inventory, active console import, automatic notifications, real-model
+behavior and vendor attack blocking are not established by this result.
+227 unit cases and Ruff checks passed. No AWS or paid inference. Local mock-only
+route/proxy and previews remain enabled for review, with no paid fallback.
+The CLI diagnostic is separate from the monitor's durable suites. The user
+authorized committing and pushing this follow-up on working-edition. Keep main
+unchanged and consult Git history for the publication result.

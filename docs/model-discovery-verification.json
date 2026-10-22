@@ -1,0 +1,57 @@
+{
+  "phases": [
+    {
+      "state": "baseline",
+      "tools_submitted": [
+        "fixture_status"
+      ],
+      "http_status": 200,
+      "selected_tool": "fixture_status",
+      "mcp_error": false,
+      "mock_provider_received": true,
+      "backend_receipt_observed": true,
+      "status": "passed"
+    },
+    {
+      "state": "added",
+      "tools_submitted": [
+        "fixture_new_tool",
+        "fixture_status"
+      ],
+      "http_status": 200,
+      "selected_tool": "fixture_new_tool",
+      "mcp_error": false,
+      "mock_provider_received": true,
+      "backend_receipt_observed": true,
+      "status": "passed"
+    }
+  ],
+  "paid_model_calls": 0,
+  "fixture_restored": true,
+  "inventory_verified": true,
+  "note": "Console verification is a separate human-visible observation, not inferred from HTTP success. No real-model behavior or vendor blocking claim.",
+  "routing_passed": true,
+  "captured_at": "2026-10-22T20:16:45Z",
+  "console_verified_at": "2026-10-22T20:18:00Z",
+  "gateway_version": "0.1.159",
+  "console_tools": [
+    {
+      "name": "fixture_status",
+      "calls": 1,
+      "first_seen_local": "2026-10-22 13:15:00"
+    },
+    {
+      "name": "fixture_new_tool",
+      "calls": 1,
+      "first_seen_local": "2026-10-22 13:16:45"
+    }
+  ],
+  "console_timezone": "America/Los_Angeles",
+  "events": {
+    "baseline_llm_allow": "01a16542-483e-706d-924b-876b21287be5",
+    "added_llm_allow": "01a16542-48cd-72cf-ba39-bbcfdcde99b6",
+    "added_mcp_allow": "01a16542-48d0-71fe-be21-fb8362033206"
+  },
+  "unit_tests_passed": 227,
+  "aws_operations": 0
+}

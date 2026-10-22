@@ -16,9 +16,11 @@ The pre-existing docker-desktop Kubernetes API returned EOF. It was not reset or
 
 Helm release: **trendai-gateway**, namespace **trendai-gateway**. Deployment and Service: **trendai-gateway-gateway**.
 
-`local-values.yaml` sets one replica, no Redis, no Ingress or cloud LoadBalancer, virtual-key authentication, admin master-key protection and enabled MCP/scanning. The LLM proxy is explicitly disabled. Resource request: 1Gi RAM; memory limit: 3Gi. Model calls remain disabled in the travel app as well.
+`local-values.yaml` sets one replica, no Redis, no Ingress or cloud LoadBalancer, virtual-key authentication, admin master-key protection and enabled MCP/scanning. The base values keep the LLM proxy disabled; the opt-in local model-discovery
+experiment enables it using `model-probe-values.yaml` (see below). Resource request: 1Gi RAM; memory limit: 3Gi. Model calls remain disabled in the travel app as well.
 
-Private service ports: 8081 MCP, 9090 manager. Port 8080 exists in the chart's Service but the LLM proxy module is disabled and does not listen. The MCP proxy uses root `/`, not `/mcp`, and aggregates upstream tools with namespaced names. The current travel client expects per-server `/mcp` endpoints with canonical names, so changing only GATEWAY_URL is not a valid integration.
+Private service ports: 8081 MCP, 9090 manager, and 8080 LLM when its opt-in module
+is enabled. In the base installation that module does not listen. The MCP proxy uses root `/`, not `/mcp`, and aggregates upstream tools with namespaced names. The current travel client expects per-server `/mcp` endpoints with canonical names, so changing only GATEWAY_URL is not a valid integration.
 
 ## Installation verification — historical 2026-10-17
 
@@ -99,7 +101,10 @@ kubectl --kubeconfig infra/trend-gateway/private/kubeconfig --context kind-borin
 infra/trend-gateway/private/helm test trendai-gateway --kubeconfig infra/trend-gateway/private/kubeconfig --kube-context kind-boring-travel --namespace trendai-gateway
 ```
 
-Upgrade the existing release using the pinned local chart and its original bootstrap file; the chart preserves the live device credential:
+Base-installation upgrade example using the pinned chart and original bootstrap
+file; the chart preserves the live device credential. This reapplies base values
+and disables the diagnostic LLM proxy. To preserve the model-probe configuration,
+use the narrow `--reuse-values` procedure in the probe guide instead:
 
 ```sh
 infra/trend-gateway/private/helm upgrade trendai-gateway infra/trend-gateway/vendor-chart-0.1.159 --kubeconfig infra/trend-gateway/private/kubeconfig --kube-context kind-boring-travel --namespace trendai-gateway -f AI_Gateway/overrides.yaml -f infra/trend-gateway/local-values.yaml --wait --timeout 8m
@@ -112,3 +117,29 @@ kubectl --kubeconfig infra/trend-gateway/private/kubeconfig --context kind-borin
 ```
 
 Use `--replicas=1` to start it again. The travel app's `make down` only stops its Compose services, not the kind cluster. The chart marks some Secrets keep-on-uninstall; do not assume Helm uninstall removes device/master keys or deregisters the gateway in Vision One. No teardown or deregistration has been performed.
+
+## Verified local model-tool discovery — 2026-10-22
+
+The opt-in local experiment now populates Vision One **Discovered Tools**. Sending
+MCP-derived definitions through the LLM proxy to an inert mock provider registered
+`fixture_status` and newly introduced `fixture_new_tool`, with one call each.
+Both model requests returned 200 and both MCP executions had matching private
+provider/backend receipts. This required no AWS deployment or paid inference.
+
+[Complete setup, failures resolved, validation and retirement procedure](../../docs/model-discovery-probe.md) ·
+[Sanitized evidence](../../docs/model-discovery-verification.json) ·
+[Architecture source](../../docs/architecture/09-model-tool-discovery.mmd).
+
+The experiment adds `compose.model-probe.yaml`, a private return link, local-only
+NodePort `dannytran-local-llm-probe`, and the LLM-enabled values overlay. The exact
+requested model `dannytran-tool-discovery-probe` routes only to alias
+`dannytran-local-tools` and inert provider `dannytran-local-mock`; no wildcard,
+paid provider or fallback is configured. The provider base URL omits `/v1` because
+the tested gateway appends it. All private keys and runtime addresses stay out of
+tracked deployment configuration. Recheck the mock's Docker address after recreation.
+
+The mock-only route, local LLM module and test services remain enabled for review.
+The travel assistant itself remains scripted. This result does not fix active MCP
+console import, signed-request inspection compatibility, automatic notifications
+or vendor per-tool blocking. Observation never promotes a tool into the app's
+approved mapping. Complete unit suite: 227 passed, plus Ruff lint/format checks.

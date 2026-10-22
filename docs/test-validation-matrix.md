@@ -237,3 +237,16 @@ This work used local Docker/kind and the existing Trend subscription; no AWS or
 paid models. Current runtime state is recorded in the tool-change verification
 JSON; the earlier local-cleanup snapshot is historical. Changes stay on
 working-edition, without an automatic commit, push, merge or cloud rollout.
+
+## Local model-routing discovery follow-up — 2026-10-22
+
+Read [model-discovery-probe.md](model-discovery-probe.md) and its sanitized JSON.
+Both baseline and added-tool phases passed with independent provider/backend receipts.
+Vision One displayed both tools with one call each; LLM and MCP Allow events matched.
+This supersedes the earlier empty-inventory result only for this new model-request
+path. Direct MCP inventory, active console import, automatic notifications, real-model
+behavior and vendor attack blocking are not established by this result.
+227 unit cases and Ruff checks passed. No AWS or paid inference. Local mock-only
+route/proxy and previews remain enabled for review, with no paid fallback.
+The CLI diagnostic is separate from the monitor's durable suites. Publication of
+this follow-up on working-edition was authorized; main remains outside its scope.

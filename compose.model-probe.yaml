@@ -1,0 +1,40 @@
+# Requires existing Trend + worker + tool-change overlays. No public model endpoint.
+services:
+  mock-model-provider:
+    build:
+      context: .
+      dockerfile: Dockerfile.python
+    command: [uvicorn, services.mock_model_provider:create_app, --factory, --host, 0.0.0.0, --port, '8000']
+    user: "${TREND_LOCAL_UID:?}:${TREND_LOCAL_GID:?}"
+    environment:
+      APP_MODE: local
+      MODEL_PROBE_ENABLED: 'true'
+      MODEL_PROBE_KEY_FILE: /run/secrets/mock_model_key
+    secrets: [mock_model_key]
+    networks: [private, trend-kind]
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  model-probe-link:
+    image: nginxinc/nginx-unprivileged:1.28-alpine
+    volumes:
+      - ./infra/trend-gateway/model-probe-return-link.conf:/etc/nginx/conf.d/default.conf:ro
+    networks: [private, trend-kind]
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+  test-worker:
+    environment:
+      MODEL_PROBE_ENABLED: 'true'
+      MODEL_PROBE_KEY_FILE: /run/secrets/mock_model_key
+    secrets: [mock_model_key]
+secrets:
+  mock_model_key:
+    file: ./infra/trend-gateway/private/mock-model-key

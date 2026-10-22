@@ -1,0 +1,5 @@
+# Explicit local-only diagnostic overlay. Preserve existing auth, MCP, and policies.
+gateway:
+  config:
+    llm_proxy:
+      enabled: true

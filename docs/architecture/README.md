@@ -38,3 +38,13 @@ and [observed sequence](08-dynamic-mcp-observed-flow.mmd) as GitHub-rendered Mer
 These show the new tool being discovered and called through Trend, while the app
 rejects it. Vendor per-tool denial remains unverified; the tested direct call was allowed.
 See [the dated report](../tool-changes.md).
+
+## Verified model-request discovery
+
+The root README also embeds [the model-tool discovery flow](09-model-tool-discovery.mmd).
+An explicit MCP catalog refresh supplies definitions to a model request routed
+through Trend's local LLM proxy to a fixed mock provider. Both synthetic tools
+appeared in Vision One Discovered Tools and executed through the MCP proxy.
+No AWS deployment or paid inference was used. This is inventory/execution evidence,
+not approval, automatic notifications, or attack-blocking evidence.
+See [the verified experiment and current runtime state](../model-discovery-probe.md).
