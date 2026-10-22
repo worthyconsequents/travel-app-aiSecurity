@@ -71,11 +71,16 @@ def canonical_catalog(server, tools):
         if tool.name in catalog:
             raise ValueError("Duplicate tool advertised by Trend")
         catalog[tool.name] = tool
+    from services.tool_catalog import fingerprint
+
+    approved = json.loads(Path(__file__).with_name("approved_trend_catalog.json").read_text())
     result = []
     for canonical, remote in mapping.items():
         if remote not in catalog:
             raise ValueError("Configured Trend tool is unavailable; no fallback used")
         tool = catalog[remote]
+        if fingerprint(tool) != fingerprint(approved[canonical]):
+            raise ValueError("Trend tool contract differs from the reviewed baseline")
         schema = dict(tool.inputSchema)
         properties = schema.get("properties", {})
         if properties.get("gateway_capability", {}).get("type") != "string":

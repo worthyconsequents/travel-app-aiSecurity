@@ -1,0 +1,19 @@
+sequenceDiagram
+    participant W as Test worker
+    participant F as Synthetic MCP server
+    participant G as Trend gateway
+    participant A as Application
+    participant V as Vision One
+    W->>F: Acquire private lease; establish baseline
+    W->>F: Advertise a new inert tool
+    W->>G: tools/list in existing and fresh sessions
+    G->>F: Refresh upstream catalog
+    G-->>W: New tool advertised (observed)
+    W->>A: Request unapproved tool
+    A-->>W: UNKNOWN_TOOL; no downstream dispatch
+    W->>G: Direct call to new tool
+    G->>F: Call forwarded under current configuration
+    F-->>W: Synthetic execution receipt
+    G-->>V: Allow event (independently observed)
+    Note over W,V: Discovery is not approval; direct-access expectation FAILED
+    W->>F: Release lease; restore baseline

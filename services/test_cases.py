@@ -25,6 +25,10 @@ def snapshot():
 
 
 def case_plan(suite):
+    if suite == "tool-changes":
+        from services.tool_change_tests import plan
+
+        return plan()
     cases = []
     if suite in {"all", "connectivity"}:
         cases += [
@@ -121,6 +125,10 @@ def dependency_error(exc):
 
 
 async def execute(suite, progress):
+    if suite == "tool-changes":
+        from services.tool_change_tests import execute as experiment
+
+        return await experiment(progress)
     plan = case_plan(suite)
     result = {
         "scenarios": [],

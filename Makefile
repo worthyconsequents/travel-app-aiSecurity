@@ -70,3 +70,15 @@ runner-offline-down:
 	$(OFFLINE_RUNNER) down
 runner-offline-test:
 	TEST_RUNNER_BASE_URL=http://localhost:8084 .venv/bin/python -m scripts.test_runner_smoke
+
+# Isolated, opt-in dynamic MCP experiment; no AWS or models.
+TOOL_CHANGES = docker compose --env-file infra/trend-gateway/private/tool-changes.env -p boring-travel-tool-changes -f compose.yaml -f compose.test-runner.yaml -f compose.tool-changes.yaml
+.PHONY: tool-changes-setup tool-changes-up tool-changes-down tool-changes-test
+tool-changes-setup:
+	.venv/bin/python -m scripts.tool_changes_setup
+tool-changes-up:
+	$(TOOL_CHANGES) up --build -d --wait
+tool-changes-down:
+	$(TOOL_CHANGES) down
+tool-changes-test:
+	.venv/bin/python -m scripts.tool_changes_smoke

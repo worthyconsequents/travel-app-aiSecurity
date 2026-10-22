@@ -105,7 +105,7 @@ inspection and backend capability checks. Do not report vendor acceptance comple
 The historical AWS gateway fixture separately allowed its injection; that test was
 removed in October 2026. Neither result is proof of real-model susceptibility.
 
-## Runtime/cleanup state at handoff
+## Earlier runtime/cleanup snapshot (superseded locally)
 
 All three original local app Compose stacks were removed without deleting their
 Postgres volumes. The dedicated `boring-travel-control-plane` kind container was
@@ -114,7 +114,9 @@ remain ignored/owner-only. Images and the unused kind network are intentionally
 retained; no Docker-wide prune was used. Trend console objects were not deleted.
 Temporary launcher-validation stacks were also removed after checks, including
 only their disposable new DB volumes. Verify the cleanup JSON before asserting a
-runtime is active. No local website is expected to be listening after handoff.
+runtime is active. The later approved tool-change experiment restarted local previews on 8085/8082
+and the kind node. See [current runtime](tool-changes-verification.json). The AWS
+scope below remains unchanged.
 
 AWS was not changed. An initial read-only STS check failed due to an expired login;
 after the user's clarification, no login or further AWS audit was attempted. The
@@ -125,3 +127,19 @@ Use the next session's operator credential chain, not copied local credentials.
 Private ledgers under `build/` are not portable deployment inputs and must not be
 published. If using another machine, supply fresh runtime secrets and explicit
 account/Region/domain settings. GitHub does not include those private files.
+
+## Dynamic MCP tool changes — 2026-10-22
+
+See [the tool-change report](tool-changes.md) and the two new diagrams embedded in
+the root README. The opt-in local monitoring suite has 13 cases. Complete unit suite:
+217 passed. Local fixture run: 10 passed/3 unavailable. Live Trend run: 10 passed,
+1 failed, 2 unavailable. Discovery refresh worked; the app rejected a new tool;
+a direct gateway call executed it and Vision One recorded Allow. Inventory still
+appeared empty when checked, and console discovery retained a missing-secret error.
+Do not claim vendor least-privilege enforcement or notification support.
+Travel contracts now use a reviewed full-metadata/schema baseline; no network
+observation auto-approves tools. Fixture state restored, bookings unchanged.
+This work used local Docker/kind and the existing Trend subscription; no AWS or
+paid models. Current runtime state is recorded in the tool-change verification
+JSON; the earlier local-cleanup snapshot is historical. Changes stay on
+working-edition, without an automatic commit, push, merge or cloud rollout.

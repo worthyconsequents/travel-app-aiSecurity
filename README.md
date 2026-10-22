@@ -58,11 +58,69 @@ The offline implementation and the historical AWS test are different environment
 
 See the [diagram index](docs/architecture/README.md), [AgentCore implementation notes](docs/agentcore-alternative.md), and [recorded AWS test results](docs/aws-test-deployment.md).
 
+### Dynamic MCP tool changes — implemented and tested locally
+
+The private monitoring page now has an opt-in **Tool changes** suite. The fixture
+is isolated from travel data and excluded from **All safe checks**. The diagrams
+below describe the implemented test path and the observed 2026-10-22 outcome.
+
+```mermaid
+flowchart LR
+    UI[Password-protected monitor] --> API[Allowlisted launch API]
+    API --> DB[(Durable job and scope lock)]
+    DB --> W[Separate local test worker]
+    W -->|private control key; 120-second lease| F[Inert changing MCP fixture]
+    W -->|application test| P[Travel application authorization]
+    P -->|unknown tool denied| R[Saved results and request flow]
+    W -->|independent MCP probe; virtual key| G[Local Trend AI Gateway]
+    G -->|authenticated private bridge| F
+    F -->|synthetic execution receipts| W
+    W --> R
+    R --> UI
+    G -. activity events .-> V[Vision One console]
+    V -. independent manual evidence .-> E[Documented verification report]
+```
+
+```mermaid
+sequenceDiagram
+    participant W as Test worker
+    participant F as Synthetic MCP server
+    participant G as Trend gateway
+    participant A as Application
+    participant V as Vision One
+    W->>F: Acquire private lease; establish baseline
+    W->>F: Advertise a new inert tool
+    W->>G: tools/list in existing and fresh sessions
+    G->>F: Refresh upstream catalog
+    G-->>W: New tool advertised (observed)
+    W->>A: Request unapproved tool
+    A-->>W: UNKNOWN_TOOL; no downstream dispatch
+    W->>G: Direct call to new tool
+    G->>F: Call forwarded under current configuration
+    F-->>W: Synthetic execution receipt
+    G-->>V: Allow event (independently observed)
+    Note over W,V: Discovery is not approval; direct-access expectation FAILED
+    W->>F: Release lease; restore baseline
+```
+
+**Result:** the live Trend proxy exposed the added tool and contract changes;
+application authorization rejected the new tool, but a direct gateway call
+executed it. Vision One recorded that call as **Allow**. The console's
+Discovered Tools page remained empty when checked, and active discovery still
+reported a missing secret file. This is an access-control acceptance failure,
+not a successful vendor blocking test. Notifications are not tested by this
+stateless fixture.
+
+[Setup, cases and evidence](docs/tool-changes.md) ·
+[Why Vision One inventory is still empty](docs/trend-discovery-diagnosis.md) ·
+[Architecture source](docs/architecture/07-dynamic-mcp-tool-tests.mmd) ·
+[Observed-flow source](docs/architecture/08-dynamic-mcp-observed-flow.mmd)
+
 ## Monitoring test launcher
 
 The protected monitoring page now launches allowlisted checks through a separate
 worker, with saved progress, request flows, retry protection and a bounded runtime.
-Choose **Connectivity**, **Authorization**, **Inspection** or **All safe checks**.
+Choose **Connectivity**, **Authorization**, **Inspection**, **All safe checks**, or the opt-in **Tool changes** experiment.
 Runs survive page refreshes and API restarts. Reference-mode inspection is marked
 unavailable; offline AgentCore inspection is labeled simulation.
 
@@ -78,9 +136,12 @@ See [launcher setup, limits and evidence](docs/test-launcher.md),
 [verification results](docs/test-launcher-verification.json), and the
 [AWS session handoff](docs/AWS_SESSION_HANDOFF.md). **AWS test execution remains
 explicitly disabled** until cloud authorization and dispatch are implemented.
-All local stacks were shut down after validation; the dedicated local Trend cluster
-is stopped. Database volumes and private configuration were preserved. No AWS
-resources, DNS records or paid models were created/used for this work.
+After the earlier teardown, the approved tool-change experiment restarted two
+isolated local previews: [reference monitoring](http://localhost:8085/monitor) and
+[Trend monitoring](http://localhost:8082/monitor), plus the preserved local kind
+gateway. Fixture catalogs are restored to baseline. Original 8080/8081 profiles
+remain stopped. See the [current runtime/test record](docs/tool-changes-verification.json).
+No AWS resources, DNS records or paid models were created/used for this work.
 
 ## Multiple isolated AWS deployments
 
@@ -121,7 +182,7 @@ make lint smoke chat-test monitor-test scenarios
 make agentcore-chat-test agentcore-monitor-test
 ```
 
-`make test` and `make agentcore-test` also run the broader synthetic booking lifecycle tests, which create and cancel test reservations. The focused chat and monitoring checks preserve existing bookings. The latest complete unit suite passes **197 cases**, including 14 Trend transport cases and 27 test-launcher cases. Earlier local checks verified protected monitoring, all six reference-policy attack fixtures, chat regressions and offline AgentCore contracts. The separate Trend app currently fails normal-use smoke and full integration under active inspection; see [its exact results](docs/trend-local-test.md) and the [test inventory](docs/test-validation-matrix.md). See [monitoring verification](docs/monitoring-verification.json) and [attack vector map](docs/attack-vectors.md).
+`make test` and `make agentcore-test` also run the broader synthetic booking lifecycle tests, which create and cancel test reservations. The focused chat and monitoring checks preserve existing bookings. The latest complete unit suite passes **217 cases**, including 14 Trend transport cases and 27 test-launcher cases. Earlier local checks verified protected monitoring, all six reference-policy attack fixtures, chat regressions and offline AgentCore contracts. The separate Trend app currently fails normal-use smoke and full integration under active inspection; see [its exact results](docs/trend-local-test.md) and the [test inventory](docs/test-validation-matrix.md). See [monitoring verification](docs/monitoring-verification.json) and [attack vector map](docs/attack-vectors.md).
 
 `make down` and `make agentcore-down` stop their respective stacks while preserving data. `make seed` is idempotent. `make demo-reset` deletes the current stack’s synthetic database contents and reseeds them.
 
@@ -135,7 +196,7 @@ This is a local demo. Identity selection and shared database/service credentials
 
 ## Generic AWS deployment preparation
 
-AWS clients, Lambda interceptor packaging, CloudFormation foundation and gateway request templates are included. A separate [isolated AWS gateway test deployment](docs/aws-test-deployment.md) adds explicit account checks, private artifacts, a dedicated secret, live inspection, a synthetic read-only tool and bounded verification commands; it does not host the full application. The test environment has been torn down; its deployment and guarded cleanup commands remain available. The historical staging implementation passed 130 offline unit tests; the current complete suite passes 197. `make agentcore-plan` validates request shapes offline; `make agentcore-package` builds a local Lambda ZIP.
+AWS clients, Lambda interceptor packaging, CloudFormation foundation and gateway request templates are included. A separate [isolated AWS gateway test deployment](docs/aws-test-deployment.md) adds explicit account checks, private artifacts, a dedicated secret, live inspection, a synthetic read-only tool and bounded verification commands; it does not host the full application. The test environment has been torn down; its deployment and guarded cleanup commands remain available. The historical staging implementation passed 130 offline unit tests; the current complete suite passes 217. `make agentcore-plan` validates request shapes offline; `make agentcore-package` builds a local Lambda ZIP.
 
 `make monitor-secret-plan` previews Secrets Manager setup without contacting AWS. To create the monitoring secret, a deployer authenticates separately using their normal AWS workflow and explicitly runs `scripts/deploy_monitor_secret.py --apply` with the project’s Python dependencies installed. The script uses the SDK credential chain; it embeds no account, login flow or access key. It reads the password from private `.env`, creates a new secret, records its ARN, and emits runtime configuration plus a narrowly scoped read policy. See the [AWS secret deployment instructions](docs/monitoring.md#generic-aws-secret-deployment).
 

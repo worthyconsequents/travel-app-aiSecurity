@@ -1,0 +1,14 @@
+flowchart LR
+    UI[Password-protected monitor] --> API[Allowlisted launch API]
+    API --> DB[(Durable job and scope lock)]
+    DB --> W[Separate local test worker]
+    W -->|private control key; 120-second lease| F[Inert changing MCP fixture]
+    W -->|application test| P[Travel application authorization]
+    P -->|unknown tool denied| R[Saved results and request flow]
+    W -->|independent MCP probe; virtual key| G[Local Trend AI Gateway]
+    G -->|authenticated private bridge| F
+    F -->|synthetic execution receipts| W
+    W --> R
+    R --> UI
+    G -. activity events .-> V[Vision One console]
+    V -. independent manual evidence .-> E[Documented verification report]

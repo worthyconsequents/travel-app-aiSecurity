@@ -115,7 +115,11 @@ has not been live-tested.
 
 ## Evidence and known failures
 
-Latest complete unit pass: **197 unit cases passed** (170 prior cases plus 27 test-launcher cases), Ruff checks passed, seven generated
+Latest complete unit pass: **217 unit cases passed** (197 prior cases plus 20
+catalog/fixture cases), Ruff and production frontend/TypeScript checks passed.
+Current local/live results and running previews are recorded in
+[tool-changes-verification.json](tool-changes-verification.json). Earlier fleet
+validation, not repeated for this local-only change: seven generated
 three-copy templates passed cfn-lint and project cfn-guard rules. The optional paid
 template passed static checks with fictitious references. Python/frontend amd64
 images built from sanitized contexts; AWS-configured runtime imports and NGINX
@@ -200,8 +204,42 @@ and locally validated. APP_MODE=aws-demo and backend=ecs remain disabled for thi
 launcher; cloud operator authorization and dispatch are explicit next-session work.
 
 Original local Compose containers/networks were removed, preserving their database
-volumes. The dedicated kind node is stopped, preserving its state. Temporary
+volumes. The dedicated kind node was stopped at the earlier teardown; the approved
+tool-change experiment subsequently restarted it. See the current runtime record. Temporary
 validation stacks/volumes were removed after checks. Private configuration and
 Trend console entries were not deleted. No local web page should be assumed live.
 The user clarified that no AWS login/audit was needed; AWS was not changed or
 freshly verified absent in this session. See the cleanup verification record.
+
+## Dynamic MCP tool changes — 2026-10-22
+
+See [the tool-change report](tool-changes.md) and the two new diagrams embedded in
+the root README. The opt-in local monitoring suite has 13 cases. Complete unit suite:
+217 passed. Local fixture run: 10 passed/3 unavailable. Live Trend run: 10 passed,
+1 failed, 2 unavailable. Discovery refresh worked; the app rejected a new tool;
+a direct gateway call executed it and Vision One recorded Allow. Inventory still
+appeared empty when checked, and console discovery retained a missing-secret error.
+Do not claim vendor least-privilege enforcement or notification support.
+Travel contracts now use a reviewed full-metadata/schema baseline; no network
+observation auto-approves tools. Fixture state restored, bookings unchanged.
+This work used local Docker/kind and the existing Trend subscription; no AWS or
+paid models. Current runtime state is recorded in the tool-change verification
+JSON; the earlier local-cleanup snapshot is historical. Changes stay on
+working-edition, without an automatic commit, push, merge or cloud rollout.
+
+For the subsequent empty-inventory investigation, read
+[trend-discovery-diagnosis.md](trend-discovery-diagnosis.md). Runtime list requests
+and activity delivery are verified; no exact vendor inventory root cause is proven.
+Console discovery still fails resolving a file that exists in the active local
+gateway. Do not infer that model routing/paid inference is required or change
+credentials/policies to bypass the mismatch. The temporary loopback diagnostic
+forward was closed; the existing app/gateway previews were left running.
+
+## Publication request — 2026-10-22
+
+The user explicitly requested publishing the completed tool-change implementation,
+README diagrams and discovery diagnosis to GitHub on `working-edition`. This also
+publishes the preceding monitoring-launcher commit. Keep `main` unchanged. The
+verification JSON files retain their capture-time publication/runtime snapshots;
+use Git history and remote state for current publication status. The pre-push
+check passed 217 unit tests, Ruff lint/format checks and credential/path screening.

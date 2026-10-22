@@ -153,6 +153,26 @@ tests/unit/test_test_runner.py::test_case_executor_separates_failure_and_transpo
 tests/unit/test_test_runner.py::test_case_executor_separates_failure_and_transport_block[failure1]
 tests/unit/test_test_runner.py::test_mismatched_worker_profile_is_not_ready
 tests/unit/test_test_runner.py::test_legacy_web_endpoints_cannot_bypass_the_durable_launcher
+tests/unit/test_tool_changes.py::test_fingerprint_canonical_keys_and_full_metadata
+tests/unit/test_tool_changes.py::test_catalog_drift_classification[baseline-added0-removed0-changed0]
+tests/unit/test_tool_changes.py::test_catalog_drift_classification[added-added1-removed1-changed1]
+tests/unit/test_tool_changes.py::test_catalog_drift_classification[schema-added2-removed2-changed2]
+tests/unit/test_tool_changes.py::test_catalog_drift_classification[description-added3-removed3-changed3]
+tests/unit/test_tool_changes.py::test_catalog_drift_classification[collision-added4-removed4-changed4]
+tests/unit/test_tool_changes.py::test_catalog_drift_classification[removed-added5-removed5-changed5]
+tests/unit/test_tool_changes.py::test_catalog_drift_classification[behavior-added6-removed6-changed6]
+tests/unit/test_tool_changes.py::test_duplicate_identity_rejected
+tests/unit/test_tool_changes.py::test_lease_exclusivity_expiration_and_stale_reset
+tests/unit/test_tool_changes.py::test_current_schema_enforced_and_same_name_behavior_observable
+tests/unit/test_tool_changes.py::test_control_auth_separated_from_mcp_and_no_arbitrary_states
+tests/unit/test_tool_changes.py::test_disabled_and_cloud_fixture_refused
+tests/unit/test_tool_changes.py::test_suite_is_opt_in_and_excluded_from_all
+tests/unit/test_tool_changes.py::test_pinned_travel_schema_and_description_rejected
+tests/unit/test_tool_changes.py::test_failed_dependencies_never_count_as_vendor_block[startup]
+tests/unit/test_tool_changes.py::test_failed_dependencies_never_count_as_vendor_block[catalog]
+tests/unit/test_tool_changes.py::test_failed_dependencies_never_count_as_vendor_block[release]
+tests/unit/test_tool_changes.py::test_unmapped_new_fixture_tools_remain_visible_in_inventory
+tests/unit/test_tool_changes.py::test_absent_and_empty_descriptions_are_equivalent_but_text_is_drift
 tests/unit/test_travel_assistant.py::test_read_only_intents[Find stays in Lisbon-search_hotels-arguments0]
 tests/unit/test_travel_assistant.py::test_read_only_intents[Explore Kyoto-search_hotels-arguments1]
 tests/unit/test_travel_assistant.py::test_read_only_intents[Show Vancouver hotels-search_hotels-arguments2]

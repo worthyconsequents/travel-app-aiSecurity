@@ -30,3 +30,11 @@ PNG previews and SVGs share the approved visual layout. Mermaid files preserve t
 - [AgentCore implementation and handoff](../agentcore-alternative.md), [offline cloud planner](../../scripts/agentcore_plan.py)
 - [AWS test and teardown](../aws-test-deployment.md), [redacted verification evidence](../aws-cloud-test-verification.json)
 - [Separate Trend gateway installation](../../infra/trend-gateway/README.md)
+
+## Dynamic MCP experiment
+
+The root README embeds the implemented [test architecture](07-dynamic-mcp-tool-tests.mmd)
+and [observed sequence](08-dynamic-mcp-observed-flow.mmd) as GitHub-rendered Mermaid diagrams.
+These show the new tool being discovered and called through Trend, while the app
+rejects it. Vendor per-tool denial remains unverified; the tested direct call was allowed.
+See [the dated report](../tool-changes.md).

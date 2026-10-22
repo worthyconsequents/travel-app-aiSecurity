@@ -12,8 +12,10 @@ API restart does not cancel the queued job. Select a case to view its recorded f
 
 ![Offline AgentCore monitoring test launcher](testing/monitor-test-launcher.png)
 
-The preview shows offline simulations, not a live vendor acceptance pass. All local
-stacks were shut down after validation; the preview is a saved image.
+The preview shows offline simulations, not a live vendor acceptance pass. Those local
+validation stacks were shut down at that milestone; the preview is a saved image.
+The later tool-change experiment has restarted separate 8085/8082 previews; see
+[its current record](tool-changes-verification.json).
 
 ```sh
 # Prepare .env from .env.example, using MODEL_MODE=mock and a private MONITOR_PASSWORD.
@@ -53,8 +55,8 @@ namespace. `TEST_PROFILE=agentcore-offline` selects the offline worker adapter.
 - Trend: request probe requires the exact vendor content-policy rejection; a backend
   capability error does not count. A safe vendor response probe is not configured
   and is marked unavailable. Ordinary signed calls remain subject to the known
-  compatibility blocker. This new launcher has not been live-tested against Trend;
-  its local gateway was stopped at the user's request.
+  compatibility blocker. The later tool-change suite was live-tested through this launcher; see
+  [the actual results](tool-changes.md). Ordinary signed calls remain blocked.
 
 Authorization fixtures submit fixed synthetic requests. They do not show a model
 being persuaded. No approvals are granted or bookings reset by these suites.
@@ -125,3 +127,23 @@ See [test-launcher-verification.json](test-launcher-verification.json) and the
 [full test inventory](test-validation-matrix.md). The standalone local HTTP helper
 is `scripts/test_runner_smoke.py`; it deliberately refuses non-loopback URLs.
 AWS/browser cloud acceptance belongs to the next session.
+
+## Dynamic MCP tool changes — 2026-10-22
+
+See [the tool-change report](tool-changes.md) and the two new diagrams embedded in
+the root README. The opt-in local monitoring suite has 13 cases. Complete unit suite:
+217 passed. Local fixture run: 10 passed/3 unavailable. Live Trend run: 10 passed,
+1 failed, 2 unavailable. Discovery refresh worked; the app rejected a new tool;
+a direct gateway call executed it and Vision One recorded Allow. Inventory still
+appeared empty when checked, and console discovery retained a missing-secret error.
+Do not claim vendor least-privilege enforcement or notification support.
+Travel contracts now use a reviewed full-metadata/schema baseline; no network
+observation auto-approves tools. Fixture state restored, bookings unchanged.
+This work used local Docker/kind and the existing Trend subscription; no AWS or
+paid models. Current runtime state is recorded in the tool-change verification
+JSON; the earlier local-cleanup snapshot is historical. Changes stay on
+working-edition, without an automatic commit, push, merge or cloud rollout.
+
+The tool-change experiment uses its own bounded control/MCP requests under the
+same 180-second job deadline and a 120-second fixture lease. Notification delivery
+and console inventory are explicitly unavailable, not inferred from a transport error.

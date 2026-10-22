@@ -130,7 +130,7 @@ async def run():
 
 class TestLaunch(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    suite: Literal["all", "connectivity", "authorization", "inspection"] = "all"
+    suite: Literal["all", "connectivity", "authorization", "inspection", "tool-changes"] = "all"
 
 
 @router.post("/test-runs", status_code=202, dependencies=[Depends(auth.require_monitor)])

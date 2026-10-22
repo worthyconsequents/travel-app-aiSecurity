@@ -1,0 +1,12 @@
+services:
+  tool-change-bridge:
+    image: nginxinc/nginx-unprivileged:1.28-alpine
+    volumes:
+      - ./infra/trend-gateway/tool-change-bridge.conf:/etc/nginx/conf.d/default.conf:ro
+    networks: [private, trend-kind]
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    depends_on:
+      tool-change-fixture: {condition: service_healthy}

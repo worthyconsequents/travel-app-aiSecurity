@@ -16,6 +16,7 @@ SUITES = {
     "connectivity": "Connectivity",
     "authorization": "Authorization",
     "inspection": "Inspection",
+    "tool-changes": "Tool changes (isolated experiment)",
 }
 ACTIVE = {"queued", "running"}
 
@@ -47,7 +48,11 @@ def capabilities():
         "enabled": configured(),
         "ready": ready,
         "backend": "local-worker",
-        "suites": [{"id": k, "name": v} for k, v in SUITES.items()],
+        "suites": [
+            {"id": k, "name": v}
+            for k, v in SUITES.items()
+            if k != "tool-changes" or tool_changes_enabled()
+        ],
         "message": "Ready for safe synthetic checks."
         if ready
         else "Local test worker is stopped or disabled. AWS execution is not enabled.",
@@ -82,9 +87,17 @@ def expire(db, now):
     db.execute(delete(TestJobLock).where(TestJobLock.scope == scope(), TestJobLock.expires <= now))
 
 
+def tool_changes_enabled():
+    from services.tool_change_tests import enabled
+
+    return enabled()
+
+
 def enqueue(suite, request_key):
     if not configured():
         raise HTTPException(403, "Test execution is disabled for this environment")
+    if suite == "tool-changes" and not tool_changes_enabled():
+        raise HTTPException(403, "Tool-change fixture is disabled")
     if suite not in SUITES:
         raise HTTPException(422, "Unknown test suite")
     job_id = hashlib.sha256((scope() + ":" + request_key).encode()).hexdigest()[:32]

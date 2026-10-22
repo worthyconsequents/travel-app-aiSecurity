@@ -1,0 +1,284 @@
+{
+  "date_utc": "2026-10-22T17:49:22Z",
+  "branch": "working-edition",
+  "publication": "uncommitted working tree; no push",
+  "unit_tests": {
+    "passed": 217,
+    "warning": "Existing Starlette/httpx deprecation warning"
+  },
+  "ruff": "passed",
+  "production_frontend_typescript_build": "passed",
+  "local_suite": {
+    "run_id": "f3dff5c654cb53c00a6ea4c90c057a5b",
+    "started": 1792690919.0664957,
+    "finished": 1792690919.5421267,
+    "status": "unavailable",
+    "cases": [
+      {
+        "name": "Catalog experiment: baseline",
+        "status": "passed",
+        "source": "local fixture",
+        "reason_code": "APPROVED_CONTROL_EXECUTED",
+        "correlation_id": "756f724da3f2468488787c66b2a78a0f"
+      },
+      {
+        "name": "Catalog experiment: added",
+        "status": "passed",
+        "source": "local fixture",
+        "reason_code": "CATALOG_OBSERVATION_MATCHED",
+        "correlation_id": "f8f9902a16174504ab687dbb6ce65ddb"
+      },
+      {
+        "name": "Catalog experiment: schema",
+        "status": "passed",
+        "source": "local fixture",
+        "reason_code": "CATALOG_OBSERVATION_MATCHED",
+        "correlation_id": "327d90e2dfe4470a8db26d1ffa4f1fc5"
+      },
+      {
+        "name": "Catalog experiment: description",
+        "status": "passed",
+        "source": "local fixture",
+        "reason_code": "CATALOG_OBSERVATION_MATCHED",
+        "correlation_id": "d3632fa7f3a645908cfc13cc807b78b1"
+      },
+      {
+        "name": "Catalog experiment: collision",
+        "status": "passed",
+        "source": "local fixture",
+        "reason_code": "CATALOG_OBSERVATION_MATCHED",
+        "correlation_id": "eb36c0c9f33c43c4b50f440830d61b55"
+      },
+      {
+        "name": "Catalog experiment: removed",
+        "status": "passed",
+        "source": "local fixture",
+        "reason_code": "CATALOG_OBSERVATION_MATCHED",
+        "correlation_id": "7d4355895dc64cfa88f2d981d229f552"
+      },
+      {
+        "name": "Catalog experiment: behavior",
+        "status": "passed",
+        "source": "local fixture",
+        "reason_code": "CATALOG_OBSERVATION_MATCHED",
+        "correlation_id": "3964b0e08c3a4167beeac0ebd3426524"
+      },
+      {
+        "name": "Application rejects a new tool",
+        "status": "passed",
+        "source": "application authorization",
+        "reason_code": "UNKNOWN_TOOL",
+        "correlation_id": "0b9024352a0a40c3813050c8e93f4f2e"
+      },
+      {
+        "name": "Independent gateway access test",
+        "status": "unavailable",
+        "source": "local fixture",
+        "reason_code": "NO_TREND_GATEWAY_ON_THIS_ROUTE",
+        "correlation_id": "e5bc8eeda2ad456386eb5b3908575855"
+      },
+      {
+        "name": "Tool-change notification support",
+        "status": "unavailable",
+        "source": "local fixture",
+        "reason_code": "STATELESS_FIXTURE_USES_EXPLICIT_REFRESH",
+        "correlation_id": "801a9d07ddb14484ad0072957fcba95e"
+      },
+      {
+        "name": "Vision One console verification",
+        "status": "unavailable",
+        "source": "operator verification",
+        "reason_code": "AWAITING_INDEPENDENT_CONSOLE_VERIFICATION",
+        "correlation_id": "c2ab441803b745d9b3b193beaa130db0"
+      },
+      {
+        "name": "Restore fixture baseline",
+        "status": "passed",
+        "source": "local fixture",
+        "reason_code": "FIXTURE_RELEASED",
+        "correlation_id": "c185af3abc2f4ad9bae802215182f635"
+      },
+      {
+        "name": "Synthetic bookings remain unchanged",
+        "status": "passed",
+        "source": "data integrity",
+        "reason_code": "BOOKING_STATE_CHECK",
+        "correlation_id": "97857fdd7e824c7288d519b956de216a"
+      }
+    ],
+    "counts": {
+      "passed": 10,
+      "unavailable": 3
+    },
+    "fixture_restored": true,
+    "bookings_unchanged": true,
+    "paid_model_calls": 0
+  },
+  "trend_suite": {
+    "run_id": "c2214aa8ad7541a710184bc8edcdbd9d",
+    "started": 1792691225.5961576,
+    "finished": 1792691226.1275637,
+    "status": "failed",
+    "cases": [
+      {
+        "name": "Catalog experiment: baseline",
+        "status": "passed",
+        "source": "Trend MCP observation",
+        "reason_code": "APPROVED_CONTROL_EXECUTED",
+        "correlation_id": "42c6676d5c904d639348c34db68cd438"
+      },
+      {
+        "name": "Catalog experiment: added",
+        "status": "passed",
+        "source": "Trend MCP observation",
+        "reason_code": "CATALOG_OBSERVATION_MATCHED",
+        "correlation_id": "d9273d49c11e421d80c7ede3cc441df5"
+      },
+      {
+        "name": "Catalog experiment: schema",
+        "status": "passed",
+        "source": "Trend MCP observation",
+        "reason_code": "CATALOG_OBSERVATION_MATCHED",
+        "correlation_id": "9fa7a0b276f7450487359b52cca583e3"
+      },
+      {
+        "name": "Catalog experiment: description",
+        "status": "passed",
+        "source": "Trend MCP observation",
+        "reason_code": "CATALOG_OBSERVATION_MATCHED",
+        "correlation_id": "8a3be67b55a64aec885ac9cc14ca06b0"
+      },
+      {
+        "name": "Catalog experiment: collision",
+        "status": "passed",
+        "source": "Trend MCP observation",
+        "reason_code": "CATALOG_OBSERVATION_MATCHED",
+        "correlation_id": "c2040f72920d4030ac4cf71e633583bb"
+      },
+      {
+        "name": "Catalog experiment: removed",
+        "status": "passed",
+        "source": "Trend MCP observation",
+        "reason_code": "CATALOG_OBSERVATION_MATCHED",
+        "correlation_id": "695b3b67ad134aa8a0a4d742e8d4a46a"
+      },
+      {
+        "name": "Catalog experiment: behavior",
+        "status": "passed",
+        "source": "Trend MCP observation",
+        "reason_code": "CATALOG_OBSERVATION_MATCHED",
+        "correlation_id": "2ae7bf5de5e44a3483f88d490806f28d"
+      },
+      {
+        "name": "Application rejects a new tool",
+        "status": "passed",
+        "source": "application authorization",
+        "reason_code": "UNKNOWN_TOOL",
+        "correlation_id": "dacdb09eaf104abe90f3d8b5f5fb8a19"
+      },
+      {
+        "name": "Independent gateway access test",
+        "status": "failed",
+        "source": "Trend MCP observation",
+        "reason_code": "UNAPPROVED_TOOL_EXECUTED",
+        "correlation_id": "fd8a62fa5054439dabc6ebb383f6b70f"
+      },
+      {
+        "name": "Tool-change notification support",
+        "status": "unavailable",
+        "source": "Trend MCP observation",
+        "reason_code": "STATELESS_FIXTURE_USES_EXPLICIT_REFRESH",
+        "correlation_id": "da4787b9d52343d69f4c875e03b0ee44"
+      },
+      {
+        "name": "Vision One console verification",
+        "status": "unavailable",
+        "source": "operator verification",
+        "reason_code": "AWAITING_INDEPENDENT_CONSOLE_VERIFICATION",
+        "correlation_id": "17ebcddb07044cf0ac7c451538b8909e"
+      },
+      {
+        "name": "Restore fixture baseline",
+        "status": "passed",
+        "source": "Trend MCP observation",
+        "reason_code": "FIXTURE_RELEASED",
+        "correlation_id": "aed8d8893b364228a1733a56389e8147"
+      },
+      {
+        "name": "Synthetic bookings remain unchanged",
+        "status": "passed",
+        "source": "data integrity",
+        "reason_code": "BOOKING_STATE_CHECK",
+        "correlation_id": "4494303591d34f9c9813c7ca4a2c144d"
+      }
+    ],
+    "counts": {
+      "failed": 1,
+      "passed": 10,
+      "unavailable": 2
+    },
+    "fixture_restored": true,
+    "bookings_unchanged": true,
+    "paid_model_calls": 0
+  },
+  "reference_all_safe_checks": {
+    "passed": 10,
+    "unavailable": 2,
+    "bookings_unchanged": true,
+    "fresh_client_recovery": true
+  },
+  "travel_connectivity": {
+    "status": "blocked",
+    "catalog": "passed with reviewed full contract baseline",
+    "ordinary_signed_search": "blocked; existing compatibility issue remains",
+    "bookings_unchanged": true
+  },
+  "vision_one_manual_evidence": {
+    "new_tool_call": "allow",
+    "event_id": "01a164ab-f4c8-7c6e-b149-e6acb297bea5",
+    "request_id": "01a164ab-f4c8-7aa2-86d5-aa3d662199a0",
+    "timestamp": "2026-10-22T17:32:33.352814764Z",
+    "tool": "fixture_new_tool",
+    "identity": "dannytran-travel-local-test",
+    "inventory_population": "not observed when console checked",
+    "active_discovery": "missing platform-secret file error",
+    "vendor_per_tool_deny": "not verified; direct call executed",
+    "notification_delivery": "not tested; stateless explicit refresh"
+  },
+  "runtime": {
+    "running_app_containers": [
+      "boring-travel-tool-changes-test-worker-1",
+      "boring-travel-tool-changes-tool-change-fixture-1",
+      "boring-travel-tool-changes-reservations-1",
+      "boring-travel-tool-changes-customer-payments-1",
+      "boring-travel-tool-changes-travel-discovery-1",
+      "boring-travel-tool-changes-gateway-1",
+      "boring-travel-tool-changes-api-1",
+      "boring-travel-tool-changes-frontend-1",
+      "boring-travel-trend-test-worker-1",
+      "boring-travel-trend-api-1",
+      "boring-travel-trend-tool-change-fixture-1",
+      "boring-travel-trend-gateway-1",
+      "boring-travel-trend-reservations-1",
+      "boring-travel-trend-customer-payments-1",
+      "boring-travel-trend-travel-discovery-1",
+      "boring-travel-trend-frontend-1",
+      "boring-travel-trend-nginx-1",
+      "boring-travel-trend-trend-mcp-bridge-1",
+      "boring-travel-trend-tool-change-bridge-1",
+      "boring-travel-trend-db-1",
+      "boring-travel-trend-trend-gateway-link-1",
+      "boring-travel-tool-changes-nginx-1",
+      "boring-travel-tool-changes-db-1"
+    ],
+    "kind_gateway_running": true,
+    "local_monitor_url": "http://localhost:8085/monitor",
+    "trend_monitor_url": "http://localhost:8082/monitor",
+    "original_8080_and_8081_not_started": true,
+    "fixture_baseline_restored": true,
+    "private_configs_and_existing_volumes_preserved": true
+  },
+  "aws_operations": false,
+  "paid_model_calls": 0,
+  "shared_tenant_policies_changed": false
+}

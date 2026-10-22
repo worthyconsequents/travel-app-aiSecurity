@@ -1,0 +1,202 @@
+{
+  "search_hotels": {
+    "name": "search_hotels",
+    "description": "",
+    "inputSchema": {
+      "properties": {
+        "destination": {
+          "default": "",
+          "title": "Destination",
+          "type": "string"
+        },
+        "gateway_capability": {
+          "default": "",
+          "title": "Gateway Capability",
+          "type": "string"
+        }
+      },
+      "title": "search_hotelsArguments",
+      "type": "object"
+    }
+  },
+  "get_hotel_details": {
+    "name": "get_hotel_details",
+    "description": "",
+    "inputSchema": {
+      "properties": {
+        "hotel_id": {
+          "title": "Hotel Id",
+          "type": "string"
+        },
+        "gateway_capability": {
+          "default": "",
+          "title": "Gateway Capability",
+          "type": "string"
+        }
+      },
+      "required": [
+        "hotel_id"
+      ],
+      "title": "get_hotel_detailsArguments",
+      "type": "object"
+    }
+  },
+  "search_flights": {
+    "name": "search_flights",
+    "description": "",
+    "inputSchema": {
+      "properties": {
+        "destination": {
+          "default": "Lisbon",
+          "title": "Destination",
+          "type": "string"
+        },
+        "gateway_capability": {
+          "default": "",
+          "title": "Gateway Capability",
+          "type": "string"
+        }
+      },
+      "title": "search_flightsArguments",
+      "type": "object"
+    }
+  },
+  "get_my_bookings": {
+    "name": "get_my_bookings",
+    "description": "",
+    "inputSchema": {
+      "properties": {
+        "booking_id": {
+          "default": "",
+          "title": "Booking Id",
+          "type": "string"
+        },
+        "gateway_capability": {
+          "default": "",
+          "title": "Gateway Capability",
+          "type": "string"
+        }
+      },
+      "title": "get_my_bookingsArguments",
+      "type": "object"
+    }
+  },
+  "create_reservation": {
+    "name": "create_reservation",
+    "description": "",
+    "inputSchema": {
+      "properties": {
+        "quote_id": {
+          "title": "Quote Id",
+          "type": "string"
+        },
+        "gateway_capability": {
+          "default": "",
+          "title": "Gateway Capability",
+          "type": "string"
+        }
+      },
+      "required": [
+        "quote_id"
+      ],
+      "title": "create_reservationArguments",
+      "type": "object"
+    }
+  },
+  "cancel_reservation": {
+    "name": "cancel_reservation",
+    "description": "",
+    "inputSchema": {
+      "properties": {
+        "booking_id": {
+          "title": "Booking Id",
+          "type": "string"
+        },
+        "gateway_capability": {
+          "default": "",
+          "title": "Gateway Capability",
+          "type": "string"
+        }
+      },
+      "required": [
+        "booking_id"
+      ],
+      "title": "cancel_reservationArguments",
+      "type": "object"
+    }
+  },
+  "get_customer_profile": {
+    "name": "get_customer_profile",
+    "description": "",
+    "inputSchema": {
+      "properties": {
+        "gateway_capability": {
+          "default": "",
+          "title": "Gateway Capability",
+          "type": "string"
+        }
+      },
+      "title": "get_customer_profileArguments",
+      "type": "object"
+    }
+  },
+  "list_customer_records": {
+    "name": "list_customer_records",
+    "description": "",
+    "inputSchema": {
+      "properties": {
+        "gateway_capability": {
+          "default": "",
+          "title": "Gateway Capability",
+          "type": "string"
+        }
+      },
+      "title": "list_customer_recordsArguments",
+      "type": "object"
+    }
+  },
+  "process_mock_payment": {
+    "name": "process_mock_payment",
+    "description": "",
+    "inputSchema": {
+      "properties": {
+        "booking_id": {
+          "title": "Booking Id",
+          "type": "string"
+        },
+        "gateway_capability": {
+          "default": "",
+          "title": "Gateway Capability",
+          "type": "string"
+        }
+      },
+      "required": [
+        "booking_id"
+      ],
+      "title": "process_mock_paymentArguments",
+      "type": "object"
+    }
+  },
+  "issue_mock_refund": {
+    "name": "issue_mock_refund",
+    "description": "",
+    "inputSchema": {
+      "properties": {
+        "booking_id": {
+          "title": "Booking Id",
+          "type": "string"
+        },
+        "gateway_capability": {
+          "default": "",
+          "title": "Gateway Capability",
+          "type": "string"
+        }
+      },
+      "required": [
+        "booking_id"
+      ],
+      "title": "issue_mock_refundArguments",
+      "type": "object"
+    }
+  }
+}

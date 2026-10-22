@@ -35,19 +35,13 @@ def trend(monkeypatch, tmp_path):
 
 
 def catalog():
+    from pathlib import Path
+
+    from mcp.types import Tool
+
+    approved = json.loads(Path("services/approved_trend_catalog.json").read_text())
     return [
-        SimpleNamespace(
-            name="dannytran-discovery__" + name,
-            description="Untrusted description",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "gateway_capability": {"type": "string"},
-                    "destination": {"type": "string", "default": ""},
-                },
-                "required": ["gateway_capability"],
-            },
-        )
+        Tool(**(approved[name] | {"name": "dannytran-discovery__" + name}))
         for name in ("search_hotels", "get_hotel_details", "search_flights")
     ]
 
@@ -98,7 +92,7 @@ def test_catalog_maps_exact_names_and_hides_capability(trend):
     assert {t["name"] for t in result} == {"search_hotels", "get_hotel_details", "search_flights"}
     assert all(t["description"] == t["name"] for t in result)
     assert all("gateway_capability" not in t["inputSchema"]["properties"] for t in result)
-    assert all("gateway_capability" not in t["inputSchema"]["required"] for t in result)
+    assert all("gateway_capability" not in t["inputSchema"].get("required", []) for t in result)
 
 
 def test_missing_duplicate_or_changed_contract_fails_closed(trend):

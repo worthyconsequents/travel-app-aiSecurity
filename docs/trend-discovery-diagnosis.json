@@ -1,0 +1,83 @@
+{
+  "checked_at_utc": "2026-10-22T18:00:56Z",
+  "scope": "Read-only local gateway/registry diagnostics and authenticated Vision One console inspection. No policy, credential, deployment or application code changes.",
+  "gateway": {
+    "version": "v0.1.159",
+    "commit": "abca741",
+    "modules": [
+      "mcp-proxy",
+      "policy"
+    ],
+    "readyz_http": 200,
+    "active_console_instance_matches_activity": true,
+    "official_public_chart_current_version": "0.1.159",
+    "upgrade_performed": false
+  },
+  "runtime_discovery": {
+    "timestamp_utc": "2026-10-22T17:54:06Z",
+    "tools_returned": 11,
+    "travel_tools": 10,
+    "fixture_baseline_tools": 1,
+    "model_calls": 0
+  },
+  "activity_delivery_snapshot": {
+    "timestamp_utc": "2026-10-22T17:56:54Z",
+    "events_shipped": 75,
+    "events_buffered": 0,
+    "events_dropped": 0,
+    "event_ship_failures": 0,
+    "catalog_sync_failures_observed": 0,
+    "tools_list_counter": 204,
+    "note": "Counters belong to the current process; not a lifetime total. Per-upstream list work can exceed client list requests."
+  },
+  "fresh_cloud_catalog_event": {
+    "timestamp_utc": "2026-10-22T17:54:06.654062043Z",
+    "event_id": "01a164bf-b0be-70f2-8837-e12e32188f71",
+    "request_id": "01a164bf-b0bd-7ea7-b974-a29ae6270a92",
+    "method": "tools/list",
+    "outcome": "allow",
+    "displayed_tool_definitions": false,
+    "displayed_tool_names": false,
+    "local_activity_resource_field": null,
+    "note": "The displayed activity record is not proof of the contents or absence of a separate inventory-reporting channel."
+  },
+  "console_inventory": {
+    "provider_filter": "All",
+    "model_filter": "All",
+    "alias_filter": "All",
+    "display": "No tools observed yet",
+    "still_empty": true
+  },
+  "active_discovery": {
+    "upstream": "dannytran-tool-changes",
+    "error_status": 502,
+    "stage": "credential file resolution",
+    "requested_file": "/etc/secrets/gateway/dannytran-tool-change",
+    "console_error": "no such file or directory",
+    "same_file_present_and_nonempty_in_local_gateway": true,
+    "other_verified_aliases": [
+      "dannytran-tool-changes",
+      "dannytran-travel-test-discovery"
+    ],
+    "associated_tools": 0
+  },
+  "conclusions": {
+    "ruled_out": [
+      "MCP server has no tools",
+      "Traffic bypasses Trend for the verified probe",
+      "General gateway enrollment/event-delivery outage",
+      "Non-All inventory filters",
+      "Local absence of the exact credential filename",
+      "An available newer public chart identified by Helm resolution"
+    ],
+    "confirmed_failure": "Console active discovery cannot resolve its credential file, so that import workflow never receives candidate tools.",
+    "likely_inventory_failure_area": "Missing/incompatible MCP inventory reporting, cloud inventory ingestion, or preview-feature behavior; successful activity events alone do not populate inventory.",
+    "likely_active_discovery_failure_area": "Discovery executor/secret context differs from the verified local gateway, or uses another stale/different context; execution location was not established.",
+    "exact_vendor_root_cause_confirmed": false,
+    "model_routing_rule_requirement_established": false
+  },
+  "temporary_diagnostic_port_forward": "127.0.0.1:19090 closed after inspection",
+  "aws_operations": false,
+  "paid_model_calls": 0,
+  "official_documentation": "https://docs.trendmicro.com/en-us/documentation/article/trend-vision-one-AIG-resources"
+}

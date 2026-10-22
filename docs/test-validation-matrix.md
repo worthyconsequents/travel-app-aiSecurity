@@ -6,17 +6,21 @@ resources. The [agent handoff](AGENT_HANDOFF.md) supplies architecture/context.
 
 ## Latest result and exact unit inventory
 
-The latest complete local run passed **197 unit cases** (170 prior cases plus 27 test-launcher cases), plus Ruff,
-CloudFormation schema/security checks and local image/configuration checks described
-below. One existing TestClient/httpx deprecation warning remained. Machine-readable
-summary: [aws-fleet-offline-verification.json](aws-fleet-offline-verification.json).
+The latest complete local run passed **217 unit cases** (197 prior cases plus 20
+catalog/fixture cases), Ruff and the production frontend/TypeScript build. One
+existing TestClient/httpx deprecation warning remains. Current local/live results:
+[tool-changes-verification.json](tool-changes-verification.json). Earlier fleet
+CloudFormation/schema/security results remain dated separately in
+[aws-fleet-offline-verification.json](aws-fleet-offline-verification.json); they
+were not rerun or deployed for this local MCP change.
 
-[unit-test-cases.txt](testing/unit-test-cases.txt) lists all 197 collected pytest
+[unit-test-cases.txt](testing/unit-test-cases.txt) lists all 217 collected pytest
 node IDs, including parameter variations. It is a discovery snapshot, not a test
 execution log. The source tests and a new run are authoritative after code changes.
 
 | Suite | Cases | Assertions covered |
 |---|---:|---|
+| `tests/unit/test_tool_changes.py` | 20 | Full contract fingerprints and empty-description normalization, additions/removals/schema/description/collision/behavior changes, lease ownership and expiry, separate control/MCP auth, current-schema validation, no cloud/disabled fixture, opt-in suite, future unmapped tool visibility, failure redaction and restoration |
 | `tests/unit/test_test_runner.py` | 27 | Operator auth, strict suite schema, action/origin checks, no cloud/paid execution, worker readiness/profile, idempotency, database concurrency, claim ownership, expiry/partial-result fencing, copy isolation, error redaction, source attribution, grouped transport failure and legacy endpoint bypass prevention |
 | `tests/unit/test_trend_transport.py` | 14 | Explicit local activation, confined URLs, file-based Bearer auth, exact complete mappings, hidden signed capability, duplicate/schema rejection and no direct fallback |
 | `tests/unit/test_aws_fleet.py` | 26 | Configuration, isolation, IAM/key references, deployment lifecycle and cloud runtime guards; detailed below |
@@ -211,9 +215,25 @@ See [test-launcher-verification.json](test-launcher-verification.json),
 | HTTP retry | Same request key returns same durable job |
 | Concurrent launches and claims | Unit tests verify one scope lock and one claimant; PostgreSQL end-to-end normal runs also exercised |
 | Frontend build and TypeScript | Passed inside Docker production build |
-| Live Trend launcher | Not run; gateway stopped; prior compatibility issue remains |
+| Live Trend launcher | Tool changes: 10 passed, 1 access failure, 2 unavailable; reviewed travel catalog passed, ordinary signed search remains blocked |
 | AWS worker, DNS, TLS and cloud authorization | Deferred; cloud execution disabled |
 
 Local runtime teardown is recorded separately. A preliminary STS check failed due
 to expired credentials; the user then clarified local teardown only. No successful
 AWS audit or AWS deletion occurred in this session.
+
+## Dynamic MCP tool changes — 2026-10-22
+
+See [the tool-change report](tool-changes.md) and the two new diagrams embedded in
+the root README. The opt-in local monitoring suite has 13 cases. Complete unit suite:
+217 passed. Local fixture run: 10 passed/3 unavailable. Live Trend run: 10 passed,
+1 failed, 2 unavailable. Discovery refresh worked; the app rejected a new tool;
+a direct gateway call executed it and Vision One recorded Allow. Inventory still
+appeared empty when checked, and console discovery retained a missing-secret error.
+Do not claim vendor least-privilege enforcement or notification support.
+Travel contracts now use a reviewed full-metadata/schema baseline; no network
+observation auto-approves tools. Fixture state restored, bookings unchanged.
+This work used local Docker/kind and the existing Trend subscription; no AWS or
+paid models. Current runtime state is recorded in the tool-change verification
+JSON; the earlier local-cleanup snapshot is historical. Changes stay on
+working-edition, without an automatic commit, push, merge or cloud rollout.
