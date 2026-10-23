@@ -17,4 +17,9 @@ def require_runtime_configuration():
         mode = os.getenv("MODEL_MODE", "mock")
         if mode == "agentcore" and os.getenv("ENABLE_PAID_INFERENCE") == "true":
             return
+    if os.getenv("MODEL_MODE") == "bedrock":
+        from services.bedrock_chat import require_bedrock_chat
+
+        require_bedrock_chat()
+        return
     require_mock()

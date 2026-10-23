@@ -25,11 +25,21 @@ def scope():
     return os.getenv("TEST_DEPLOYMENT_ID", deployment_profile())
 
 
+def bedrock_chat_enabled():
+    from services.bedrock_chat import require_bedrock_chat
+
+    try:
+        require_bedrock_chat()
+        return True
+    except RuntimeError:
+        return False
+
+
 def cloud_configured():
     return (
         os.getenv("APP_MODE") == "aws-demo"
         and os.getenv("ENABLE_AWS_TREND_GATEWAY") == "true"
-        and os.getenv("MODEL_MODE", "mock") == "mock"
+        and (os.getenv("MODEL_MODE", "mock") == "mock" or bedrock_chat_enabled())
         and os.getenv("TEST_RUNNER_ENABLED") == "true"
         and os.getenv("TEST_RUNNER_BACKEND") == "kubernetes-cronjob"
         and deployment_profile() == "trend-gateway"

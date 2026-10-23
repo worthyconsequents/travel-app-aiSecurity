@@ -5,6 +5,16 @@ Snapshot: 2026-10-22. Read this with the repository's root `AGENTS.md` and the
 state, not authorization to deploy, spend money, delete resources or publish changes.
 Current user instructions determine the authorized work.
 
+## New Bedrock option and agent instructions
+
+The operator requested an optional automated AWS Bedrock integration and a guide
+for other LLMs. Start with [LLM_GUIDE.md](LLM_GUIDE.md) and
+[the Bedrock runbook](bedrock-deployment-option.md). New adapter/chat/deployment
+code is implemented and offline-tested, **not deployed or invoked with real models**.
+Offline suite: 287 passed; lint, cfn-lint and three project Guard rules pass.
+Preserve the live mock environment and its original evidence. The user has now requested publication of this subsequent work to `working-edition`;
+verify the remote commit. The prior build was pushed as `32e1c83`.
+
 ## Latest user direction and resume point
 
 The user reviewed documentation/diagrams and subsequently authorized publishing

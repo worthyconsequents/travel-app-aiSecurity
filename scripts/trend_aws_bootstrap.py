@@ -130,10 +130,17 @@ def sync(c, profile=None):
             Name=fixture_name, SecretString=json.dumps(fixture), Tags=secret_tags(c)
         )
     apply_secret(c, "discovery-fixture", fixture | {"upstream-key": values["MCP_SERVICE_KEY"]})
+    bedrock_alias = {}
+    provider_name = c.name + "-bedrock-provider"
+    if owned_secret_exists(client, c, provider_name):
+        bedrock_alias[c.name + "-bedrock"] = client.get_secret_value(SecretId=provider_name)[
+            "SecretString"
+        ]
     apply_secret(
         c,
         "gateway-upstream-credentials",
         {
+            **bedrock_alias,
             "mcp-boring-travel": values["MCP_SERVICE_KEY"],
             "mock-boring-travel": fixture["model-key"],
             c.name + "-mock": fixture["model-key"],

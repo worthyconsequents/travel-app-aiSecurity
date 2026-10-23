@@ -3,7 +3,18 @@
 Updated October 23, 2026. Context and evidence do not grant new deployment,
 spending, deletion or publication authority. Follow current user instructions.
 
-## Latest user request and review boundary
+## Latest Bedrock continuation
+
+The prior reviewed build was pushed as `32e1c83`. The user then authorized building
+the Bedrock option and a guide for other LLMs. That option is implemented locally
+with offline tests; no AWS resource mutation, image publishing, live Bedrock call
+or runtime switch was performed during this build. Offline checks passed: 287 unit tests, ruff, local cfn-lint and three repository
+Guard rules. Read [LLM guide](LLM_GUIDE.md)
+and [Bedrock runbook](bedrock-deployment-option.md). The user subsequently authorized committing/pushing the Bedrock option and LLM
+guide to `working-edition` on October 23. Verify the remote commit after publication.
+Paid activation remains an explicit deployment step.
+
+## Earlier documentation publication request
 
 Document encountered issues/fixes and explain discovery/model routing with diagrams.
 The user subsequently approved committing/pushing the current build on October 23.

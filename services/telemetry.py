@@ -4,7 +4,16 @@ from services.db import Activity, Session, uid
 
 
 def emit(correlation_id, stage, human, agent, tool="", audit_id="", details=None):
-    permitted = {"decision", "reason_code", "outcome", "profile", "model", "call_count"}
+    permitted = {
+        "decision",
+        "reason_code",
+        "outcome",
+        "profile",
+        "model",
+        "call_count",
+        "input_tokens",
+        "output_tokens",
+    }
     safe = {k: v for k, v in (details or {}).items() if k in permitted}
     with Session.begin() as db:
         db.add(

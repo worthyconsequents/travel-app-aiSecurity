@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-23",
+  "scope": "local implementation and offline validation",
+  "unit_tests_passed": 287,
+  "bedrock_cases_passed": 30,
+  "ruff": "passed",
+  "cfn_lint": "passed",
+  "cfn_guard": {
+    "status": "passed",
+    "rules": 3,
+    "scope": "repository-specific add-on constraints"
+  },
+  "offline_plan": "passed",
+  "aws_mutations": 0,
+  "live_model_calls": 0,
+  "deployed": false,
+  "vision_one_setup": "generated manual checklist; not applied",
+  "pending": [
+    "select eligible in-region Converse tool-use model",
+    "rebuild/publish updated Python image",
+    "review and deploy add-on",
+    "verify Pod Identity and model access",
+    "configure Vision One route/access/inspection",
+    "explicit paid activation and live acceptance"
+  ],
+  "known_existing_gap": "Direct Trend new-tool denial failed in prior mock dynamic test; app denial passed",
+  "offline_render": "passed",
+  "guard_negative_control": "wildcard model permission rejected"
+}

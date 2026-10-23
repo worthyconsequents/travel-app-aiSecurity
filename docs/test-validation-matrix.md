@@ -344,3 +344,28 @@ Current status and all recorded issue/fix findings are consolidated in the
 MCP-versus-LLM request paths, keys, evidence limits and editable diagrams. Readiness
 and HTTPS were rechecked without resource changes; all 11 deployments ready.
 Documentation remains local pending user review before GitHub publication.
+
+
+### Bedrock deployment option — local implementation, October 23, 2026
+
+Full offline suite: **287 passed**, including **30 cases** in
+`tests/unit/test_bedrock.py`. Ruff passed. New code has not been deployed, images
+have not been published, and no live AWS API/model calls were made for this build.
+Existing AWS core/mock results retain their original scope.
+
+| Validation group | Coverage |
+|---|---|
+| Converse protocol | Botocore Stubber verifies exact request shape, maxTokens, tool specs and numeric usage; no live model |
+| Provider boundary | Missing/wrong auth, disabled inference, streaming, mutations and changed schemas rejected before SDK call; validation/provider errors redact input/details |
+| Tool protocol | Tool-use/result IDs correlate; forged IDs, unknown names and spoofed arguments rejected |
+| Model loop | HTTP mock verifies Trend LLM endpoint/virtual key, business authorization call, safe tool-result projection and usage accumulation |
+| Bounds | Attempted-call hourly gate, bounded model rounds/tools, per-chat deadline and concurrency limits; process limits are not durable cost caps |
+| Deployment | Exact model ARN and InvokeModel action, adapter-only Pod Identity, generated retained key, disabled/private pod defaults and immutable image validation |
+| Credential/network isolation | Prepare merges existing MCP/mock credential aliases and excludes adapter from additive namespace-wide allow; later base sync retains Bedrock key |
+| Activation/rollback | Missing opt-ins rejected before AWS; API switches only after adapter prepared; rollback restores prior template and refuses external drift after disabling provider |
+| Change-set resume | Only the recorded stack/model/change-set ledger resumes; no duplicate change-set created |
+| CloudFormation | Local cfn-lint pass; three repository-specific Guard rules pass. AWS service validation and actual IAM/Pod Identity behavior pending live deployment |
+
+Run `make bedrock-plan` for a no-AWS preview; use the
+[Bedrock runbook](bedrock-deployment-option.md) for render/apply/checkpoint/activation.
+[LLM guide](LLM_GUIDE.md) explains context and evidence boundaries.

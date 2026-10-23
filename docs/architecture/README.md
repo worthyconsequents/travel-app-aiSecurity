@@ -4,6 +4,7 @@ The diagrams describe repository code and recorded evidence as of 23 October 202
 
 | Diagram | Scope | Preview | Editable files |
 | --- | --- | --- | --- |
+| AWS Bedrock option | Implemented locally, offline-tested; no live inference or deployment | [GitHub Mermaid](12-aws-bedrock-option.mmd) | [Mermaid source](12-aws-bedrock-option.mmd) |
 | AWS tool discovery and model linking | Implemented AWS mock route and execution; inventory/ACL limits labeled | [PNG](10-aws-discovery-mechanism.png) | [SVG](10-aws-discovery-mechanism.svg), [Model linking](10-aws-discovery-model-linking.mmd), [Sequence](11-aws-discovery-sequence.mmd) |
 | Non-AgentCore local deployment | Implemented local Compose app on port 8080; reference authorization gateway | [PNG](01-non-agentcore-local.png) | [SVG](01-non-agentcore-local.svg), [Mermaid](01-non-agentcore-local.mmd) |
 | AgentCore target design | Intended full AWS architecture; not deployed | [PNG](02-agentcore-target-design.png) | [SVG](02-agentcore-target-design.svg), [Mermaid](02-agentcore-target-design.mmd) |

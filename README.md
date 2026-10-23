@@ -2,7 +2,8 @@
 
 A travel website with local and AWS deployment options, destination photography, a scripted travel assistant, protected MCP tools, and a separate password-locked operations dashboard. All travelers, hotels, bookings, payments and attack fixtures are synthetic. The build makes no paid model calls and does not deploy AWS resources automatically.
 
-For development or agent continuation, start with [AGENTS.md](AGENTS.md) and the
+For development or agent continuation, read the [LLM interpretation guide](docs/LLM_GUIDE.md),
+[AGENTS.md](AGENTS.md), and the
 [agent handoff](docs/AGENT_HANDOFF.md). The [test and validation inventory](docs/test-validation-matrix.md)
 lists completed checks, exact unit cases, evidence limits and pending AWS acceptance tests.
 
@@ -21,7 +22,7 @@ provider is an inert fixture.
 
 [Issues, fixes and remaining checks](docs/aws-deployment-issues.md) ·
 [How discovery and model linking work](docs/aws-discovery-explained.md) ·
-[Proposed Bedrock automation option](docs/bedrock-deployment-option.md)
+[Bedrock deployment option and runbook](docs/bedrock-deployment-option.md)
 
 ### Discovery mechanism
 
@@ -35,6 +36,38 @@ tool permissions. The AWS runtime has no dependency on local application service
 [Editable SVG](docs/architecture/10-aws-discovery-mechanism.svg) ·
 [Model-linking Mermaid](docs/architecture/10-aws-discovery-model-linking.mmd) ·
 [Full sequence Mermaid](docs/architecture/11-aws-discovery-sequence.mmd)
+
+## Optional AWS Bedrock chat
+
+The real-model option is **implemented locally and offline-tested, not deployed**.
+It adds a private OpenAI-shaped adapter behind Trend that invokes one selected
+in-region Bedrock model using an EKS Pod Identity role. The API runs a bounded,
+read-only tool loop; mock worker/fixture behavior and the working mock route remain
+separate. Deployment defaults to disabled inference. Existing AWS mock results do
+not establish real-model behavior or Bedrock acceptance.
+
+```mermaid
+flowchart LR
+    U[Signed-in browser] --> A[API: bounded read-only agent loop]
+    A -->|Virtual key and tools definitions| T[Private Trend LLM proxy]
+    T -->|Exact alias route and provider credential| P[Private Bedrock adapter]
+    P -->|Pod Identity role: one model| B[AWS Bedrock Converse]
+    B -->|Tool selection or text| P
+    P --> T
+    T --> A
+    A -->|Validate model-selected arguments| G[Business authorization gateway]
+    G -->|Short signed-grant reference| M[Trend MCP proxy]
+    M --> S[Existing business MCP tools]
+    S --> D[(Private PostgreSQL)]
+    V[Vision One configuration and inspection] -. policies .-> T
+    T -. observations and events .-> V
+    W[Existing bounded test worker: mock mode] --> G
+```
+
+`make bedrock-plan` performs an offline preview. The
+[Bedrock runbook](docs/bedrock-deployment-option.md) covers rendering, change-set
+review, preparation, generated one-time Vision One setup, explicit paid activation
+and guarded rollback. [LLM guide](docs/LLM_GUIDE.md) explains how to read this repo.
 
 ## Architecture diagrams
 
@@ -262,7 +295,7 @@ make lint smoke chat-test monitor-test scenarios
 make agentcore-chat-test agentcore-monitor-test
 ```
 
-`make test` and `make agentcore-test` also run the broader synthetic booking lifecycle tests, which create and cancel test reservations. The focused chat and monitoring checks preserve existing bookings. The latest complete unit suite passes **257 cases**. Earlier local checks verified protected monitoring, all six reference-policy attack fixtures, chat regressions and offline AgentCore contracts. The separate Trend app currently fails normal-use smoke and full integration under active inspection; see [its exact results](docs/trend-local-test.md) and the [test inventory](docs/test-validation-matrix.md). See [monitoring verification](docs/monitoring-verification.json) and [attack vector map](docs/attack-vectors.md).
+`make test` and `make agentcore-test` also run the broader synthetic booking lifecycle tests, which create and cancel test reservations. The focused chat and monitoring checks preserve existing bookings. The latest complete unit suite passes **287 cases**. Earlier local checks verified protected monitoring, all six reference-policy attack fixtures, chat regressions and offline AgentCore contracts. The separate Trend app currently fails normal-use smoke and full integration under active inspection; see [its exact results](docs/trend-local-test.md) and the [test inventory](docs/test-validation-matrix.md). See [monitoring verification](docs/monitoring-verification.json) and [attack vector map](docs/attack-vectors.md).
 
 `make down` and `make agentcore-down` stop their respective stacks while preserving data. `make seed` is idempotent. `make demo-reset` deletes the current stack’s synthetic database contents and reseeds them.
 
@@ -276,7 +309,7 @@ Synthetic persona selection and shared service credentials are not production cu
 
 ## Generic AWS deployment preparation
 
-AWS clients, Lambda interceptor packaging, CloudFormation foundation and gateway request templates are included. A separate [isolated AWS gateway test deployment](docs/aws-test-deployment.md) adds explicit account checks, private artifacts, a dedicated secret, live inspection, a synthetic read-only tool and bounded verification commands; it does not host the full application. The test environment has been torn down; its deployment and guarded cleanup commands remain available. The historical staging implementation passed 130 offline unit tests; the current complete suite passes 257. `make agentcore-plan` validates request shapes offline; `make agentcore-package` builds a local Lambda ZIP.
+AWS clients, Lambda interceptor packaging, CloudFormation foundation and gateway request templates are included. A separate [isolated AWS gateway test deployment](docs/aws-test-deployment.md) adds explicit account checks, private artifacts, a dedicated secret, live inspection, a synthetic read-only tool and bounded verification commands; it does not host the full application. The test environment has been torn down; its deployment and guarded cleanup commands remain available. The historical staging implementation passed 130 offline unit tests; the current complete suite passes 287. `make agentcore-plan` validates request shapes offline; `make agentcore-package` builds a local Lambda ZIP.
 
 `make monitor-secret-plan` previews Secrets Manager setup without contacting AWS. To create the monitoring secret, a deployer authenticates separately using their normal AWS workflow and explicitly runs `scripts/deploy_monitor_secret.py --apply` with the project’s Python dependencies installed. The script uses the SDK credential chain; it embeds no account, login flow or access key. It reads the password from private `.env`, creates a new secret, records its ARN, and emits runtime configuration plus a narrowly scoped read policy. See the [AWS secret deployment instructions](docs/monitoring.md#generic-aws-secret-deployment).
 

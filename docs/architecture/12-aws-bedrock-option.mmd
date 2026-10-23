@@ -1,0 +1,15 @@
+flowchart LR
+    U[Signed-in browser] --> A[API: bounded read-only agent loop]
+    A -->|Virtual key and tools definitions| T[Private Trend LLM proxy]
+    T -->|Exact alias route and provider credential| P[Private Bedrock adapter]
+    P -->|Pod Identity role: one model| B[AWS Bedrock Converse]
+    B -->|Tool selection or text| P
+    P --> T
+    T --> A
+    A -->|Validate model-selected arguments| G[Business authorization gateway]
+    G -->|Short signed-grant reference| M[Trend MCP proxy]
+    M --> S[Existing business MCP tools]
+    S --> D[(Private PostgreSQL)]
+    V[Vision One configuration and inspection] -. policies .-> T
+    T -. observations and events .-> V
+    W[Existing bounded test worker: mock mode] --> G

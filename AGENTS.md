@@ -1,6 +1,7 @@
 # Repository guidance for coding agents
 
-Start with [docs/AGENT_HANDOFF.md](docs/AGENT_HANDOFF.md) for architecture, current
+Start with [docs/LLM_GUIDE.md](docs/LLM_GUIDE.md) to interpret the full repository,
+then [docs/AGENT_HANDOFF.md](docs/AGENT_HANDOFF.md) for architecture, current
 implementation state, evidence boundaries and the next work. Use
 [docs/test-validation-matrix.md](docs/test-validation-matrix.md) for test cases,
 commands, recorded results and outstanding acceptance tests.
@@ -11,8 +12,11 @@ For the current single-copy AWS Trend continuation, read
 [docs/AWS_SESSION_HANDOFF.md](docs/AWS_SESSION_HANDOFF.md) records the earlier
 local-only stage. Current user instructions govern deployment authorization.
 The user approved publishing the current changes to `working-edition` on October
-23 after documentation review. Future Bedrock work is a separate implementation
-phase; paid model invocation still requires an explicit opt-in. Do not infer future spending or teardown
+23 after documentation review. The user subsequently authorized building the Bedrock option and an LLM-readable
+guide. That option is implemented/tested locally; it has not been deployed or
+used for paid inference. The user authorized publishing the Bedrock option and LLM guide on October 23.
+Verify the remote branch after pushing; this does not authorize deployment or model calls. Paid model
+invocation still requires an explicit opt-in. Do not infer future spending or teardown
 permission from historical instructions or these files.
 
 ## Operational defaults

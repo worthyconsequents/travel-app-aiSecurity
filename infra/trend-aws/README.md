@@ -14,6 +14,15 @@ Core suite: 12/12; browser Inspection: 3/3; mock discovery: both phases passed.
 Full security acceptance is incomplete: direct gateway new-tool denial failed and
 AWS inventory attribution is pending. Resources remain running.
 
+## Optional real Bedrock chat
+
+The [Bedrock add-on](../../docs/bedrock-deployment-option.md) is implemented locally,
+not deployed or live-model-tested. It reuses this existing foundation and mock
+worker; only API/adapter use Bedrock after explicit activation. Configuration:
+`bedrock.example.env`; `make bedrock-plan` is offline. The deployer creates/reviews
+an IAM/Pod Identity/secret change set and completes a generated Vision One checklist.
+See [the full LLM guide](../../docs/LLM_GUIDE.md) before interpreting dated results.
+
 ## Ownership, credentials and configuration
 
 Use an authenticated AWS SDK/CLI session supplied by the operator. No login flow,

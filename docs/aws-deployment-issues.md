@@ -7,6 +7,14 @@ the separate AgentCore staging experiment/fleet retains its own historical repor
 The operator subsequently approved publishing the reviewed build to the
 `working-edition` branch on October 23. Paid inference remains disabled.
 
+## Subsequent Bedrock option build
+
+A private IAM-backed Bedrock adapter, bounded read-only chat loop, guarded add-on
+deployment commands and [LLM guide](LLM_GUIDE.md) have been implemented locally.
+They have not been deployed, exercised with a real model or used to change the
+running AWS mock environment. [Runbook and scope](bedrock-deployment-option.md).
+The historical/current AWS test records below still describe the mock deployment.
+
 ## Current verification
 
 | Area | Result | Evidence / limit |

@@ -82,3 +82,14 @@ tool-changes-down:
 	$(TOOL_CHANGES) down
 tool-changes-test:
 	.venv/bin/python -m scripts.tool_changes_smoke
+
+# Offline Bedrock preparation; no model invocation or AWS mutation.
+BEDROCK_ENV ?= infra/trend-aws/bedrock.example.env
+BEDROCK_IMAGES ?= build/trend-aws/images.json
+.PHONY: bedrock-plan bedrock-render bedrock-test
+bedrock-plan:
+	.venv/bin/python -m scripts.trend_bedrock plan --env-file $(BEDROCK_ENV)
+bedrock-render:
+	.venv/bin/python -m scripts.trend_bedrock render --env-file $(BEDROCK_ENV) --images-file $(BEDROCK_IMAGES)
+bedrock-test:
+	.venv/bin/python -m pytest -q tests/unit/test_bedrock.py

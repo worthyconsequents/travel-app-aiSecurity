@@ -1,0 +1,23 @@
+# Repository-specific add-on rules; not a complete managed compliance framework.
+let keys = Resources.*[ Type == 'AWS::SecretsManager::Secret' ]
+let roles = Resources.*[ Type == 'AWS::IAM::Role' ]
+let associations = Resources.*[ Type == 'AWS::EKS::PodIdentityAssociation' ]
+rule generated_retained_provider_key when %keys !empty {
+    %keys {
+        DeletionPolicy == 'Retain'
+        UpdateReplacePolicy == 'Retain'
+        Properties.GenerateSecretString exists
+        Properties.SecretString !exists
+    }
+}
+rule adapter_has_only_nonstreaming_model_permission when %roles !empty {
+    %roles.Properties.Policies[*].PolicyDocument.Statement[*] {
+        Action == ['bedrock:InvokeModel']
+        Resource[*] != '*'
+        Effect == 'Allow'
+    }
+}
+rule adapter_service_account_only when %associations !empty {
+    %associations.Properties.ServiceAccount == 'bedrock-adapter'
+    %associations.Properties.DisableSessionTags !exists
+}
