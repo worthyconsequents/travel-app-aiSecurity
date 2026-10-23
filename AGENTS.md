@@ -19,6 +19,18 @@ Verify the remote branch after pushing; this does not authorize deployment or mo
 invocation still requires an explicit opt-in. Do not infer future spending or teardown
 permission from historical instructions or these files.
 
+## Latest consolidation context
+
+The original AWS Trend test deployment was torn down after local encrypted recovery
+capture; see `docs/aws-teardown-status.md`. The separate supplied working-directory
+export reports another deployment's live Bedrock result; it was not independently
+verified here. See `docs/deployment-consolidation.md` before interpreting historical
+running-state claims. The operator authorized consolidating the public source changes
+and committing on `working-edition`; private export files must not be imported.
+The reviewed exception prefix `boring-travel-bedrock-dtran` supports that other copy;
+defaults remain `dannytran-`. Keep EKS administration restricted even for an explicitly
+public website. No new deployment or paid model call follows from this consolidation.
+
 ## Operational defaults
 
 - Preserve both local implementations: original Compose on port 8080 and the

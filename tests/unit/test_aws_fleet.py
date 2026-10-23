@@ -197,12 +197,14 @@ def test_package_excludes_private_inputs(tmp_path):
     (root / "services/ok.py").write_text("# allowed")
     (root / "frontend/.env.local").write_text("SECRET=private")
     (root / "services/key.pem").write_text("private")
+    (root / "frontend/extra-ca.crt").write_text("local trust input")
     (root / "services/linked.py").symlink_to(root / "frontend/.env.local")
     image_context(root, target)
     assert (target / "services/ok.py").exists()
     assert not (target / "frontend/.env.local").exists()
     assert not (target / "services/linked.py").exists()
     assert not (target / "services/key.pem").exists()
+    assert not (target / "frontend/extra-ca.crt").exists()
 
 
 def fake_fleet(config):

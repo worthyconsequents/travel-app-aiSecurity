@@ -10,9 +10,10 @@ def foundation(c):
         "ref": [{"at": "infra/trend-aws/README.md", "has": "scope, costs and acceptance gates"}],
         "must": [
             "Do not modify existing clusters, DNS applications or AgentCore deployments",
-            "All application AWS names start dannytran-boring-travel; one test copy only",
+            "Names use a reviewed boring-travel prefix; one test copy only",
         ],
     }
+    t["Metadata"]["BoringTravelPublicWeb"] = c.public_web
     r = t["Resources"]
     tags = [
         {"Key": "Project", "Value": "boring-travel"},
@@ -127,14 +128,15 @@ def foundation(c):
         "IngressSecurity",
         "EC2::SecurityGroup",
         {
-            "GroupDescription": "Operator HTTPS only",
+            "GroupDescription": "Authenticated website HTTPS",
             "VpcId": ref("Vpc"),
             "SecurityGroupIngress": [
-                {"IpProtocol": "tcp", "FromPort": 443, "ToPort": 443, "CidrIp": c.operator_cidr}
+                {"IpProtocol": "tcp", "FromPort": 443, "ToPort": 443, "CidrIp": c.web_cidr}
             ],
             "Tags": tags,
         },
-        "Only operator network may reach the authenticated ALB",
+        "Authenticated ALB; internet access requires DEPLOYMENT_PUBLIC_WEB=true; "
+        "EKS administration always keeps the separate narrow operator CIDR",
     )
     add(
         "DatabaseSecurity",

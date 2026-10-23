@@ -1,7 +1,8 @@
 """Explicit, deployment-bound activation of inert AWS discovery fixtures."""
 
 import os
-import re
+
+from services.deployment_names import valid_trend_namespace
 
 
 def cloud_enabled():
@@ -10,11 +11,7 @@ def cloud_enabled():
         and os.getenv("ENABLE_AWS_TREND_GATEWAY") == "true"
         and os.getenv("ENABLE_AWS_TREND_FIXTURE") == "true"
         and os.getenv("MODEL_MODE", "mock") == "mock"
-        and bool(
-            re.fullmatch(
-                r"dannytran-boring-travel[a-z0-9-]{1,40}", os.getenv("TREND_K8S_NAMESPACE", "")
-            )
-        )
+        and bool(valid_trend_namespace(os.getenv("TREND_K8S_NAMESPACE", "")))
     )
 
 

@@ -9,10 +9,14 @@ lists completed checks, exact unit cases, evidence limits and pending AWS accept
 
 ## Current AWS deployment status — October 23, 2026
 
-The hosted application is running: all 11 deployments were ready at the latest
-check, HTTPS/Cognito works, core AWS checks passed 12/12, and the browser-launched
-Inspection job passed 3/3. The corrected mock discovery route passed baseline and
-added-tool phases with provider/backend receipts and no paid model calls.
+**The hosted application is offline.** The user authorized AWS teardown after
+local encrypted recovery capture. Load balancer, application DNS and Cognito have
+been removed; both deployment stacks are deleted and the final scoped audit passed. See the [teardown record](docs/aws-teardown-status.md).
+
+Historical pre-teardown results: all 11 deployments ready, HTTPS/Cognito working,
+core AWS checks 12/12 and browser Inspection 3/3. The corrected mock discovery route
+passed baseline and added-tool phases with provider/backend receipts and no paid
+model calls. These results do not mean an AWS application is currently running.
 
 **Full security acceptance remains incomplete:** direct gateway access executed a
 new synthetic tool that the application correctly rejected. Independent AWS
@@ -23,6 +27,19 @@ provider is an inert fixture.
 [Issues, fixes and remaining checks](docs/aws-deployment-issues.md) ·
 [How discovery and model linking work](docs/aws-discovery-explained.md) ·
 [Bedrock deployment option and runbook](docs/bedrock-deployment-option.md)
+
+## Consolidated second-deployment fixes
+
+The supplied second-deployment working directory is consolidated into this branch.
+It adds the second naming prefix, fixes the Bedrock adapter manifest and shortened
+ALB-name validation, and supports an optional builder-only CA. Public website access
+is now explicit (`DEPLOYMENT_PUBLIC_WEB=true`) and separate from restricted EKS
+administration. Default access remains restricted.
+
+The export reports a benign live Nova Micro chat on a separate deployment; that
+observation has not been independently rechecked here. It does not change the
+verified teardown of our original deployment. See the
+[comparison, integration decisions and validation](docs/deployment-consolidation.md).
 
 ### Discovery mechanism
 
@@ -344,3 +361,11 @@ flowchart LR
 [Setup, evidence, limits and current runtime state](docs/model-discovery-probe.md) ·
 [Sanitized verification](docs/model-discovery-verification.json) ·
 [Editable architecture source](docs/architecture/09-model-tool-discovery.mmd).
+
+## Recovery before teardown
+
+See the [recovery bundle guide](docs/recovery-bundle.md) for capture, verification, restore
+steps and retention costs (about $4.50/month after teardown). The encrypted RDS
+snapshot is available; local encrypted archive capture and offline verification succeeded (316 files, 9,116,370 bytes); S3 export was declined.
+No teardown is authorized or performed by recovery capture. Inspect the private
+latest-recovery receipt for actual completion; archive integrity is not a restore drill.

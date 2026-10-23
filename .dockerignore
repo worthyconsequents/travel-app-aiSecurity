@@ -16,3 +16,6 @@ infra/trend-gateway/private
 build
 
 infra/agentcore/deployment.local.json
+
+# Optional local build CA: provide through a BuildKit secret, never COPY.
+frontend/extra-ca.crt

@@ -320,6 +320,7 @@ def test_manifest_and_checklist_keep_model_inference_disabled_and_private():
     )
     items = manifests(o, image)["items"]
     dep = next(i for i in items if i["kind"] == "Deployment")
+    assert dep["apiVersion"] == "apps/v1"
     spec = dep["spec"]["template"]["spec"]
     assert dep["spec"]["replicas"] == 1 and dep["spec"]["strategy"]["type"] == "Recreate"
     assert spec["serviceAccountName"] == "bedrock-adapter"
@@ -649,3 +650,33 @@ def test_model_failure_never_bypasses_auth_or_exceeds_tool_call_limit(env, monke
     assert error.value.status_code == 503
     assert len(dispatched) == (0 if scenario == "unknown-tool" else 3)
     assert len(model_calls) == (1 if scenario == "unknown-tool" else 4)
+
+
+@pytest.mark.parametrize(
+    "namespace",
+    [
+        "dannytran-boring-travel-trend-lab01-01",
+        "boring-travel-bedrock-dtran-demo01-01",
+    ],
+)
+def test_both_deployment_names_work_for_bedrock_gates(env, monkeypatch, namespace):
+    monkeypatch.setenv("TREND_K8S_NAMESPACE", namespace)
+    assert adapter.deployment() == "example.test-v1:0"
+    assert chat.require_bedrock_chat() == namespace
+
+
+@pytest.mark.parametrize(
+    "namespace",
+    [
+        "boring-travel-bedrock-dtran",
+        "boring-travel-bedrock-dtran-demo01-02",
+        "dannytran-boring-travelevil-lab01-01",
+        "other-deployment-lab01-01",
+    ],
+)
+def test_bedrock_namespace_must_match_a_reviewed_single_copy(env, monkeypatch, namespace):
+    monkeypatch.setenv("TREND_K8S_NAMESPACE", namespace)
+    with pytest.raises(RuntimeError):
+        adapter.deployment()
+    with pytest.raises(RuntimeError):
+        chat.require_bedrock_chat()

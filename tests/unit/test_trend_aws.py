@@ -201,7 +201,9 @@ def test_only_vendor_gateway_gets_private_control_plane_egress(config):
 
 
 @pytest.mark.parametrize("amount, expected", [("", None), ("101", "101"), ("250.50", "250.50")])
-def test_planning_budget_is_optional_and_has_no_historical_operator_ceiling(tmp_path, amount, expected):
+def test_planning_budget_is_optional_and_has_no_historical_operator_ceiling(
+    tmp_path, amount, expected
+):
     from pathlib import Path
 
     source = Path("infra/trend-aws/trend.example.env").read_text()
@@ -229,9 +231,11 @@ def test_secret_ownership_rejects_other_deployments_before_values_are_read(confi
     assert not owned_secret_exists(client, config, "fixture")
     client.tags = secret_tags(config)
     assert owned_secret_exists(client, config, "fixture")
-    for tags in ([], [{"Key": "Project", "Value": "boring-travel"}],
-                 [{"Key": "Project", "Value": "other"},
-                  {"Key": "Deployment", "Value": config.name}]):
+    for tags in (
+        [],
+        [{"Key": "Project", "Value": "boring-travel"}],
+        [{"Key": "Project", "Value": "other"}, {"Key": "Deployment", "Value": config.name}],
+    ):
         client.tags = tags
         with pytest.raises(ValueError, match="ownership mismatch"):
             owned_secret_exists(client, config, "fixture")
@@ -249,10 +253,97 @@ def test_secret_sync_checks_cluster_before_reading_or_writing_secrets(monkeypatc
 
         def client(self, service):
             assert service == "eks", "Secret access happened before cluster validation"
-            return SimpleNamespace(describe_cluster=lambda **kw: {"cluster": {"endpoint": "approved"}})
+            return SimpleNamespace(
+                describe_cluster=lambda **kw: {"cluster": {"endpoint": "approved"}}
+            )
 
     monkeypatch.setattr(bootstrap, "AWS", Cloud)
-    monkeypatch.setattr(bootstrap, "kubectl", lambda *a, **kw: json.dumps(
-        {"clusters": [{"cluster": {"server": "different-cluster"}}]}))
+    monkeypatch.setattr(
+        bootstrap,
+        "kubectl",
+        lambda *a, **kw: json.dumps({"clusters": [{"cluster": {"server": "different-cluster"}}]}),
+    )
     with pytest.raises(ValueError, match="does not match"):
         bootstrap.sync(config)
+
+
+@pytest.mark.parametrize("prefix", ["dannytran-boring-travel-trend", "boring-travel-bedrock-dtran"])
+def test_both_prefixes_share_the_cloud_transport_and_fixture_contract(config, monkeypatch, prefix):
+    from services import fixture_scope
+    from services.deployment_names import valid_trend_namespace
+
+    namespace = prefix + "-demo01-01"
+    assert valid_trend_namespace(namespace)
+    for key, value in {
+        "APP_MODE": "aws-demo",
+        "ENABLE_AWS_TREND_GATEWAY": "true",
+        "ENABLE_AWS_TREND_FIXTURE": "true",
+        "ENABLE_TREND_GATEWAY": "true",
+        "MODEL_MODE": "mock",
+        "TREND_K8S_NAMESPACE": namespace,
+        "TREND_MCP_URL": f"http://trendai-gateway-gateway.{namespace}.svc.cluster.local:8081/",
+        "TREND_VIRTUAL_KEY_FILE": "/not-read-by-route",
+    }.items():
+        monkeypatch.setenv(key, value)
+    assert fixture_scope.cloud_enabled()
+    assert trend_transport.route()[0].startswith("http://trendai-gateway-gateway." + namespace)
+    monkeypatch.setenv(
+        "TREND_MCP_URL", "http://trendai-gateway-gateway.other.svc.cluster.local:8081/"
+    )
+    with pytest.raises(ValueError):
+        trend_transport.route()
+    monkeypatch.setenv("TREND_K8S_NAMESPACE", "unreviewed-demo01-01")
+    assert not fixture_scope.cloud_enabled()
+
+
+def test_second_prefix_and_public_web_are_explicit_config_options(tmp_path):
+    from pathlib import Path
+
+    text = Path("infra/trend-aws/trend.example.env").read_text()
+    text = text.replace("dannytran-boring-travel-trend", "boring-travel-bedrock-dtran")
+    text = text.replace("DEPLOYMENT_PUBLIC_WEB=false", "DEPLOYMENT_PUBLIC_WEB=true")
+    path = tmp_path / "test.env"
+    path.write_text(text)
+    c = TrendAWSConfig.load(path)
+    assert c.public_web and c.name == "boring-travel-bedrock-dtran-lab01-01"
+    resources = foundation(c)["Resources"]
+    assert resources["IngressSecurity"]["Properties"]["SecurityGroupIngress"] == [
+        {"IpProtocol": "tcp", "FromPort": 443, "ToPort": 443, "CidrIp": "0.0.0.0/0"}
+    ]
+    assert resources["Cluster"]["Properties"]["ResourcesVpcConfig"]["PublicAccessCidrs"] == [
+        "203.0.113.1/32"
+    ]
+    for invalid in ("yes", "1", "TRUE"):
+        path.write_text(
+            text.replace("DEPLOYMENT_PUBLIC_WEB=true", "DEPLOYMENT_PUBLIC_WEB=" + invalid)
+        )
+        with pytest.raises(ValueError):
+            TrendAWSConfig.load(path)
+    path.write_text(text.replace("203.0.113.1/32", "0.0.0.0/0"))
+    with pytest.raises(ValueError):
+        TrendAWSConfig.load(path)
+
+
+def test_hash_shortened_alb_name_preserves_exact_signer_binding(monkeypatch):
+    region, _, issuer, client = EXPECTED
+    signer = "arn:aws:elasticloadbalancing:us-east-1:123456789012:loadbalancer/app/boring-travel-bedrock-e333a3-web/e1c91cc1f25cba5e"
+    for key, value in {
+        "AWS_REGION": region,
+        "AWS_ALB_ARN": signer,
+        "AWS_COGNITO_ISSUER": issuer,
+        "AWS_COGNITO_CLIENT_ID": client,
+    }.items():
+        monkeypatch.setenv(key, value)
+    expected = cloud_edge.configuration()
+    assert expected[1] == signer
+    key = ec.generate_private_key(ec.SECP256R1())
+    headers = {"signer": signer, "iss": issuer, "client": client, "exp": 200}
+    token = jwt.encode({"sub": "operator"}, key, algorithm="ES256", headers=headers)
+    assert cloud_edge.validate_claims(token, key.public_key(), expected, now=100)
+    wrong_signer = (region, EXPECTED[1], issuer, client)
+    with pytest.raises(ValueError):
+        cloud_edge.validate_claims(token, key.public_key(), wrong_signer, now=100)
+    for bad in (signer.replace("us-east-1", "us-west-2"), "arn:aws:iam::123456789012:role/not-alb"):
+        monkeypatch.setenv("AWS_ALB_ARN", bad)
+        with pytest.raises(ValueError):
+            cloud_edge.configuration()

@@ -81,9 +81,13 @@ The deployment is staged, **not a one-command finished installer**:
 8. Follow [Vision One setup](../../docs/trend-aws-console-setup.md) for private MCP
    upstreams, service-identity access, blocking guardrails and mock-only model route.
 
-Public HTTPS is restricted to the configured operator CIDR. The gateway listeners,
-MCP endpoints, database and mock provider have no public ingress. Rotating operator
-IP addresses requires an explicit scoped configuration update, not opening access.
+By default, public HTTPS is restricted to `DEPLOYMENT_ALLOWED_CIDR`. The explicit
+`DEPLOYMENT_PUBLIC_WEB=true` option allows internet access to website TCP 443 while
+retaining Cognito authentication. It does not change the EKS administrative CIDR,
+which must remain IPv4 /24 or narrower. The gateway listeners, MCP endpoints,
+database and model providers have no public ingress. See the
+[consolidation guide](../../docs/deployment-consolidation.md) for the second naming
+prefix and optional BuildKit public-CA mount. Neither option authorizes deployment.
 
 ## Runtime and test acceptance
 

@@ -13,6 +13,7 @@ from jsonschema import Draft202012Validator
 
 from services.bedrock_adapter import READ_TOOLS, reviewed_tools
 from services.contracts import SPOOF, Call
+from services.deployment_names import valid_trend_namespace
 from services.telemetry import emit
 from services.trend_transport import VirtualKeyAuth
 
@@ -38,7 +39,7 @@ def require_bedrock_chat():
     ):
         raise RuntimeError("Bedrock chat requires explicit AWS Trend paid-inference activation")
     ns = os.getenv("TREND_K8S_NAMESPACE", "")
-    if not re.fullmatch(r"dannytran-boring-travel[a-z0-9-]{1,40}", ns):
+    if not valid_trend_namespace(ns):
         raise RuntimeError("Invalid Bedrock namespace")
     return ns
 

@@ -3,6 +3,23 @@
 Updated October 23, 2026. Context and evidence do not grant new deployment,
 spending, deletion or publication authority. Follow current user instructions.
 
+## Consolidation of the other deployment export
+
+Reviewed second-deployment fixes are integrated locally; see
+[comparison and evidence scope](deployment-consolidation.md). The source reports
+one live benign Nova Micro chat on another copy; no new AWS operation or model
+call was made during consolidation. The original teardown below is unchanged.
+
+## Latest operational state — teardown
+
+The user authorized AWS teardown after choosing local-only encrypted recovery storage.
+Teardown completed at 16:20 PDT / 23:20 UTC: both stacks deleted and the final scoped
+audit passed. The website is offline. Refer to [teardown status](aws-teardown-status.md) before
+using any historical deployment commands. Recovery retention is intentional; do not
+delete retained snapshots, KMS access, ECR images, secrets or logs as a side effect.
+Do not redeploy without a new user request. Historical running-state statements below
+are pre-teardown observations.
+
 ## Latest Bedrock continuation
 
 The prior reviewed build was pushed as `32e1c83`. The user then authorized building
@@ -19,7 +36,7 @@ Paid activation remains an explicit deployment step.
 Document encountered issues/fixes and explain discovery/model routing with diagrams.
 The user subsequently approved committing/pushing the current build on October 23.
 Keep `working-edition`; do not merge main. Verify the remote commit after pushing.
-AWS runtime stays running; no teardown requested. The previous $100 planning ceiling
+At that earlier publication stage AWS runtime stayed running; teardown was later authorized. The previous $100 planning ceiling
 was withdrawn. Config supports an optional blank planning amount; this is not an
 AWS budget or permission for unrelated spending. Paid model inference stays disabled.
 
@@ -106,3 +123,11 @@ fields establish console observations; do not claim automated console inspection
 
 Next design topic: [Bedrock automation boundaries](bedrock-deployment-option.md).
 No real-provider adapter or paid inference is enabled by publishing this build.
+
+## Recovery before teardown
+
+See the [recovery bundle guide](recovery-bundle.md) for capture, verification, restore
+steps and retention costs (about $4.50/month after teardown). The encrypted RDS
+snapshot is available; local encrypted archive capture and offline verification succeeded (316 files, 9,116,370 bytes); S3 export was declined.
+No teardown is authorized or performed by recovery capture. Inspect the private
+latest-recovery receipt for actual completion; archive integrity is not a restore drill.

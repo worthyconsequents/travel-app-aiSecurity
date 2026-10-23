@@ -6,6 +6,7 @@ from dataclasses import asdict, dataclass
 from decimal import Decimal
 
 from scripts.fleet_config import read_env
+from services.deployment_names import valid_trend_prefix
 
 
 @dataclass(frozen=True)
@@ -19,6 +20,11 @@ class TrendAWSConfig:
     operator_arn: str
     eks_version: str
     budget: str | None
+    public_web: bool = False
+
+    @property
+    def web_cidr(self):
+        return "0.0.0.0/0" if self.public_web else self.operator_cidr
 
     @classmethod
     def load(cls, path):
@@ -31,8 +37,10 @@ class TrendAWSConfig:
             raise ValueError("Validate one Trend AWS copy before enabling a fleet")
         prefix = v.get("DEPLOYMENT_PREFIX", "dannytran-boring-travel-trend")
         env = v.get("DEPLOYMENT_ENV", "lab01")
-        if not re.fullmatch(r"dannytran-boring-travel(?:-[a-z0-9]+)*", prefix):
-            raise ValueError("Use the dannytran-boring-travel naming prefix")
+        if not valid_trend_prefix(prefix):
+            raise ValueError(
+                "Use the dannytran-boring-travel or boring-travel-bedrock-dtran naming prefix"
+            )
         if not re.fullmatch(r"[a-z][a-z0-9]{0,9}", env):
             raise ValueError("Invalid environment slug")
         name = prefix + "-" + env + "-01"
@@ -70,7 +78,21 @@ class TrendAWSConfig:
             not re.fullmatch(r"[0-9]+(?:\.[0-9]{1,2})?", budget) or Decimal(budget) <= 0
         ):
             raise ValueError("Planning budget must be a positive amount or blank")
-        return cls(name, region, account, hostname, zone, cidr, operator, version, budget)
+        public_web = v.get("DEPLOYMENT_PUBLIC_WEB", "false")
+        if public_web not in ("true", "false"):
+            raise ValueError("DEPLOYMENT_PUBLIC_WEB must be true or false")
+        return cls(
+            name,
+            region,
+            account,
+            hostname,
+            zone,
+            cidr,
+            operator,
+            version,
+            budget,
+            public_web == "true",
+        )
 
     def validate_provision(self):
         if not all((self.account, self.hostname, self.zone, self.operator_cidr, self.operator_arn)):

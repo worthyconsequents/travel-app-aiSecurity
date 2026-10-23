@@ -25,7 +25,7 @@ def configuration():
     if not re.fullmatch(r"[a-z]{2}-[a-z]+-[0-9]", region):
         raise ValueError("Invalid cloud Region")
     if not re.fullmatch(
-        rf"arn:aws:elasticloadbalancing:{region}:[0-9]{{12}}:loadbalancer/app/dannytran-[a-z0-9-]+/[a-z0-9]+",
+        rf"arn:aws:elasticloadbalancing:{region}:[0-9]{{12}}:loadbalancer/app/[a-z0-9-]+/[a-z0-9]+",
         signer,
     ):
         raise ValueError("Exact deployment ALB ARN is required")

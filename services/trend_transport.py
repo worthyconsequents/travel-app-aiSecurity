@@ -8,6 +8,8 @@ from urllib.parse import urlsplit
 
 import httpx
 
+from services.deployment_names import valid_trend_namespace
+
 
 class VirtualKeyAuth(httpx.Auth):
     def __init__(self, key_file):
@@ -34,7 +36,7 @@ def route():
     namespace = os.getenv("TREND_K8S_NAMESPACE", "")
     cloud_host = (
         cloud
-        and re.fullmatch(r"dannytran-boring-travel[a-z0-9-]{1,40}", namespace)
+        and valid_trend_namespace(namespace)
         and url.hostname == f"trendai-gateway-gateway.{namespace}.svc.cluster.local"
         and url.port == 8081
     )

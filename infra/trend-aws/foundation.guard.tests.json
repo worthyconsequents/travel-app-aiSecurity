@@ -1,0 +1,296 @@
+[
+  {
+    "name": "explicit public website allows HTTPS",
+    "input": {
+      "Metadata": {
+        "BoringTravelPublicWeb": true
+      },
+      "Resources": {
+        "IngressSecurity": {
+          "Type": "AWS::EC2::SecurityGroup",
+          "Properties": {
+            "SecurityGroupIngress": [
+              {
+                "IpProtocol": "tcp",
+                "FromPort": 443,
+                "ToPort": 443,
+                "CidrIp": "0.0.0.0/0"
+              }
+            ]
+          }
+        },
+        "Cluster": {
+          "Type": "AWS::EKS::Cluster",
+          "Properties": {
+            "ResourcesVpcConfig": {
+              "EndpointPrivateAccess": true,
+              "PublicAccessCidrs": [
+                "203.0.113.1/32"
+              ]
+            }
+          },
+          "DependsOn": "ClusterLogs"
+        },
+        "Database": {
+          "Type": "AWS::RDS::DBInstance",
+          "Properties": {
+            "PubliclyAccessible": false,
+            "StorageEncrypted": true
+          },
+          "DeletionPolicy": "Retain",
+          "UpdateReplacePolicy": "Retain"
+        }
+      }
+    },
+    "expectations": {
+      "rules": {
+        "public_https_requires_explicit_opt_in": "PASS"
+      }
+    }
+  },
+  {
+    "name": "world ingress without opt-in is rejected",
+    "input": {
+      "Metadata": {
+        "BoringTravelPublicWeb": false
+      },
+      "Resources": {
+        "IngressSecurity": {
+          "Type": "AWS::EC2::SecurityGroup",
+          "Properties": {
+            "SecurityGroupIngress": [
+              {
+                "IpProtocol": "tcp",
+                "FromPort": 443,
+                "ToPort": 443,
+                "CidrIp": "0.0.0.0/0"
+              }
+            ]
+          }
+        },
+        "Cluster": {
+          "Type": "AWS::EKS::Cluster",
+          "Properties": {
+            "ResourcesVpcConfig": {
+              "EndpointPrivateAccess": true,
+              "PublicAccessCidrs": [
+                "203.0.113.1/32"
+              ]
+            }
+          },
+          "DependsOn": "ClusterLogs"
+        },
+        "Database": {
+          "Type": "AWS::RDS::DBInstance",
+          "Properties": {
+            "PubliclyAccessible": false,
+            "StorageEncrypted": true
+          },
+          "DeletionPolicy": "Retain",
+          "UpdateReplacePolicy": "Retain"
+        }
+      }
+    },
+    "expectations": {
+      "rules": {
+        "public_https_requires_explicit_opt_in": "FAIL"
+      }
+    }
+  },
+  {
+    "name": "world ingress cannot switch to SSH",
+    "input": {
+      "Metadata": {
+        "BoringTravelPublicWeb": true
+      },
+      "Resources": {
+        "IngressSecurity": {
+          "Type": "AWS::EC2::SecurityGroup",
+          "Properties": {
+            "SecurityGroupIngress": [
+              {
+                "IpProtocol": "tcp",
+                "FromPort": 443,
+                "ToPort": 22,
+                "CidrIp": "0.0.0.0/0"
+              }
+            ]
+          }
+        },
+        "Cluster": {
+          "Type": "AWS::EKS::Cluster",
+          "Properties": {
+            "ResourcesVpcConfig": {
+              "EndpointPrivateAccess": true,
+              "PublicAccessCidrs": [
+                "203.0.113.1/32"
+              ]
+            }
+          },
+          "DependsOn": "ClusterLogs"
+        },
+        "Database": {
+          "Type": "AWS::RDS::DBInstance",
+          "Properties": {
+            "PubliclyAccessible": false,
+            "StorageEncrypted": true
+          },
+          "DeletionPolicy": "Retain",
+          "UpdateReplacePolicy": "Retain"
+        }
+      }
+    },
+    "expectations": {
+      "rules": {
+        "public_https_requires_explicit_opt_in": "FAIL"
+      }
+    }
+  },
+  {
+    "name": "public website cannot open EKS administration",
+    "input": {
+      "Metadata": {
+        "BoringTravelPublicWeb": true
+      },
+      "Resources": {
+        "IngressSecurity": {
+          "Type": "AWS::EC2::SecurityGroup",
+          "Properties": {
+            "SecurityGroupIngress": [
+              {
+                "IpProtocol": "tcp",
+                "FromPort": 443,
+                "ToPort": 443,
+                "CidrIp": "0.0.0.0/0"
+              }
+            ]
+          }
+        },
+        "Cluster": {
+          "Type": "AWS::EKS::Cluster",
+          "Properties": {
+            "ResourcesVpcConfig": {
+              "EndpointPrivateAccess": true,
+              "PublicAccessCidrs": [
+                "0.0.0.0/0"
+              ]
+            }
+          },
+          "DependsOn": "ClusterLogs"
+        },
+        "Database": {
+          "Type": "AWS::RDS::DBInstance",
+          "Properties": {
+            "PubliclyAccessible": false,
+            "StorageEncrypted": true
+          },
+          "DeletionPolicy": "Retain",
+          "UpdateReplacePolicy": "Retain"
+        }
+      }
+    },
+    "expectations": {
+      "rules": {
+        "private_control_plane": "FAIL"
+      }
+    }
+  },
+  {
+    "name": "public website cannot open the database",
+    "input": {
+      "Metadata": {
+        "BoringTravelPublicWeb": true
+      },
+      "Resources": {
+        "IngressSecurity": {
+          "Type": "AWS::EC2::SecurityGroup",
+          "Properties": {
+            "SecurityGroupIngress": [
+              {
+                "IpProtocol": "tcp",
+                "FromPort": 443,
+                "ToPort": 443,
+                "CidrIp": "0.0.0.0/0"
+              }
+            ]
+          }
+        },
+        "Cluster": {
+          "Type": "AWS::EKS::Cluster",
+          "Properties": {
+            "ResourcesVpcConfig": {
+              "EndpointPrivateAccess": true,
+              "PublicAccessCidrs": [
+                "203.0.113.1/32"
+              ]
+            }
+          },
+          "DependsOn": "ClusterLogs"
+        },
+        "Database": {
+          "Type": "AWS::RDS::DBInstance",
+          "Properties": {
+            "PubliclyAccessible": true,
+            "StorageEncrypted": true
+          },
+          "DeletionPolicy": "Retain",
+          "UpdateReplacePolicy": "Retain"
+        }
+      }
+    },
+    "expectations": {
+      "rules": {
+        "private_encrypted_database": "FAIL"
+      }
+    }
+  },
+  {
+    "name": "unreviewed public IPv6 is rejected",
+    "input": {
+      "Metadata": {
+        "BoringTravelPublicWeb": true
+      },
+      "Resources": {
+        "IngressSecurity": {
+          "Type": "AWS::EC2::SecurityGroup",
+          "Properties": {
+            "SecurityGroupIngress": [
+              {
+                "IpProtocol": "tcp",
+                "FromPort": 443,
+                "ToPort": 443,
+                "CidrIpv6": "::/0"
+              }
+            ]
+          }
+        },
+        "Cluster": {
+          "Type": "AWS::EKS::Cluster",
+          "Properties": {
+            "ResourcesVpcConfig": {
+              "EndpointPrivateAccess": true,
+              "PublicAccessCidrs": [
+                "203.0.113.1/32"
+              ]
+            }
+          },
+          "DependsOn": "ClusterLogs"
+        },
+        "Database": {
+          "Type": "AWS::RDS::DBInstance",
+          "Properties": {
+            "PubliclyAccessible": false,
+            "StorageEncrypted": true
+          },
+          "DeletionPolicy": "Retain",
+          "UpdateReplacePolicy": "Retain"
+        }
+      }
+    },
+    "expectations": {
+      "rules": {
+        "no_public_ipv6": "FAIL"
+      }
+    }
+  }
+]

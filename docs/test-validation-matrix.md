@@ -369,3 +369,40 @@ Existing AWS core/mock results retain their original scope.
 Run `make bedrock-plan` for a no-AWS preview; use the
 [Bedrock runbook](bedrock-deployment-option.md) for render/apply/checkpoint/activation.
 [LLM guide](LLM_GUIDE.md) explains context and evidence boundaries.
+
+## Recovery archive validation — October 23, 2026
+
+The recovery unit tests cover authenticated encryption round-trip, ciphertext tampering,
+wrong key/deployment, unsafe archive paths, Kubernetes runtime-field cleanup, S3
+ownership/control helpers, and offline verification without AWS credentials. Capture
+now stores the archive locally only; S3 helpers are not called by capture.
+
+Live local-only capture retained 316 files in a 9,116,370-byte encrypted archive.
+Re-reading the saved archive verified authenticated decryption and all checksums.
+The separate offline verify command succeeded with zero AWS calls. The owned encrypted
+RDS snapshot was available. No S3 upload or teardown occurred. Restore into a new
+AWS environment has not been tested; ECR and RDS/KMS remain external dependencies.
+
+## AWS teardown audit — October 23, 2026
+
+After explicit user authorization and recovery verification, the final live audit
+confirmed both owned CloudFormation stacks DELETE_COMPLETE; EKS, live RDS, active
+worker instances, ALB/target groups, NAT, VPC, ENIs, Elastic IP and application DNS
+were absent. Both encrypted RDS snapshots were available and their KMS key enabled.
+Three ECR repositories (18 image entries), six owned secrets, two retained log
+groups and the shared DNS zone remained. See [teardown record](aws-teardown-status.md)
+for the subnet dependency retry and worker termination-hook completion. These are
+scoped cleanup checks, not an all-account cost audit or a full restore test.
+
+## Second-deployment consolidation — October 23, 2026
+
+310 offline tests and ruff passed. New regression coverage includes both naming
+prefixes across runtime gates and private transport, malformed/cross-copy rejection,
+Bedrock Deployment apps/v1, shortened ALB names with exact signed-token binding,
+public web separated from administrative CIDRs, strict boolean options, optional
+BuildKit CA input and private-key/context exclusion. Both template variants passed
+cfn-lint and foundation Guard validation. Six Guard tests include expected-denial
+cases for absent public opt-in, SSH, public EKS, public RDS and public IPv6.
+Docker BuildKit --check passed with a sanitized frontend build context.
+See [integration comparison](deployment-consolidation.md) for imported evidence limits.
+No cloud deployment, paid model call or application-container startup occurred.

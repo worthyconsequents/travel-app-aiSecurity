@@ -38,3 +38,6 @@ infra/agentcore/deployment.local.json
 *.pem
 *.key
 kubeconfig*
+
+# Optional local build CA: provide through a BuildKit secret, never COPY.
+/frontend/extra-ca.crt

@@ -205,7 +205,8 @@ def manifests(option, image):
             item(
                 "Deployment",
                 "bedrock-adapter",
-                {
+                version="apps/v1",
+                content={
                     "spec": {
                         "replicas": 1,
                         "strategy": {"type": "Recreate"},

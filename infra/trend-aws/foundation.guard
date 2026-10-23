@@ -17,6 +17,16 @@ rule private_encrypted_database when %databases !empty {
         }
     }
 }
-rule no_world_ingress when %groups !empty {
-    %groups.Properties.SecurityGroupIngress[*].CidrIp != '0.0.0.0/0'
+let world_ingress = %groups.Properties.SecurityGroupIngress[ CidrIp == '0.0.0.0/0' ]
+let ipv6_world_ingress = %groups.Properties.SecurityGroupIngress[ CidrIpv6 == '::/0' ]
+rule public_https_requires_explicit_opt_in when %world_ingress !empty {
+    Metadata.BoringTravelPublicWeb == true
+    %world_ingress {
+        IpProtocol == 'tcp'
+        FromPort == 443
+        ToPort == 443
+    }
+}
+rule no_public_ipv6 {
+    %ipv6_world_ingress empty
 }

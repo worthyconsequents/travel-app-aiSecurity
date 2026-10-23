@@ -7,6 +7,8 @@ import shutil
 import subprocess
 from pathlib import Path
 
+from cryptography import x509
+
 from scripts.fleet_package import image_context
 from scripts.trend_aws import AWS
 from scripts.trend_aws_config import TrendAWSConfig
@@ -29,9 +31,30 @@ def prepare_context(destination):
     return digest.hexdigest()
 
 
-def publish(c, component, context, tag, profile=None):
+def build_secret_args(component, build_ca_file=None):
+    if not build_ca_file:
+        return []
+    if component != "frontend":
+        raise ValueError("The optional build CA applies only to the frontend")
+    path = Path(build_ca_file).expanduser().resolve(strict=True)
+    if not path.is_file() or any(c in str(path) for c in (",", "\n", "\r")):
+        raise ValueError("Expected a local certificate file with a plain path")
+    data = path.read_bytes()
+    if b"PRIVATE KEY" in data:
+        raise ValueError("Only public CA certificates may be supplied")
+    certificates = x509.load_pem_x509_certificates(data)
+    if not certificates or any(
+        not cert.extensions.get_extension_for_class(x509.BasicConstraints).value.ca
+        for cert in certificates
+    ):
+        raise ValueError("Expected public PEM CA certificates")
+    return ["--secret", "id=corporate_ca,src=" + str(path)]
+
+
+def publish(c, component, context, tag, profile=None, build_ca_file=None):
     if component not in {"python", "frontend", "edge"}:
         raise ValueError("Unknown image component")
+    secret_args = build_secret_args(component, build_ca_file)
     aws = AWS(c, profile)
     aws.identity()
     status = aws.status()
@@ -70,6 +93,7 @@ def publish(c, component, context, tag, profile=None):
             "docker",
             "buildx",
             "build",
+            *secret_args,
             "--platform",
             "linux/amd64",
             "--file",
@@ -95,6 +119,7 @@ def main():
     parser.add_argument("--component", choices=["python", "frontend", "edge"])
     parser.add_argument("--tag")
     parser.add_argument("--profile")
+    parser.add_argument("--build-ca-file", help="Optional public PEM CA for frontend BuildKit only")
     parser.add_argument("--apply", action="store_true")
     args = parser.parse_args()
     c = TrendAWSConfig.load(args.env_file)
@@ -103,7 +128,11 @@ def main():
     else:
         if not args.apply or not args.component or not args.tag:
             raise ValueError("Publishing requires explicit --apply, --component and --tag")
-        print(json.dumps(publish(c, args.component, args.context, args.tag, args.profile)))
+        print(
+            json.dumps(
+                publish(c, args.component, args.context, args.tag, args.profile, args.build_ca_file)
+            )
+        )
 
 
 if __name__ == "__main__":

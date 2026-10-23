@@ -5,6 +5,16 @@ Snapshot: 2026-10-22. Read this with the repository's root `AGENTS.md` and the
 state, not authorization to deploy, spend money, delete resources or publish changes.
 Current user instructions determine the authorized work.
 
+## Latest consolidation and deployment state
+
+Read [consolidation decisions](deployment-consolidation.md), [current teardown](aws-teardown-status.md)
+and [recovery](recovery-bundle.md) before the historical notes below. Original AWS
+runtime was verified torn down; retained recovery assets remain. The supplied export
+reports another deployment's benign live Bedrock success, not independently verified
+here. Reviewed code fixes are consolidated; no private export files were imported.
+The consolidated offline suite passes 310 tests. Current user direction authorizes
+committing on `working-edition`; no AWS rollout or paid inference is authorized.
+
 ## New Bedrock option and agent instructions
 
 The operator requested an optional automated AWS Bedrock integration and a guide

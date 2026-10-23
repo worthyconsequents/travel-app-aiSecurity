@@ -1,7 +1,9 @@
 # Optional Bedrock deployment with Trend Gateway
 
-**Implemented locally; not deployed or validated with real Bedrock inference.**
-The existing hosted mock application and its evidence remain unchanged. This option
+**Consolidated locally; no live-model verification performed by this checkout.**
+The imported second-deployment notes report a successful benign Nova Micro chat;
+see [evidence and integration decisions](deployment-consolidation.md). That report
+is separate from the original deployment, which was torn down after recovery capture. This option
 adds a private adapter and enables real read-only travel chat only after explicit
 activation. It does not switch to AgentCore or silently replace the mock fixtures.
 

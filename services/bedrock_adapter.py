@@ -18,6 +18,8 @@ from fastapi.responses import JSONResponse
 from jsonschema import Draft202012Validator
 from pydantic import BaseModel, ConfigDict, Field
 
+from services.deployment_names import valid_trend_namespace
+
 READ_TOOLS = {"search_hotels", "get_hotel_details", "get_my_bookings"}
 PROVIDER_MODEL = "boring-travel-bedrock"
 
@@ -70,7 +72,7 @@ def deployment():
         os.getenv("APP_MODE") == "aws-demo"
         and os.getenv("DEPLOYMENT_PROFILE") == "trend-gateway"
         and os.getenv("ENABLE_AWS_BEDROCK") == "true"
-        and re.fullmatch(r"dannytran-boring-travel[a-z0-9-]{1,40}", namespace)
+        and valid_trend_namespace(namespace)
     ):
         raise RuntimeError("Bedrock adapter requires explicit AWS Trend deployment")
     model = os.getenv("BEDROCK_MODEL_ID", "")
