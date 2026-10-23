@@ -45,8 +45,10 @@ class Completion(BaseModel):
 
 
 def create_app():
-    if os.getenv("APP_MODE", "local") != "local" or os.getenv("MODEL_PROBE_ENABLED") != "true":
-        raise RuntimeError("Mock provider requires explicit local activation")
+    from services.fixture_scope import allowed_mode
+
+    if not allowed_mode() or os.getenv("MODEL_PROBE_ENABLED") != "true":
+        raise RuntimeError("Mock provider requires explicit isolated fixture activation")
     app = FastAPI()
     app.state.receipts = []
 

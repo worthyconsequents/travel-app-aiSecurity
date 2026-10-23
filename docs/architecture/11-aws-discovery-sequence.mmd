@@ -1,0 +1,25 @@
+sequenceDiagram
+    participant P as AWS fixed diagnostic probe
+    participant G as Trend Gateway (MCP + LLM proxies)
+    participant F as Private MCP fixture
+    participant M as Private mock model provider
+    participant V as Vision One inventory
+    Note over P,F: Repeat for baseline, then newly added tool
+    P->>F: Acquire lease / select fixed fixture state (private control)
+    P->>G: 1. MCP tools/list with application virtual key
+    G->>F: Authenticated catalog request
+    F-->>G: Tool names, descriptions and JSON schemas
+    G-->>P: 2. Current MCP definitions
+    P->>G: 3. POST /v1/chat/completions with model + tools[]
+    Note over G,M: Exact route -> alias -> weighted model/provider
+    G->>M: 4. Request to AWS mock using provider credential
+    G-->>V: Observations/activity (AWS inventory confirmation pending)
+    M-->>G: 5. Fixed tool_calls response; no real inference
+    G-->>P: Selected tool name and arguments
+    P->>G: 6. MCP tools/call for the selected fixture tool
+    G->>F: Execute authenticated synthetic tool
+    F-->>G: Tool result and independent execution receipt
+    G-->>P: Tool result
+    P->>M: 7. Check authenticated provider receipt
+    P->>F: Check backend receipt / release lease / restore baseline
+    Note over P,V: Discovery, permission, execution and console inventory are separate checks

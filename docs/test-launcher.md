@@ -1,5 +1,12 @@
 # Monitoring test launcher
 
+Current AWS Trend continuation: the bounded one-shot Kubernetes worker and human
+browser Inspection launch are verified. This is separate from the older local
+and proposed AgentCore/ECS stages described below. See
+[current deployment status](aws-deployment-issues.md) and
+[discovery explanation](aws-discovery-explained.md).
+
+
 Implemented locally on `working-edition`, 2026-10-22. AWS execution, DNS and HTTPS
 provisioning are deliberately deferred to [the AWS session handoff](AWS_SESSION_HANDOFF.md).
 

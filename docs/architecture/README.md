@@ -1,9 +1,10 @@
 # Architecture diagrams
 
-The diagrams describe repository code and recorded evidence as of 22 October 2026. They separate what is implemented from planned integrations and historical infrastructure.
+The diagrams describe repository code and recorded evidence as of 23 October 2026. They separate what is implemented from planned integrations and historical infrastructure.
 
 | Diagram | Scope | Preview | Editable files |
 | --- | --- | --- | --- |
+| AWS tool discovery and model linking | Implemented AWS mock route and execution; inventory/ACL limits labeled | [PNG](10-aws-discovery-mechanism.png) | [SVG](10-aws-discovery-mechanism.svg), [Model linking](10-aws-discovery-model-linking.mmd), [Sequence](11-aws-discovery-sequence.mmd) |
 | Non-AgentCore local deployment | Implemented local Compose app on port 8080; reference authorization gateway | [PNG](01-non-agentcore-local.png) | [SVG](01-non-agentcore-local.svg), [Mermaid](01-non-agentcore-local.mmd) |
 | AgentCore target design | Intended full AWS architecture; not deployed | [PNG](02-agentcore-target-design.png) | [SVG](02-agentcore-target-design.svg), [Mermaid](02-agentcore-target-design.mmd) |
 | AgentCore implementation and test scope | Implemented offline alternative on port 8081 versus completed and removed AWS test slice | [PNG](03-agentcore-implementation-and-test-scope.png) | [SVG](03-agentcore-implementation-and-test-scope.svg), [Mermaid](03-agentcore-implementation-and-test-scope.mmd) |
@@ -12,6 +13,15 @@ The diagrams describe repository code and recorded evidence as of 22 October 202
 | Trend inspection test flows | Observed backend rejection, vendor content denial and signed-request compatibility blocker | [PNG](06-trend-inspection-test-flows.png) | [SVG](06-trend-inspection-test-flows.svg), [Mermaid](06-trend-inspection-test-flows.mmd) |
 
 PNG previews and SVGs share the approved visual layout. Mermaid files preserve the logical relationships for editing or GitHub rendering; their automatic layout can differ. Request and data flows are shown at a high level; return responses generally follow the same path unless response inspection is illustrated explicitly.
+
+## Current single-copy AWS Trend deployment
+
+See [the mechanism explained](../aws-discovery-explained.md) and
+[current issue register](../aws-deployment-issues.md). Hosted services are ready;
+core suite 12/12, browser Inspection 3/3, mock discovery baseline/added phases pass.
+Independent AWS inventory is pending; direct gateway new-tool denial failed while
+the application allowlist denied the new tool. The following older local and
+AgentCore diagram boundaries keep their original scope.
 
 ## Evidence boundaries
 

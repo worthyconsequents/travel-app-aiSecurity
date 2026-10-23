@@ -1,0 +1,8 @@
+flowchart LR
+    R["Request model: namespace-discovery-probe"] --> RULE["Enabled exact routing rule"]
+    RULE --> ALIAS["Alias: namespace-mock"]
+    ALIAS -->|"Weight 1 / 100%"| MODEL["Model: dannytran-mock-model"]
+    MODEL --> PROVIDER["AWS provider: namespace-mock"]
+    PROVIDER --> URL["Private mock-model-provider:8000"]
+    ALIAS -. "Weight 0 / excluded" .-> LOCAL["Local mock provider"]
+    KEY["Mock provider credential file"] -. "Authenticates outbound provider request" .-> PROVIDER

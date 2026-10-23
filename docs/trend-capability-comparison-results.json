@@ -1,0 +1,114 @@
+{
+  "date_pacific": "2026-10-22",
+  "deployment": "dannytran-boring-travel-trend-lab01-01",
+  "scope": "Eight fixed read-only calls through the AWS Trend MCP gateway with inspection and signature verification enabled",
+  "result": {
+    "cases": [
+      {
+        "tool": "get_my_bookings",
+        "variant": "omitted",
+        "started_at_utc": "2026-10-23T05:44:25.863813+00:00",
+        "correlation_id": "fb328aafe8a2457394f96e51fe5b1cf4",
+        "audit_id": "c4f506c27a7447e681b106c47c62f273",
+        "signature_valid_locally": null,
+        "outcome": "backend_capability_rejection",
+        "finished_at_utc": "2026-10-23T05:44:31.116099+00:00"
+      },
+      {
+        "tool": "get_my_bookings",
+        "variant": "invalid_literal",
+        "started_at_utc": "2026-10-23T05:44:31.172528+00:00",
+        "correlation_id": "a1d6e13bb53a47c993cf463457de4402",
+        "audit_id": "9e803cb659144b3aaa85a2ca9862636f",
+        "signature_valid_locally": false,
+        "outcome": "backend_capability_rejection",
+        "finished_at_utc": "2026-10-23T05:44:36.350657+00:00"
+      },
+      {
+        "tool": "get_my_bookings",
+        "variant": "valid_signed",
+        "started_at_utc": "2026-10-23T05:44:36.378918+00:00",
+        "correlation_id": "b94e5729189a40529934c52768f980ba",
+        "audit_id": "77930162973f4ffe932cd4e7f0d2b065",
+        "signature_valid_locally": true,
+        "outcome": "trend_request_content_block",
+        "finished_at_utc": "2026-10-23T05:44:38.876558+00:00"
+      },
+      {
+        "tool": "get_my_bookings",
+        "variant": "tampered_signature",
+        "started_at_utc": "2026-10-23T05:44:38.896208+00:00",
+        "correlation_id": "36c2e0964666444ebdbfd706fd0cbdb3",
+        "audit_id": "c2434f148d7a4af9b86ab75181b16dd3",
+        "signature_valid_locally": false,
+        "outcome": "trend_request_content_block",
+        "finished_at_utc": "2026-10-23T05:44:41.382855+00:00"
+      },
+      {
+        "tool": "search_hotels",
+        "variant": "omitted",
+        "started_at_utc": "2026-10-23T05:44:41.401107+00:00",
+        "correlation_id": "637ee6753ba74b49a945bfef1e777232",
+        "audit_id": "85f33e5f19ce40be82f708827a1404f9",
+        "signature_valid_locally": null,
+        "outcome": "backend_capability_rejection",
+        "finished_at_utc": "2026-10-23T05:44:46.599897+00:00"
+      },
+      {
+        "tool": "search_hotels",
+        "variant": "invalid_literal",
+        "started_at_utc": "2026-10-23T05:44:46.621219+00:00",
+        "correlation_id": "016525fdb2e7427d98ab0df157a824e2",
+        "audit_id": "2572541034fc47a69a25ff9d7d9ac433",
+        "signature_valid_locally": false,
+        "outcome": "backend_capability_rejection",
+        "finished_at_utc": "2026-10-23T05:44:51.793646+00:00"
+      },
+      {
+        "tool": "search_hotels",
+        "variant": "valid_signed",
+        "started_at_utc": "2026-10-23T05:44:51.811217+00:00",
+        "correlation_id": "d79e60f8d249464ea15957102c784e34",
+        "audit_id": "6f22aec414234e59ba3c1f6507443c9a",
+        "signature_valid_locally": true,
+        "outcome": "trend_request_content_block",
+        "finished_at_utc": "2026-10-23T05:44:54.272880+00:00"
+      },
+      {
+        "tool": "search_hotels",
+        "variant": "tampered_signature",
+        "started_at_utc": "2026-10-23T05:44:54.289453+00:00",
+        "correlation_id": "fa23fab94c494c309646ad374d6d75fa",
+        "audit_id": "d790372c6ad749f08ed935a13d640e7b",
+        "signature_valid_locally": false,
+        "outcome": "trend_request_content_block",
+        "finished_at_utc": "2026-10-23T05:44:56.851018+00:00"
+      }
+    ],
+    "booking_state_unchanged": true,
+    "paid_model_calls": 0,
+    "raw_capabilities_logged_by_probe": false,
+    "note": "Controlled read-only diagnostic; content inspection and backend verification remain enabled. Correlate classifier details independently in Vision One."
+  },
+  "finding": "Both tools reach backend capability rejection with omitted or short invalid capability; both receive Trend request content-policy rejection with a valid signed capability or the same body and tampered signature.",
+  "limits": [
+    "This implicates the full capability value in classification, not its cryptographic validity.",
+    "This does not isolate token length, encoding, decoded fields, or particular substrings as the exact classifier trigger.",
+    "No inspection bypass or replacement transport was implemented.",
+    "The browser launcher and real-model susceptibility were not tested."
+  ],
+  "prior_operator_supplied_vision_one_event": {
+    "event_id": "01a16730-a671-7cbf-a524-afcfb2a33c16",
+    "request_id": "01a16730-9c82-70d0-a7a2-81e734ec9eff",
+    "policy": "dtran-boring-travel-policy",
+    "surface": "request",
+    "reasons": [
+      "harmful_content.default.sexual (low)",
+      "harmful_content.default.sexual_minors (low)",
+      "prompt_attack.default.classifier (high)"
+    ],
+    "prompt_attack_confidence_score": 0,
+    "prompt_attack_content_violation": true,
+    "score_semantics_verified": false
+  }
+}

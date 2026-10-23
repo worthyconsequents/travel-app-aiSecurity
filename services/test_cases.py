@@ -77,6 +77,10 @@ async def inspection(direction):
     if profile == "local":
         return "unavailable", "NO_INSPECTION_CONFIGURED"
     if direction == "response":
+        if profile == "trend-gateway":
+            from services.trend_response_probe import run
+
+            return await run()
         if profile != "agentcore-offline":
             return "unavailable", "RESPONSE_PROBE_NOT_CONFIGURED"
         # This endpoint exists only in the explicitly selected offline simulator.

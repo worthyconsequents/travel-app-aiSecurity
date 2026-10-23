@@ -45,9 +45,20 @@ async def validation_error(request, exc):
 async def boundaries(request: Request, call_next):
     if int(request.headers.get("content-length", "0")) > 65536:
         return Response(status_code=413)
+    from services import cloud_edge
+
+    if cloud_edge.enabled() and request.url.path != "/health":
+        try:
+            request.state.operator_id = await cloud_edge.authenticate(request)
+        except HTTPException:
+            return JSONResponse({"detail": "Verified operator sign-in required"}, status_code=401)
     if request.method not in {"GET", "HEAD", "OPTIONS"}:
         origin = request.headers.get("origin")
-        if origin and origin != f"{request.url.scheme}://{request.headers.get('host')}":
+        try:
+            expected_origin = cloud_edge.origin(request)
+        except ValueError:
+            return Response("Unexpected deployment host", status_code=403)
+        if origin and origin != expected_origin:
             return Response("Cross-origin request rejected", status_code=403)
     request.state.correlation_id = uid()
     response = await call_next(request)

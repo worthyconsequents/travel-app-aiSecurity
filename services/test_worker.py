@@ -1,5 +1,6 @@
 """Local durable worker; same execution contract can be hosted after AWS authorization work."""
 
+import argparse
 import asyncio
 import time
 
@@ -26,7 +27,7 @@ async def process_one(owner):
 
             deadline = db.get(TestJob, job_id).deadline
         result, status = await asyncio.wait_for(
-            execute(job["suite"], progress), timeout=max(0.01, deadline - time.time() - 1)
+            execute(job["suite"], progress), timeout=min(180, max(0.01, deadline - time.time() - 1))
         )
         jobs.store(job_id, owner, result, status)
     except Exception:
@@ -40,9 +41,15 @@ async def process_one(owner):
     return True
 
 
-async def run():
+async def run(one_shot=False):
     if not jobs.configured():
-        raise RuntimeError("Only the explicitly enabled local mock worker is available")
+        raise RuntimeError("Test worker requires explicit supported activation")
+    if jobs.cloud_configured() and not one_shot:
+        raise RuntimeError("Cloud test workers must be bounded one-shot jobs")
+    from services.capability_transport import cleanup, reference_enabled
+
+    if reference_enabled():
+        cleanup()
     owner = uid()
 
     async def heartbeat():
@@ -53,7 +60,10 @@ async def run():
     beat = asyncio.create_task(heartbeat())
     try:
         while True:
+            jobs.presence()
             await process_one(owner)
+            if one_shot:
+                return
             if beat.done():
                 beat.result()
             await asyncio.sleep(1)
@@ -62,5 +72,12 @@ async def run():
         await asyncio.gather(beat, return_exceptions=True)
 
 
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--one-shot", action="store_true")
+    args = parser.parse_args()
+    asyncio.run(run(args.one_shot))
+
+
 if __name__ == "__main__":
-    asyncio.run(run())
+    main()

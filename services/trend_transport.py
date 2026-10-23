@@ -23,10 +23,23 @@ class VirtualKeyAuth(httpx.Auth):
 
 
 def route():
-    if os.getenv("APP_MODE", "local") != "local" or os.getenv("ENABLE_TREND_GATEWAY") != "true":
-        raise RuntimeError("Local Trend transport requires explicit activation")
+    mode = os.getenv("APP_MODE", "local")
+    cloud = mode == "aws-demo" and os.getenv("ENABLE_AWS_TREND_GATEWAY") == "true"
+    if (mode != "local" and not cloud) or os.getenv("ENABLE_TREND_GATEWAY") != "true":
+        raise RuntimeError("Trend transport requires explicit local or AWS activation")
+    if cloud and os.getenv("MODEL_MODE", "mock") != "mock":
+        raise RuntimeError("AWS Trend tests require mock inference")
     value = os.environ["TREND_MCP_URL"]
     url = urlsplit(value)
+    namespace = os.getenv("TREND_K8S_NAMESPACE", "")
+    cloud_host = (
+        cloud
+        and re.fullmatch(r"dannytran-boring-travel[a-z0-9-]{1,40}", namespace)
+        and url.hostname == f"trendai-gateway-gateway.{namespace}.svc.cluster.local"
+        and url.port == 8081
+    )
+    if cloud and not cloud_host:
+        raise ValueError("AWS Trend MCP must use this deployment's private cluster service")
     if (
         url.scheme not in {"http", "https"}
         or not url.hostname
@@ -37,6 +50,7 @@ def route():
         or url.path != "/"
         or (
             url.scheme == "http"
+            and not cloud_host
             and url.hostname not in {"trend-gateway-link", "localhost", "127.0.0.1"}
         )
     ):

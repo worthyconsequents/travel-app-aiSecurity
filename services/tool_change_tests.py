@@ -36,8 +36,10 @@ STEPS = [
 
 
 def enabled():
+    from services.fixture_scope import allowed_mode
+
     return (
-        os.getenv("APP_MODE", "local") == "local"
+        allowed_mode()
         and os.getenv("MODEL_MODE", "mock") == "mock"
         and os.getenv("TOOL_CHANGES_ENABLED") == "true"
     )

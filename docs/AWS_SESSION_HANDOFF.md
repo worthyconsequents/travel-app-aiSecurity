@@ -4,6 +4,11 @@ Prepared 2026-10-22. Read this file, root `AGENTS.md`, `docs/AGENT_HANDOFF.md`,
 `docs/test-launcher.md` and `docs/test-validation-matrix.md` before editing.
 This document is context, not permission to deploy or spend money.
 
+> Historical local-first handoff. The single-copy AWS Trend deployment has since
+> been hosted and tested. Use [current issues/status](aws-deployment-issues.md) and
+> [current resume handoff](AWS_TREND_RESUME.md); the restrictions/status below describe
+> the earlier stage, not the presently running Trend worker.
+
 ## User intent and current boundary
 
 The user wants the travel website and protected monitoring page hosted in AWS with

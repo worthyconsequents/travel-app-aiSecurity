@@ -61,7 +61,13 @@ async def invoke(server, tool, args):
             remote = tool_map(server)[tool]
         else:
             remote = prefix + tool
-        result = await session.call_tool(remote, args)
+        if deployment_profile() == "trend-gateway":
+            from services.capability_transport import outgoing
+
+            args_to_send = outgoing(args, tool)
+        else:
+            args_to_send = args
+        result = await session.call_tool(remote, args_to_send)
         if result.isError:
             raise ValueError("MCP tool rejected the request")
         if result.structuredContent is not None:

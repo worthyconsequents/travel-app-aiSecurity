@@ -2,6 +2,13 @@
 
 Installed on 2026-10-17 after the user confirmed their license/trial covers registration and testing without additional charges. No AWS infrastructure or paid model inference was used. The gateway does communicate with the configured Trend Vision One API for enrollment, policy/catalog refresh and activity reporting.
 
+This file describes the historical **local** installation. The currently running
+single-copy AWS deployment has a separate [runbook](../trend-aws/README.md),
+[status and issue register](../../docs/aws-deployment-issues.md), and
+[discovery/model-linking diagram](../../docs/aws-discovery-explained.md).
+Local addresses, key paths and dated test outcomes below must not be copied into
+AWS configuration or read as current local-container health.
+
 ## Inspected inputs and authoritative source
 
 - `AI_Gateway/AI_GatewayHelm`: vendor Helm command; treated as reference, not automatically executed.
@@ -10,7 +17,7 @@ Installed on 2026-10-17 after the user confirmed their license/trial covers regi
 - Chart content layer digest: `sha256:0dd83e32d57761ae0bc4ba496e5440f9e7f3d69d35bb205999fddf7c6290716b`.
 - Chart requires Kubernetes >=1.27 and Helm 3. The image manifest supports linux/amd64 and linux/arm64. Temporary tooling was downloaded from official Helm/kind releases and SHA-256 checked against their published checksums.
 
-## What is running
+## Historical local installation topology
 
 The pre-existing docker-desktop Kubernetes API returned EOF. It was not reset or modified. A dedicated kind cluster **boring-travel**, context **kind-boring-travel**, was created inside local Docker. Its kubeconfig and temporary Helm/kind tools are stored in the ignored owner-only `private/` folder. The default kubeconfig was not changed.
 

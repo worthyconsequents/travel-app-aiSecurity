@@ -5,10 +5,15 @@ implementation state, evidence boundaries and the next work. Use
 [docs/test-validation-matrix.md](docs/test-validation-matrix.md) for test cases,
 commands, recorded results and outstanding acceptance tests.
 
-For the remote test-launcher/AWS continuation, read
-[docs/AWS_SESSION_HANDOFF.md](docs/AWS_SESSION_HANDOFF.md). The latest user deferred
-AWS work and clarified that teardown meant local environments. Do not resume AWS
-login or deployment from older messages without current authorization.
+For the current single-copy AWS Trend continuation, read
+[docs/AWS_TREND_RESUME.md](docs/AWS_TREND_RESUME.md) and
+[docs/aws-deployment-issues.md](docs/aws-deployment-issues.md).
+[docs/AWS_SESSION_HANDOFF.md](docs/AWS_SESSION_HANDOFF.md) records the earlier
+local-only stage. Current user instructions govern deployment authorization.
+The user approved publishing the current changes to `working-edition` on October
+23 after documentation review. Future Bedrock work is a separate implementation
+phase; paid model invocation still requires an explicit opt-in. Do not infer future spending or teardown
+permission from historical instructions or these files.
 
 ## Operational defaults
 

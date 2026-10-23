@@ -18,6 +18,11 @@ async def run():
     probe = Probe()
     if not probe.live:
         raise RuntimeError("This experiment requires the local Trend route")
+    from services.fixture_scope import cloud_enabled
+
+    requested_model = "dannytran-tool-discovery-probe"
+    if cloud_enabled():
+        requested_model = os.environ["TREND_K8S_NAMESPACE"] + "-discovery-probe"
     key = Path(os.environ["MODEL_PROBE_KEY_FILE"]).read_text().strip()
     rows = []
     acquired = False
@@ -50,7 +55,7 @@ async def run():
                     if {t["name"] for t in tools} != expected:
                         raise RuntimeError("Unexpected fixture catalog")
                     payload = {
-                        "model": "dannytran-tool-discovery-probe",
+                        "model": requested_model,
                         "stream": False,
                         "max_tokens": 32,
                         "temperature": 0,

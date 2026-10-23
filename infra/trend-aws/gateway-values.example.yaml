@@ -1,0 +1,30 @@
+# The deployment runner must set gatewayName and namespace from validated config.
+admin:
+  masterKey:
+    enabled: true
+gateway:
+  gatewayName: dannytran-boring-travel-trend-lab01-01
+  replicaCount: 1
+  redis:
+    enabled: false
+  autoscaling:
+    enabled: false
+  ingress:
+    enabled: false
+  service:
+    type: ClusterIP
+  config:
+    auth_mode: vk
+    mcp_proxy:
+      enabled: true
+    llm_proxy:
+      enabled: false
+    koolaide:
+      enabled: true
+  resources:
+    requests:
+      cpu: 250m
+      memory: 1Gi
+    limits:
+      cpu: "2"
+      memory: 3Gi

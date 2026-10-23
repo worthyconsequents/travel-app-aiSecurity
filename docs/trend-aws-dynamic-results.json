@@ -1,0 +1,307 @@
+{
+  "event": "result",
+  "suite": "tool-changes",
+  "status": "failed",
+  "result": {
+    "scenarios": [
+      {
+        "id": 1,
+        "name": "Catalog experiment: baseline",
+        "status": "passed",
+        "passed": true,
+        "decision": "PASSED",
+        "source": "Trend MCP observation",
+        "observed_at": 1792767522.0518742,
+        "expected": "Approved baseline executes",
+        "reason_code": "APPROVED_CONTROL_EXECUTED",
+        "correlation_id": "29d115572ec34fb39c69a135ab8d29f3",
+        "audit_id": "",
+        "evidence": {
+          "catalog": {
+            "added": [],
+            "removed": [],
+            "changed": [],
+            "before": {
+              "fixture_status": "be7d20f8522d51279e5709347b3a08ab3f247b58f50a7cac0d5b8c51c3414de6"
+            },
+            "after": {
+              "fixture_status": "be7d20f8522d51279e5709347b3a08ab3f247b58f50a7cac0d5b8c51c3414de6"
+            }
+          },
+          "protocol": "2025-11-25"
+        }
+      },
+      {
+        "id": 2,
+        "name": "Catalog experiment: added",
+        "status": "passed",
+        "passed": true,
+        "decision": "PASSED",
+        "source": "Trend MCP observation",
+        "observed_at": 1792767522.250156,
+        "expected": "New tool visible",
+        "reason_code": "CATALOG_OBSERVATION_MATCHED",
+        "correlation_id": "dd6e41105f734c15a6c45b50b9a48f2f",
+        "audit_id": "",
+        "evidence": {
+          "catalog": {
+            "added": [
+              "fixture_new_tool"
+            ],
+            "removed": [],
+            "changed": [],
+            "before": {
+              "fixture_status": "be7d20f8522d51279e5709347b3a08ab3f247b58f50a7cac0d5b8c51c3414de6"
+            },
+            "after": {
+              "fixture_status": "be7d20f8522d51279e5709347b3a08ab3f247b58f50a7cac0d5b8c51c3414de6",
+              "fixture_new_tool": "be7d20f8522d51279e5709347b3a08ab3f247b58f50a7cac0d5b8c51c3414de6"
+            }
+          },
+          "same_and_fresh_session_agree": true
+        }
+      },
+      {
+        "id": 3,
+        "name": "Catalog experiment: schema",
+        "status": "passed",
+        "passed": true,
+        "decision": "PASSED",
+        "source": "Trend MCP observation",
+        "observed_at": 1792767522.458213,
+        "expected": "Schema drift detected",
+        "reason_code": "CATALOG_OBSERVATION_MATCHED",
+        "correlation_id": "080ab38f5ddc45cda7b70b604ea98220",
+        "audit_id": "",
+        "evidence": {
+          "catalog": {
+            "added": [],
+            "removed": [],
+            "changed": [
+              "fixture_status"
+            ],
+            "before": {
+              "fixture_status": "be7d20f8522d51279e5709347b3a08ab3f247b58f50a7cac0d5b8c51c3414de6"
+            },
+            "after": {
+              "fixture_status": "1cc0a19457d3951dc20af9572f876ab5c72c07bbf3fb0be74d4656da73a26cb3"
+            }
+          },
+          "same_and_fresh_session_agree": true
+        }
+      },
+      {
+        "id": 4,
+        "name": "Catalog experiment: description",
+        "status": "passed",
+        "passed": true,
+        "decision": "PASSED",
+        "source": "Trend MCP observation",
+        "observed_at": 1792767522.639995,
+        "expected": "Description drift detected",
+        "reason_code": "CATALOG_OBSERVATION_MATCHED",
+        "correlation_id": "e70176c6827c468a8557e651086c3333",
+        "audit_id": "",
+        "evidence": {
+          "catalog": {
+            "added": [],
+            "removed": [],
+            "changed": [
+              "fixture_status"
+            ],
+            "before": {
+              "fixture_status": "be7d20f8522d51279e5709347b3a08ab3f247b58f50a7cac0d5b8c51c3414de6"
+            },
+            "after": {
+              "fixture_status": "fde0b28d176fc9f515ba05773a87a4be468af62a1999998aaba02dc71fe8ad70"
+            }
+          },
+          "same_and_fresh_session_agree": true
+        }
+      },
+      {
+        "id": 5,
+        "name": "Catalog experiment: collision",
+        "status": "passed",
+        "passed": true,
+        "decision": "PASSED",
+        "source": "Trend MCP observation",
+        "observed_at": 1792767522.8373826,
+        "expected": "Distinct upstream identity",
+        "reason_code": "CATALOG_OBSERVATION_MATCHED",
+        "correlation_id": "6ed5ad66c3714b1b9dd0831d7b8e733a",
+        "audit_id": "",
+        "evidence": {
+          "catalog": {
+            "added": [
+              "search_hotels"
+            ],
+            "removed": [],
+            "changed": [],
+            "before": {
+              "fixture_status": "be7d20f8522d51279e5709347b3a08ab3f247b58f50a7cac0d5b8c51c3414de6"
+            },
+            "after": {
+              "fixture_status": "be7d20f8522d51279e5709347b3a08ab3f247b58f50a7cac0d5b8c51c3414de6",
+              "search_hotels": "be7d20f8522d51279e5709347b3a08ab3f247b58f50a7cac0d5b8c51c3414de6"
+            }
+          },
+          "same_and_fresh_session_agree": true
+        }
+      },
+      {
+        "id": 6,
+        "name": "Catalog experiment: removed",
+        "status": "passed",
+        "passed": true,
+        "decision": "PASSED",
+        "source": "Trend MCP observation",
+        "observed_at": 1792767523.0372589,
+        "expected": "Removal detected",
+        "reason_code": "CATALOG_OBSERVATION_MATCHED",
+        "correlation_id": "a4bb9ff3ed4c4485b46a5bc64f8f0fa9",
+        "audit_id": "",
+        "evidence": {
+          "catalog": {
+            "added": [],
+            "removed": [
+              "fixture_status"
+            ],
+            "changed": [],
+            "before": {
+              "fixture_status": "be7d20f8522d51279e5709347b3a08ab3f247b58f50a7cac0d5b8c51c3414de6"
+            },
+            "after": {}
+          },
+          "same_and_fresh_session_agree": true
+        }
+      },
+      {
+        "id": 7,
+        "name": "Catalog experiment: behavior",
+        "status": "passed",
+        "passed": true,
+        "decision": "PASSED",
+        "source": "Trend MCP observation",
+        "observed_at": 1792767525.8933928,
+        "expected": "Changed receipt with unchanged catalog",
+        "reason_code": "CATALOG_OBSERVATION_MATCHED",
+        "correlation_id": "690756592b1d4204a10e925ab0d5bb99",
+        "audit_id": "",
+        "evidence": {
+          "catalog": {
+            "added": [],
+            "removed": [],
+            "changed": [],
+            "before": {
+              "fixture_status": "be7d20f8522d51279e5709347b3a08ab3f247b58f50a7cac0d5b8c51c3414de6"
+            },
+            "after": {
+              "fixture_status": "be7d20f8522d51279e5709347b3a08ab3f247b58f50a7cac0d5b8c51c3414de6"
+            }
+          },
+          "same_and_fresh_session_agree": true,
+          "behavior_changed_with_identical_catalog": true
+        }
+      },
+      {
+        "id": 8,
+        "name": "Application rejects a new tool",
+        "status": "passed",
+        "passed": true,
+        "decision": "PASSED",
+        "source": "application authorization",
+        "observed_at": 1792767525.9349208,
+        "expected": "Unapproved tool denied",
+        "reason_code": "UNKNOWN_TOOL",
+        "correlation_id": "14a30938a93c476a8bf64ce6b97c1c07",
+        "audit_id": "",
+        "evidence": {}
+      },
+      {
+        "id": 9,
+        "name": "Independent gateway access test",
+        "status": "failed",
+        "passed": false,
+        "decision": "FAILED",
+        "source": "Trend MCP observation",
+        "observed_at": 1792767528.5434523,
+        "expected": "Unapproved tool denied by gateway",
+        "reason_code": "UNAPPROVED_TOOL_EXECUTED",
+        "correlation_id": "672d5c75919b408abad4b0e2ab3e34e9",
+        "audit_id": "",
+        "evidence": {
+          "backend_executed": true,
+          "mcp_error": false,
+          "vendor_acl_verified": false
+        }
+      },
+      {
+        "id": 10,
+        "name": "Tool-change notification support",
+        "status": "unavailable",
+        "passed": false,
+        "decision": "UNAVAILABLE",
+        "source": "Trend MCP observation",
+        "observed_at": 1792767528.5467858,
+        "expected": "Notification delivery verified",
+        "reason_code": "STATELESS_FIXTURE_USES_EXPLICIT_REFRESH",
+        "correlation_id": "3cd84e1299c34a8296a3d821f1e3f239",
+        "audit_id": "",
+        "evidence": {
+          "advertised_list_changed": false,
+          "notification_delivery_verified": false
+        }
+      },
+      {
+        "id": 11,
+        "name": "Vision One console verification",
+        "status": "unavailable",
+        "passed": false,
+        "decision": "UNAVAILABLE",
+        "source": "operator verification",
+        "observed_at": 1792767528.5508935,
+        "expected": "Inventory independently verified",
+        "reason_code": "AWAITING_INDEPENDENT_CONSOLE_VERIFICATION",
+        "correlation_id": "0b8d38ef77cb42059179b319bfa1bb89",
+        "audit_id": "",
+        "evidence": {}
+      },
+      {
+        "id": 12,
+        "name": "Restore fixture baseline",
+        "status": "passed",
+        "passed": true,
+        "decision": "PASSED",
+        "source": "Trend MCP observation",
+        "observed_at": 1792767528.5758224,
+        "expected": "Fixture baseline restored",
+        "reason_code": "FIXTURE_RELEASED",
+        "correlation_id": "ff527e6177a74d34930fe51e2375eb58",
+        "audit_id": "",
+        "evidence": {}
+      },
+      {
+        "id": 13,
+        "name": "Synthetic bookings remain unchanged",
+        "status": "passed",
+        "passed": true,
+        "decision": "PASSED",
+        "source": "data integrity",
+        "observed_at": 1792767528.5830283,
+        "expected": "Bookings unchanged",
+        "reason_code": "BOOKING_STATE_CHECK",
+        "correlation_id": "f0c9e93ccd774bd18b02914a5bdbf4eb",
+        "audit_id": "",
+        "evidence": {}
+      }
+    ],
+    "total": 13,
+    "paid_model_calls": 0,
+    "no_mutations": true,
+    "fixture_restored": true,
+    "vision_one_verified": false,
+    "note": "Catalog observations and app decisions are separate from Vision One inventory and vendor ACL evidence.",
+    "passed": false
+  }
+}

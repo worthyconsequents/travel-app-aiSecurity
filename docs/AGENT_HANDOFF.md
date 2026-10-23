@@ -5,6 +5,27 @@ Snapshot: 2026-10-22. Read this with the repository's root `AGENTS.md` and the
 state, not authorization to deploy, spend money, delete resources or publish changes.
 Current user instructions determine the authorized work.
 
+## Latest user direction and resume point
+
+The user reviewed documentation/diagrams and subsequently authorized publishing
+the current changes to GitHub on October 23. Preserve `working-edition`; do not
+merge main. Verify the remote commit before reporting publication complete. Runtime remains running; paid models
+stay disabled and the old $100 ceiling is withdrawn.
+
+Read [current status and issues](aws-deployment-issues.md),
+[discovery mechanism](aws-discovery-explained.md) and
+[the concise AWS handoff](AWS_TREND_RESUME.md). Core 12/12 and browser Inspection
+3/3 passed; corrected mock discovery phases pass. AWS inventory attribution remains
+pending; direct Trend new-tool denial failed while application denial passed.
+Historical notes below retain their dated scope.
+
+## Latest AWS Trend test continuation
+
+See [AWS Trend test status](trend-aws-status.md) for the currently authorized
+single-copy deployment, confirmed key authentication, resolved networking issues
+and remaining upstream/attack acceptance checks. This supersedes older statements
+below that no AWS Trend hosting exists; AgentCore fleet verification stays pending.
+
 ## Purpose and user decisions
 
 The product is **the boring-travel company**, a realistic-looking travel website
@@ -258,3 +279,11 @@ route/proxy and previews remain enabled for review, with no paid fallback.
 The CLI diagnostic is separate from the monitor's durable suites. The user
 authorized committing and pushing this follow-up on working-edition. Keep main
 unchanged and consult Git history for the publication result.
+
+
+October 23 resumption: see [AWS Trend handoff](AWS_TREND_RESUME.md) and the
+[single-copy runbook](../infra/trend-aws/README.md). AWS session and application
+health verified; core acceptance is 12/12 with opaque references, browser Inspection
+3/3. Mock discovery route remains HTTP 400; paid models stay disabled. The obsolete
+$100 validator ceiling is removed and a blank planning amount is supported. No
+commit or push is implied by this continuation.

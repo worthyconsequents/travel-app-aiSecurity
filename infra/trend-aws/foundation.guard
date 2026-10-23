@@ -1,0 +1,22 @@
+let clusters = Resources.*[ Type == 'AWS::EKS::Cluster' ]
+let databases = Resources.*[ Type == 'AWS::RDS::DBInstance' ]
+let groups = Resources.*[ Type == 'AWS::EC2::SecurityGroup' Properties.SecurityGroupIngress exists ]
+rule private_control_plane when %clusters !empty {
+    %clusters.Properties.ResourcesVpcConfig {
+        EndpointPrivateAccess == true
+        PublicAccessCidrs[*] != '0.0.0.0/0'
+    }
+}
+rule private_encrypted_database when %databases !empty {
+    %databases {
+        DeletionPolicy == 'Retain'
+        UpdateReplacePolicy == 'Retain'
+        Properties {
+            PubliclyAccessible == false
+            StorageEncrypted == true
+        }
+    }
+}
+rule no_world_ingress when %groups !empty {
+    %groups.Properties.SecurityGroupIngress[*].CidrIp != '0.0.0.0/0'
+}

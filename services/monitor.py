@@ -67,7 +67,7 @@ def data(limit: int = Query(default=100, ge=1, le=500)):
                 "Application authorization and activity for this AWS copy. Inspector decisions "
                 "are recorded separately in CloudWatch. Successful calls alone do not prove attack blocking."
                 if deployment_profile() == "agentcore-aws"
-                else "Application authorization through the local Trend MCP gateway. "
+                else "Application authorization through the configured Trend MCP gateway. "
                 "Vendor inspection decisions are recorded separately in Trend Events; "
                 "an app denial alone does not establish a Trend detection."
                 if deployment_profile() == "trend-gateway"
@@ -141,7 +141,9 @@ def launch_test(
 ):
     if request.headers.get("X-Monitor-Action") != "run-tests":
         raise HTTPException(403, "Explicit monitoring action required")
-    return test_jobs.enqueue(body.suite, idempotency_key)
+    return test_jobs.enqueue(
+        body.suite, idempotency_key, getattr(request.state, "operator_id", None)
+    )
 
 
 @router.get("/test-runs/{job_id}", dependencies=[Depends(auth.require_monitor)])

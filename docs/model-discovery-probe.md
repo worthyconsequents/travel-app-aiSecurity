@@ -1,5 +1,9 @@
 # Local model-routing discovery test — 2026-10-22
 
+For the later AWS implementation, see [discovery/model linking explained](aws-discovery-explained.md)
+and [current deployment issues](aws-deployment-issues.md). The observations below
+are the historical **local** experiment; they do not verify AWS inventory.
+
 **Passed:** Vision One Discovered Tools now contains `fixture_status` and
 `fixture_new_tool`, each with one call. Both model requests returned HTTP 200;
 the mock provider and MCP fixture independently recorded the expected calls.

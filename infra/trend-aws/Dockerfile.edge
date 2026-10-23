@@ -1,0 +1,5 @@
+FROM nginxinc/nginx-unprivileged:1.28-alpine
+COPY infra/trend-aws/nginx.conf /app/nginx.conf
+COPY infra/trend-aws/edge.conf.template /app/edge.conf.template
+COPY infra/trend-aws/bridge.conf.template /app/bridge.conf.template
+CMD ["/bin/sh", "-ec", "cp /app/edge.conf.template /tmp/routes.conf; exec nginx -c /app/nginx.conf -g 'daemon off;'"]

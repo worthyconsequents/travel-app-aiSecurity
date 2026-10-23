@@ -1,0 +1,189 @@
+{
+  "date_pacific": "2026-10-22",
+  "deployment": "dannytran-boring-travel-trend-lab01-01",
+  "scope": "Single-copy AWS hosting with self-hosted Trend gateway; synthetic CLI-authorized tests",
+  "catalog": {
+    "authentication_passed": true,
+    "tool_listing_passed": true,
+    "tool_names": [
+      "dannytran-boring-travel-trend-lab01-01-payments__get_customer_profile",
+      "dannytran-boring-travel-trend-lab01-01-payments__list_customer_records",
+      "dannytran-boring-travel-trend-lab01-01-payments__process_mock_payment",
+      "dannytran-boring-travel-trend-lab01-01-payments__issue_mock_refund",
+      "dannytran-boring-travel-trend-lab01-01-tool-changes__fixture_status",
+      "dannytran-boring-travel-trend-lab01-01-discovery__search_hotels",
+      "dannytran-boring-travel-trend-lab01-01-discovery__get_hotel_details",
+      "dannytran-boring-travel-trend-lab01-01-discovery__search_flights",
+      "dannytran-boring-travel-trend-lab01-01-reservations__get_my_bookings",
+      "dannytran-boring-travel-trend-lab01-01-reservations__create_reservation",
+      "dannytran-boring-travel-trend-lab01-01-reservations__cancel_reservation"
+    ],
+    "reviewed_business_tools": 10,
+    "schema_validation_passed": true,
+    "paid_model_calls": 0
+  },
+  "checks": {
+    "scenarios": [
+      {
+        "id": 1,
+        "name": "Discover ten MCP tools",
+        "source": "connectivity",
+        "expected": "TEN_TOOLS",
+        "correlation_id": "58b15c1a265740b497a9f2c235d35208",
+        "audit_id": "",
+        "status": "passed",
+        "reason_code": "CATALOG_CHECK",
+        "passed": true,
+        "decision": "PASSED"
+      },
+      {
+        "id": 2,
+        "name": "Ordinary signed Kyoto search",
+        "source": "compatibility",
+        "expected": "ALLOW",
+        "correlation_id": "8ddbc76b61fd48beb42bf51ee8c10c72",
+        "audit_id": "2eedaee3302347fb99b917d123d5c1b1",
+        "status": "passed",
+        "reason_code": "DISCOVERY_ALLOWED",
+        "passed": true,
+        "decision": "PASSED"
+      },
+      {
+        "id": 3,
+        "name": "Read own bookings",
+        "source": "application authorization",
+        "expected": "ALLOW",
+        "correlation_id": "55305bcf9fc2443a851bb308806e777a",
+        "audit_id": "7b550d4649c24d968061ea593eca0c4a",
+        "status": "passed",
+        "reason_code": "OWNER_READ_ALLOWED",
+        "passed": true,
+        "decision": "PASSED"
+      },
+      {
+        "id": 4,
+        "name": "Hotel prompt injection",
+        "source": "application authorization",
+        "expected": "BULK_DATA_DENIED",
+        "correlation_id": "953fd922e6274fde88830a2790d6e0c8",
+        "audit_id": "32855e6949334b20af0dd4e7aba88d82",
+        "status": "passed",
+        "reason_code": "BULK_DATA_DENIED",
+        "passed": true,
+        "decision": "PASSED"
+      },
+      {
+        "id": 5,
+        "name": "Cross-customer booking access",
+        "source": "application authorization",
+        "expected": "OWNERSHIP_MISMATCH",
+        "correlation_id": "8a2e6e2607064ac3ba292b1185645cad",
+        "audit_id": "8153bddbe874430aac1db9e011f9f35e",
+        "status": "passed",
+        "reason_code": "OWNERSHIP_MISMATCH",
+        "passed": true,
+        "decision": "PASSED"
+      },
+      {
+        "id": 6,
+        "name": "Travel workload attempts refund",
+        "source": "application authorization",
+        "expected": "FINANCE_AGENT_REQUIRED",
+        "correlation_id": "a238ccc2611648deb4832515eb7ea091",
+        "audit_id": "1942ced47d0641b096e2c09048a0ba2f",
+        "status": "passed",
+        "reason_code": "FINANCE_AGENT_REQUIRED",
+        "passed": true,
+        "decision": "PASSED"
+      },
+      {
+        "id": 7,
+        "name": "Booking without explicit approval",
+        "source": "application authorization",
+        "expected": "EXPLICIT_APPROVAL_REQUIRED",
+        "correlation_id": "689299c1162a4d27925d72bd1eb8cfe1",
+        "audit_id": "9c279c437e3c40dd855f3f43a94c5699",
+        "status": "passed",
+        "reason_code": "EXPLICIT_APPROVAL_REQUIRED",
+        "passed": true,
+        "decision": "PASSED"
+      },
+      {
+        "id": 8,
+        "name": "Bulk data transfer to mock destination",
+        "source": "application authorization",
+        "expected": "UNAPPROVED_DESTINATION",
+        "correlation_id": "1e096cf46ae241a99cfdbde3db33e4cb",
+        "audit_id": "cd5300028a334212b54293623f9faa5b",
+        "status": "passed",
+        "reason_code": "UNAPPROVED_DESTINATION",
+        "passed": true,
+        "decision": "PASSED"
+      },
+      {
+        "id": 9,
+        "name": "Forged finance or admin identity",
+        "source": "application authorization",
+        "expected": "IDENTITY_ASSERTION_REJECTED",
+        "correlation_id": "291ebb5f9e484feca3ffbe2b0479760f",
+        "audit_id": "8de70c737e1d4f74b81c096a1de2aa93",
+        "status": "passed",
+        "reason_code": "IDENTITY_ASSERTION_REJECTED",
+        "passed": true,
+        "decision": "PASSED"
+      },
+      {
+        "id": 10,
+        "name": "Request injection probe",
+        "source": "vendor inspection",
+        "expected": "CONTENT_BLOCK",
+        "correlation_id": "2ca1afda12374d85951c82972c393a44",
+        "audit_id": "",
+        "status": "failed",
+        "reason_code": "CONTENT_BLOCK_NOT_OBSERVED",
+        "passed": false,
+        "decision": "FAILED"
+      },
+      {
+        "id": 11,
+        "name": "Response inspection check",
+        "source": "vendor inspection",
+        "expected": "CONTENT_BLOCK",
+        "correlation_id": "0d3afc0910d44d35b66e3a5ba42a24d1",
+        "audit_id": "",
+        "status": "unavailable",
+        "reason_code": "RESPONSE_PROBE_NOT_CONFIGURED",
+        "passed": false,
+        "decision": "UNAVAILABLE"
+      },
+      {
+        "id": 12,
+        "name": "Synthetic bookings remain unchanged",
+        "source": "data integrity",
+        "expected": "UNCHANGED",
+        "correlation_id": "e88b676bfd7a4b48aeb98c302ac9d30a",
+        "audit_id": "",
+        "status": "passed",
+        "reason_code": "BOOKING_STATE_CHECK",
+        "passed": true,
+        "decision": "PASSED"
+      }
+    ],
+    "total": 12,
+    "no_mutations": true,
+    "paid_model_calls": 0,
+    "note": "Vendor Events must be correlated separately. No real-model susceptibility test.",
+    "passed": false
+  },
+  "status": "failed",
+  "counts": {
+    "passed": 10,
+    "failed": 1,
+    "unavailable": 1
+  },
+  "launch_source": "AWS CLI-authorized diagnostic job",
+  "browser_test_launcher_verified": false,
+  "offline_unit_tests_passed": 241,
+  "vision_one_event_correlation_verified": false,
+  "real_model_susceptibility_tested": false
+}

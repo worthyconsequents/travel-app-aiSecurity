@@ -1,0 +1,78 @@
+{
+  "checked_at": "2026-10-23T15:09:02.785256+00:00",
+  "account_verified": true,
+  "foundation_status": "CREATE_COMPLETE",
+  "deployments": [
+    {
+      "name": "api",
+      "desired": 1,
+      "available": 1,
+      "ready": 1
+    },
+    {
+      "name": "customer-payments",
+      "desired": 1,
+      "available": 1,
+      "ready": 1
+    },
+    {
+      "name": "edge",
+      "desired": 1,
+      "available": 1,
+      "ready": 1
+    },
+    {
+      "name": "frontend",
+      "desired": 1,
+      "available": 1,
+      "ready": 1
+    },
+    {
+      "name": "gateway",
+      "desired": 1,
+      "available": 1,
+      "ready": 1
+    },
+    {
+      "name": "mcp-bridge",
+      "desired": 1,
+      "available": 1,
+      "ready": 1
+    },
+    {
+      "name": "mock-model-provider",
+      "desired": 1,
+      "available": 1,
+      "ready": 1
+    },
+    {
+      "name": "reservations",
+      "desired": 1,
+      "available": 1,
+      "ready": 1
+    },
+    {
+      "name": "tool-change-fixture",
+      "desired": 1,
+      "available": 1,
+      "ready": 1
+    },
+    {
+      "name": "travel-discovery",
+      "desired": 1,
+      "available": 1,
+      "ready": 1
+    },
+    {
+      "name": "trendai-gateway-gateway",
+      "desired": 1,
+      "available": 1,
+      "ready": 1
+    }
+  ],
+  "https": {
+    "status": 302,
+    "tls_verified": true,
+    "cognito_redirect": true
+  }
+}

@@ -25,9 +25,28 @@ def scope():
     return os.getenv("TEST_DEPLOYMENT_ID", deployment_profile())
 
 
+def cloud_configured():
+    return (
+        os.getenv("APP_MODE") == "aws-demo"
+        and os.getenv("ENABLE_AWS_TREND_GATEWAY") == "true"
+        and os.getenv("MODEL_MODE", "mock") == "mock"
+        and os.getenv("TEST_RUNNER_ENABLED") == "true"
+        and os.getenv("TEST_RUNNER_BACKEND") == "kubernetes-cronjob"
+        and deployment_profile() == "trend-gateway"
+    )
+
+
+def worker_freshness():
+    return 150 if cloud_configured() else 15
+
+
+def deadline_seconds():
+    return 600 if cloud_configured() else 180
+
+
 def configured():
     # Cloud operator authorization/dispatch must be completed in the AWS session.
-    return (
+    return cloud_configured() or (
         os.getenv("APP_MODE", "local") == "local"
         and os.getenv("MODEL_MODE", "mock") == "mock"
         and os.getenv("TEST_RUNNER_ENABLED") == "true"
@@ -42,12 +61,14 @@ def capabilities():
         with Session() as db:
             worker = db.get(TestWorkerPresence, scope())
             ready = bool(
-                worker and worker.profile == deployment_profile() and worker.at > time.time() - 15
+                worker
+                and worker.profile == deployment_profile()
+                and worker.at > time.time() - worker_freshness()
             )
     return {
         "enabled": configured(),
         "ready": ready,
-        "backend": "local-worker",
+        "backend": "kubernetes-cronjob" if cloud_configured() else "local-worker",
         "suites": [
             {"id": k, "name": v}
             for k, v in SUITES.items()
@@ -55,8 +76,12 @@ def capabilities():
         ],
         "message": "Ready for safe synthetic checks."
         if ready
-        else "Local test worker is stopped or disabled. AWS execution is not enabled.",
-        "max_seconds": 180,
+        else (
+            "Scheduled AWS test worker has not checked in."
+            if cloud_configured()
+            else "Local test worker is stopped or disabled. AWS execution is not enabled."
+        ),
+        "max_seconds": deadline_seconds(),
     }
 
 
@@ -93,9 +118,11 @@ def tool_changes_enabled():
     return enabled()
 
 
-def enqueue(suite, request_key):
+def enqueue(suite, request_key, operator=None):
     if not configured():
         raise HTTPException(403, "Test execution is disabled for this environment")
+    if cloud_configured() and (not isinstance(operator, str) or len(operator) != 32):
+        raise HTTPException(403, "Verified cloud operator required")
     if suite == "tool-changes" and not tool_changes_enabled():
         raise HTTPException(403, "Tool-change fixture is disabled")
     if suite not in SUITES:
@@ -111,9 +138,13 @@ def enqueue(suite, request_key):
                     raise HTTPException(409, "Request key was already used for another suite")
                 return public(previous)
             worker = db.get(TestWorkerPresence, scope())
-            if not worker or worker.profile != deployment_profile() or worker.at <= now - 15:
+            if (
+                not worker
+                or worker.profile != deployment_profile()
+                or worker.at <= now - worker_freshness()
+            ):
                 raise HTTPException(503, "Test worker is not available")
-            db.add(TestJobLock(scope=scope(), job_id=job_id, expires=now + 180))
+            db.add(TestJobLock(scope=scope(), job_id=job_id, expires=now + deadline_seconds()))
             db.flush()  # Unique scope lock serializes launches across API processes.
             from services.test_cases import case_plan
 
@@ -123,9 +154,13 @@ def enqueue(suite, request_key):
                 profile=deployment_profile(),
                 suite=suite,
                 started=now,
-                deadline=now + 180,
+                deadline=now + deadline_seconds(),
                 status="queued",
-                result={"scenarios": [], "total": len(case_plan(suite))},
+                result={
+                    "scenarios": [],
+                    "total": len(case_plan(suite)),
+                    **({"operator_id": operator} if operator else {}),
+                },
             )
             db.add(row)
             db.flush()
@@ -208,6 +243,9 @@ def claim(owner):
 def store(job_id, owner, result, status=None):
     with Session.begin() as db:
         now = time.time()
+        previous = db.get(TestJob, job_id)
+        if previous and previous.scope == scope() and previous.result.get("operator_id"):
+            result = result | {"operator_id": previous.result["operator_id"]}
         values = {"result": result, "heartbeat": now}
         if status:
             values.update(status=status, finished=now)

@@ -250,3 +250,97 @@ behavior and vendor attack blocking are not established by this result.
 route/proxy and previews remain enabled for review, with no paid fallback.
 The CLI diagnostic is separate from the monitor's durable suites. Publication of
 this follow-up on working-edition was authorized; main remains outside its scope.
+
+
+## AWS Trend single-copy continuation — 2026-10-22
+
+See [recorded cloud checks and remaining acceptance cases](trend-aws-status.md).
+Key authentication, TLS/Cognito redirect, deployment readiness, worker execution
+and log ingestion passed. Tool listing fails at upstream access; no AWS attack
+suite or model-discovery acceptance is claimed. The new offline regression checks
+that private control-plane egress selects only the vendor gateway and restricts
+ports/destinations; `tests/unit/test_trend_aws.py`: 12 passed.
+
+
+### AWS Trend upstream registration follow-up — 2026-10-22 Pacific
+
+The four AWS upstreams are registered; credential filename aliases are mounted and
+startup clients were reloaded. Ten business schemas matched and the fixture
+baseline tool was listed. The bounded AWS synthetic CLI job ran all 12 scenarios:
+10 passed, request inspection failed its expected content-block observation, and
+response inspection was unavailable. Bookings remained unchanged. This does not
+verify the Cognito browser launcher, real-model behavior, or Vision One inventory.
+See [sanitized evidence](trend-aws-test-results.json). Offline suite: 241 passed.
+
+
+### AWS Trend guardrail assignment retest — 2026-10-22 Pacific
+
+A catalog with two guardrails and zero degraded assignments was applied. The
+bounded synthetic retest recorded **9 passed, 2 blocked, 1 unavailable**. Injection
+now receives a request content-policy rejection, while legitimate signed hotel
+search and own-booking read are also content-policy blocked. Application denial
+cases still pass and bookings remain unchanged. Response probe, browser launcher
+and independent Vision One Event correlation remain pending. Exact classifier
+cause is unconfirmed. See [retest evidence](trend-aws-guardrail-results.json);
+the earlier [baseline](trend-aws-test-results.json) is preserved. No paid models.
+
+
+### AWS capability comparison — 2026-10-22 Pacific
+
+Eight read-only calls: both booking and hotel tools compared omitted, short invalid,
+valid signed and signature-tampered capabilities. First two variants reach correct
+backend capability rejection; full valid/tampered variants receive Trend request
+content-policy blocks. Booking state unchanged; zero paid model calls. No controls
+disabled. [Evidence and limits](trend-capability-comparison.md). Backend rejection
+is not a vendor detection; this diagnostic is not a passing normal-use acceptance
+test. Full capability content is implicated, but encoding/length/substring causes
+have not been isolated. The exact Vision One reasons supplied by the operator are
+recorded separately from new probe outcomes.
+
+
+### Resumed AWS Trend acceptance — October 23, 2026
+
+The current AWS transport uses short opaque grant references and retains backend
+HMAC/scope/expiry enforcement. Latest saved core suite: **12/12 passed**, unchanged
+bookings, zero paid inference. An earlier request-inspection miss is preserved;
+fixed probes are not evidence of general protection or real-model susceptibility.
+The authenticated browser-launched Inspection job passed **3/3** and operator
+attribution was verified from the stored job.
+
+Resumption verified account identity and Ready application deployments. The bounded
+mock-model probe still returned HTTP 400 at baseline with fixture restoration and
+zero paid calls. Model/provider/alias linkage and independent Vision One inventory
+remain pending. The old dynamic job expired and its final CloudWatch result was
+not recovered; a new bounded run is used to collect current evidence.
+
+Focused offline additions cover optional planning budgets, invalid amounts, secret
+ownership mismatches, and cluster-endpoint verification before secret access.
+See [current handoff](AWS_TREND_RESUME.md) and
+[deployment runbook](../infra/trend-aws/README.md) for evidence and cleanup limits.
+
+
+Current collected dynamic-tool result: **10 passed, 1 failed, 2 unavailable**.
+Direct gateway access executed the added fixture tool; the application allowlist
+rejected it. Notifications and independent inventory are unavailable. Fixture
+restored and bookings unchanged. [Evidence](trend-aws-dynamic-results.json).
+Final offline suite: **257 passed**; full repository ruff and diff checks pass.
+
+
+### AWS mock discovery route correction — October 23, 2026
+
+Corrected exact requested-model match and excluded local provider (AWS weight 1,
+local weight 0). Baseline and added-tool phases both passed: HTTP 200, provider and
+backend receipts verified, fixture restored, zero paid model calls. The added
+phase selected `fixture_new_tool`. [Evidence](trend-aws-model-discovery-results.json).
+Independent console inventory and direct gateway new-tool denial remain separate
+unresolved acceptance checks. Earlier HTTP 400 evidence is retained.
+
+
+### Documentation review — October 23, 2026
+
+Current status and all recorded issue/fix findings are consolidated in the
+[issue register](aws-deployment-issues.md). The new
+[discovery explanation](aws-discovery-explained.md) includes model linking,
+MCP-versus-LLM request paths, keys, evidence limits and editable diagrams. Readiness
+and HTTPS were rechecked without resource changes; all 11 deployments ready.
+Documentation remains local pending user review before GitHub publication.

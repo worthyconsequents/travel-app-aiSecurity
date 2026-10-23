@@ -172,3 +172,10 @@ class TestWorkerPresence(Base):
     scope: Mapped[str] = mapped_column(String, primary_key=True)
     profile: Mapped[str]
     at: Mapped[float]
+
+
+class CapabilityReference(Base):
+    __tablename__ = "capability_references"
+    id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    token: Mapped[str] = mapped_column(String(16000))
+    expires: Mapped[float] = mapped_column(index=True)

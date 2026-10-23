@@ -1,0 +1,22 @@
+{
+  "event": "result",
+  "suite": "model-discovery",
+  "result": {
+    "captured_at": "2026-10-23T14:56:13.469395+00:00",
+    "phases": [
+      {
+        "state": "baseline",
+        "tools_submitted": [
+          "fixture_status"
+        ],
+        "http_status": 400,
+        "status": "blocked"
+      }
+    ],
+    "paid_model_calls": 0,
+    "fixture_restored": true,
+    "inventory_verified": false,
+    "note": "Verify Vision One inventory independently. Mock inference does not prove real-model behavior.",
+    "routing_passed": false
+  }
+}

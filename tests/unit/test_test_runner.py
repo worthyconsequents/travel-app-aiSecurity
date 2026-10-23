@@ -287,3 +287,42 @@ def test_legacy_web_endpoints_cannot_bypass_the_durable_launcher(runner):
         assert client.post("/scenarios/run").status_code == 409
     finally:
         app.dependency_overrides.clear()
+
+
+def test_cloud_queue_requires_verified_operator_and_preserves_attribution(runner, monkeypatch):
+    _, sessions = runner
+    for k, v in {
+        "APP_MODE": "aws-demo",
+        "ENABLE_AWS_TREND_GATEWAY": "true",
+        "DEPLOYMENT_PROFILE": "trend-gateway",
+        "TEST_RUNNER_BACKEND": "kubernetes-cronjob",
+    }.items():
+        monkeypatch.setenv(k, v)
+    jobs.presence()
+    with pytest.raises(HTTPException) as error:
+        jobs.enqueue("connectivity", "cloud-request-key-0001")
+    assert error.value.status_code == 403
+    with pytest.raises(HTTPException) as error:
+        jobs.enqueue("tool-changes", "cloud-request-key-0001", "a" * 32)
+    assert error.value.status_code == 403
+    run = jobs.enqueue("connectivity", "cloud-request-key-0001", "a" * 32)
+    assert jobs.capabilities()["backend"] == "kubernetes-cronjob"
+    assert jobs.capabilities()["max_seconds"] == 600
+    owner = "cloud-worker"
+    assert jobs.claim(owner) == run["id"]
+    jobs.store(run["id"], owner, {"scenarios": []}, "passed")
+    assert jobs.get(run["id"])["result"]["operator_id"] == "a" * 32
+    with sessions() as db:
+        assert db.get(Job, run["id"]).deadline - db.get(Job, run["id"]).started == 600
+
+
+def test_cloud_continuous_worker_refused(runner, monkeypatch):
+    for k, v in {
+        "APP_MODE": "aws-demo",
+        "ENABLE_AWS_TREND_GATEWAY": "true",
+        "DEPLOYMENT_PROFILE": "trend-gateway",
+        "TEST_RUNNER_BACKEND": "kubernetes-cronjob",
+    }.items():
+        monkeypatch.setenv(k, v)
+    with pytest.raises(RuntimeError, match="one-shot"):
+        asyncio.run(worker.run())

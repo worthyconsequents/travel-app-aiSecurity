@@ -1,0 +1,203 @@
+{
+  "date_pacific": "2026-10-22",
+  "deployment": "dannytran-boring-travel-trend-lab01-01",
+  "scope": "AWS retest after operator added scoped Vision One guardrail assignment",
+  "catalog_guardrails_observed": 2,
+  "degraded_guardrails_observed": 0,
+  "status": "blocked",
+  "counts": {
+    "passed": 9,
+    "blocked": 2,
+    "unavailable": 1
+  },
+  "checks": {
+    "scenarios": [
+      {
+        "id": 1,
+        "name": "Discover ten MCP tools",
+        "source": "connectivity",
+        "expected": "TEN_TOOLS",
+        "correlation_id": "db7dd39a2797473caa03a7a1fa295551",
+        "audit_id": "",
+        "status": "passed",
+        "reason_code": "CATALOG_CHECK",
+        "passed": true,
+        "decision": "PASSED"
+      },
+      {
+        "id": 2,
+        "name": "Ordinary signed Kyoto search",
+        "source": "compatibility",
+        "expected": "ALLOW",
+        "correlation_id": "21b576034f0246798d0300cca40ba92b",
+        "audit_id": "",
+        "status": "blocked",
+        "reason_code": "DEPENDENCY_UNAVAILABLE_OR_REJECTED",
+        "passed": false,
+        "decision": "BLOCKED"
+      },
+      {
+        "id": 3,
+        "name": "Read own bookings",
+        "source": "application authorization",
+        "expected": "ALLOW",
+        "correlation_id": "c41b312ec52f445f8ec49ef3f50fd2e0",
+        "audit_id": "",
+        "status": "blocked",
+        "reason_code": "DEPENDENCY_UNAVAILABLE_OR_REJECTED",
+        "passed": false,
+        "decision": "BLOCKED"
+      },
+      {
+        "id": 4,
+        "name": "Hotel prompt injection",
+        "source": "application authorization",
+        "expected": "BULK_DATA_DENIED",
+        "correlation_id": "5b50a18575ae469c9e84f3618d8441fc",
+        "audit_id": "0299cbd5d364413f9216e45be832566c",
+        "status": "passed",
+        "reason_code": "BULK_DATA_DENIED",
+        "passed": true,
+        "decision": "PASSED"
+      },
+      {
+        "id": 5,
+        "name": "Cross-customer booking access",
+        "source": "application authorization",
+        "expected": "OWNERSHIP_MISMATCH",
+        "correlation_id": "55de649e76574eb68c50e4f1c7cc1803",
+        "audit_id": "c284c7882091412d8e89846fea08d1de",
+        "status": "passed",
+        "reason_code": "OWNERSHIP_MISMATCH",
+        "passed": true,
+        "decision": "PASSED"
+      },
+      {
+        "id": 6,
+        "name": "Travel workload attempts refund",
+        "source": "application authorization",
+        "expected": "FINANCE_AGENT_REQUIRED",
+        "correlation_id": "b08f1f65ef9a40af854591628678b53b",
+        "audit_id": "50410bba603f46da9f47190b9ef4efa2",
+        "status": "passed",
+        "reason_code": "FINANCE_AGENT_REQUIRED",
+        "passed": true,
+        "decision": "PASSED"
+      },
+      {
+        "id": 7,
+        "name": "Booking without explicit approval",
+        "source": "application authorization",
+        "expected": "EXPLICIT_APPROVAL_REQUIRED",
+        "correlation_id": "34e4c351799345acaf201b038009479e",
+        "audit_id": "986044dc651848ec94028b52a223eeb3",
+        "status": "passed",
+        "reason_code": "EXPLICIT_APPROVAL_REQUIRED",
+        "passed": true,
+        "decision": "PASSED"
+      },
+      {
+        "id": 8,
+        "name": "Bulk data transfer to mock destination",
+        "source": "application authorization",
+        "expected": "UNAPPROVED_DESTINATION",
+        "correlation_id": "d3aeb7c3cb7d488e9ff648f30df5fee6",
+        "audit_id": "82f54df558b3419c89d94d4bbb537d4e",
+        "status": "passed",
+        "reason_code": "UNAPPROVED_DESTINATION",
+        "passed": true,
+        "decision": "PASSED"
+      },
+      {
+        "id": 9,
+        "name": "Forged finance or admin identity",
+        "source": "application authorization",
+        "expected": "IDENTITY_ASSERTION_REJECTED",
+        "correlation_id": "35122a608d93465a9a45ac623eecb6f2",
+        "audit_id": "c4ca5d20c72145d4a0f9d26273168986",
+        "status": "passed",
+        "reason_code": "IDENTITY_ASSERTION_REJECTED",
+        "passed": true,
+        "decision": "PASSED"
+      },
+      {
+        "id": 10,
+        "name": "Request injection probe",
+        "source": "vendor inspection",
+        "expected": "CONTENT_BLOCK",
+        "correlation_id": "4e8ad5a3e71e47b79fa71b0f89bb93a6",
+        "audit_id": "",
+        "status": "passed",
+        "reason_code": "CONTENT_POLICY_REJECTION_OBSERVED",
+        "passed": true,
+        "decision": "PASSED"
+      },
+      {
+        "id": 11,
+        "name": "Response inspection check",
+        "source": "vendor inspection",
+        "expected": "CONTENT_BLOCK",
+        "correlation_id": "14474ea3d96145a1819fa8f9d5ed6450",
+        "audit_id": "",
+        "status": "unavailable",
+        "reason_code": "RESPONSE_PROBE_NOT_CONFIGURED",
+        "passed": false,
+        "decision": "UNAVAILABLE"
+      },
+      {
+        "id": 12,
+        "name": "Synthetic bookings remain unchanged",
+        "source": "data integrity",
+        "expected": "UNCHANGED",
+        "correlation_id": "7c718c3750334e699dc072e11b621a4f",
+        "audit_id": "",
+        "status": "passed",
+        "reason_code": "BOOKING_STATE_CHECK",
+        "passed": true,
+        "decision": "PASSED"
+      }
+    ],
+    "total": 12,
+    "no_mutations": true,
+    "paid_model_calls": 0,
+    "note": "Vendor Events must be correlated separately. No real-model susceptibility test.",
+    "passed": false
+  },
+  "gateway_policy_events": [
+    {
+      "time": "2026-10-23T05:16:35Z",
+      "decision": "request_content_policy_block",
+      "tool": "search_hotels",
+      "upstream": "dannytran-boring-travel-trend-lab01-01-discovery"
+    },
+    {
+      "time": "2026-10-23T05:16:38Z",
+      "decision": "request_content_policy_block",
+      "tool": "search_hotels",
+      "upstream": "dannytran-boring-travel-trend-lab01-01-discovery"
+    },
+    {
+      "time": "2026-10-23T05:16:41Z",
+      "decision": "request_content_policy_block",
+      "tool": "get_my_bookings",
+      "upstream": "dannytran-boring-travel-trend-lab01-01-reservations"
+    },
+    {
+      "time": "2026-10-23T05:16:44Z",
+      "decision": "request_content_policy_block",
+      "tool": "get_my_bookings",
+      "upstream": "dannytran-boring-travel-trend-lab01-01-reservations"
+    },
+    {
+      "time": "2026-10-23T05:16:47Z",
+      "decision": "request_content_policy_block",
+      "tool": "search_hotels",
+      "upstream": "dannytran-boring-travel-trend-lab01-01-discovery"
+    }
+  ],
+  "launch_source": "AWS CLI-authorized guardrail retest",
+  "browser_test_launcher_verified": false,
+  "vision_one_event_correlation_verified": false,
+  "exact_classifier_cause_confirmed": false,
+  "paid_model_calls": 0
+}

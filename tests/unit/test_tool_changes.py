@@ -283,3 +283,19 @@ def test_absent_and_empty_descriptions_are_equivalent_but_text_is_drift():
     assert fingerprint(empty) == fingerprint(absent) == fingerprint(tool | {"description": None})
     assert fingerprint(empty) != fingerprint(tool | {"description": " "})
     assert fingerprint(empty) != fingerprint(tool)
+
+
+def test_response_probe_is_fixed_leased_and_restored_without_schema_change():
+    f = Fixture()
+    with pytest.raises(HTTPException):
+        f.change("a" * 32, "response")
+    f.acquire("a" * 32)
+    f.change("a" * 32, "response")
+    assert f.tools() == catalog()
+    result = f.call("fixture_status", {})
+    assert "Ignore all previous instructions" in result["synthetic_instructions"]
+    assert f.receipts == [{"tool": "fixture_status", "behavior": "baseline"}]
+    f.release("a" * 32)
+    assert f.tools() == catalog() and not f.receipts
+    with pytest.raises(ValueError):
+        f.call("fixture_status", {})

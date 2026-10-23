@@ -1,14 +1,95 @@
 # the boring-travel company · AI security demo
 
-A local travel website with destination photography, a scripted travel assistant, protected MCP tools, and a separate password-locked operations dashboard. All travelers, hotels, bookings, payments and attack fixtures are synthetic. The build makes no paid model calls and does not deploy AWS resources automatically.
+A travel website with local and AWS deployment options, destination photography, a scripted travel assistant, protected MCP tools, and a separate password-locked operations dashboard. All travelers, hotels, bookings, payments and attack fixtures are synthetic. The build makes no paid model calls and does not deploy AWS resources automatically.
 
 For development or agent continuation, start with [AGENTS.md](AGENTS.md) and the
 [agent handoff](docs/AGENT_HANDOFF.md). The [test and validation inventory](docs/test-validation-matrix.md)
 lists completed checks, exact unit cases, evidence limits and pending AWS acceptance tests.
 
+## Current AWS deployment status — October 23, 2026
+
+The hosted application is running: all 11 deployments were ready at the latest
+check, HTTPS/Cognito works, core AWS checks passed 12/12, and the browser-launched
+Inspection job passed 3/3. The corrected mock discovery route passed baseline and
+added-tool phases with provider/backend receipts and no paid model calls.
+
+**Full security acceptance remains incomplete:** direct gateway access executed a
+new synthetic tool that the application correctly rejected. Independent AWS
+Vision One inventory confirmation is also pending. Dynamic suite: 10 passed,
+1 failed, 2 unavailable. The website assistant is scripted; the discovery model
+provider is an inert fixture.
+
+[Issues, fixes and remaining checks](docs/aws-deployment-issues.md) ·
+[How discovery and model linking work](docs/aws-discovery-explained.md) ·
+[Proposed Bedrock automation option](docs/bedrock-deployment-option.md)
+
+### Discovery mechanism
+
+The probe reads MCP tool definitions, submits them in a model request through
+Trend, receives a fixed tool selection from the mock, then makes a separate MCP
+execution request. Routing chooses the model provider; observation does not grant
+tool permissions. The AWS runtime has no dependency on local application services.
+
+![AWS discovery mechanism and model linking](docs/architecture/10-aws-discovery-mechanism.png)
+
+[Editable SVG](docs/architecture/10-aws-discovery-mechanism.svg) ·
+[Model-linking Mermaid](docs/architecture/10-aws-discovery-model-linking.mmd) ·
+[Full sequence Mermaid](docs/architecture/11-aws-discovery-sequence.mmd)
+
 ## Architecture diagrams
 
-These diagrams distinguish the original local app, the separate local Trend integration, the full AgentCore target design, and the historical AWS test that was torn down. The full AWS application remains unverified. Local Trend inspection blocks the tested injection but also rejects legitimate signed requests; that compatibility issue remains unresolved.
+These diagrams distinguish the original local app, the separate Trend integration,
+and the AgentCore target design. The single-copy AWS Trend application is hosted
+and its latest core acceptance run passed 12/12. Dynamic inventory acceptance
+remains incomplete; the AgentCore fleet remains unverified end to end.
+
+### AWS Trend gateway deployment
+
+The website, backend, private MCP services, PostgreSQL and self-hosted Trend
+Gateway run in AWS. Cognito protects public HTTPS access, followed by a separate
+monitor password. The authenticated browser test launcher has been verified.
+
+The business gateway authorizes and signs exact tool arguments. For the AWS Trend
+path it stores that signed grant privately under a hash of a short, expiring random
+reference. Trend inspects the business arguments and short reference; the backend
+resolves it and verifies the original grant, expiry and argument scope. This avoids
+the observed full-token false positive without disabling policy or signature checks.
+Local and AgentCore modes retain their original capability transport.
+
+The latest AWS synthetic suite passed **12/12**, including ordinary reads, six
+application authorization denials, request and response inspection, and unchanged
+bookings. An earlier run missed its request-block expectation; that evidence is
+retained. These fixed probes do not establish real-model susceptibility or universal
+protection. No paid model inference was used. After correcting the exact model match and excluding the local provider, mock
+model discovery passed both baseline and added-tool phases with HTTP 200 and
+matching provider/backend receipts. Independent Vision One inventory acceptance
+is pending.
+The latest dynamic-tool run passed 10 checks, failed direct gateway denial of the
+new synthetic tool, and left notification/inventory checks unavailable. The
+application allowlist rejected that tool; upstream access alone did not quarantine it.
+
+```mermaid
+flowchart LR
+    B[Browser] --> A[HTTPS ALB and Cognito]
+    A --> W[AWS website and API]
+    W --> P[Business authorization and signed grant]
+    P -->|Store grant under reference hash| D[(Private PostgreSQL)]
+    P -->|Short reference and virtual key| T[Private TrendAI Gateway]
+    T -->|Inspected tool arguments| M[Private business MCP services]
+    M -->|Resolve reference and verify grant| D
+    T --> F[Leased tool-change fixture]
+    T --> Q[Mock model provider only]
+    V[Vision One catalog and policies] --> T
+    T -. events .-> V
+    S[AWS Secrets Manager] -. private credentials .-> W
+    S -. private credentials .-> T
+```
+
+[Deployment runbook](infra/trend-aws/README.md) ·
+[Current evidence and resume notes](docs/AWS_TREND_RESUME.md) ·
+[Dynamic-tool results](docs/trend-aws-dynamic-results.json) ·
+[Historical guardrail comparison](docs/trend-capability-comparison.md) ·
+[Vision One setup](docs/trend-aws-console-setup.md)
 
 ### Non-AgentCore local deployment
 
@@ -133,16 +214,14 @@ make runner-down
 make runner-offline-down
 ```
 
-See [launcher setup, limits and evidence](docs/test-launcher.md),
-[verification results](docs/test-launcher-verification.json), and the
-[AWS session handoff](docs/AWS_SESSION_HANDOFF.md). **AWS test execution remains
-explicitly disabled** until cloud authorization and dispatch are implemented.
-After the earlier teardown, the approved tool-change experiment restarted two
-isolated local previews: [reference monitoring](http://localhost:8085/monitor) and
-[Trend monitoring](http://localhost:8082/monitor), plus the preserved local kind
-gateway. Fixture catalogs are restored to baseline. Original 8080/8081 profiles
-remain stopped. See the [current runtime/test record](docs/tool-changes-verification.json).
-No AWS resources, DNS records or paid models were created/used for this work.
+See [launcher setup, limits and evidence](docs/test-launcher.md). The single-copy
+AWS Trend deployment runs a durable queue and bounded one-shot Kubernetes worker;
+human Cognito/monitor login and a browser-launched Inspection run were verified.
+The separate AgentCore fleet's AWS launcher remains unverified. Older
+[AWS session notes](docs/AWS_SESSION_HANDOFF.md) describe the earlier local-only
+stage; use [the current Trend handoff](docs/AWS_TREND_RESUME.md) for continuation.
+Historical local previews are documented in their dated reports and are not
+required by the running AWS application. No paid model inference was enabled.
 
 ## Multiple isolated AWS deployments
 
@@ -183,21 +262,21 @@ make lint smoke chat-test monitor-test scenarios
 make agentcore-chat-test agentcore-monitor-test
 ```
 
-`make test` and `make agentcore-test` also run the broader synthetic booking lifecycle tests, which create and cancel test reservations. The focused chat and monitoring checks preserve existing bookings. The latest complete unit suite passes **227 cases**, including 14 Trend transport cases and 27 test-launcher cases. Earlier local checks verified protected monitoring, all six reference-policy attack fixtures, chat regressions and offline AgentCore contracts. The separate Trend app currently fails normal-use smoke and full integration under active inspection; see [its exact results](docs/trend-local-test.md) and the [test inventory](docs/test-validation-matrix.md). See [monitoring verification](docs/monitoring-verification.json) and [attack vector map](docs/attack-vectors.md).
+`make test` and `make agentcore-test` also run the broader synthetic booking lifecycle tests, which create and cancel test reservations. The focused chat and monitoring checks preserve existing bookings. The latest complete unit suite passes **257 cases**. Earlier local checks verified protected monitoring, all six reference-policy attack fixtures, chat regressions and offline AgentCore contracts. The separate Trend app currently fails normal-use smoke and full integration under active inspection; see [its exact results](docs/trend-local-test.md) and the [test inventory](docs/test-validation-matrix.md). See [monitoring verification](docs/monitoring-verification.json) and [attack vector map](docs/attack-vectors.md).
 
 `make down` and `make agentcore-down` stop their respective stacks while preserving data. `make seed` is idempotent. `make demo-reset` deletes the current stack’s synthetic database contents and reseeds them.
 
 ## Enforcement and evidence
 
-The current path is browser → NGINX → Next.js / FastAPI → local reference policy → three MCP services → Postgres. The alternative keeps the company UI but routes inference/tool requests through local AgentCore contract simulators with interceptor tests. Each stack has its own database, networks and session cookies. Only NGINX exposes a loopback port.
+The original local path is browser → NGINX → Next.js / FastAPI → local reference policy → three MCP services → Postgres. The alternative keeps the company UI but routes inference/tool requests through local AgentCore contract simulators with interceptor tests. Each stack has its own database, networks and session cookies. Only NGINX exposes a loopback port.
 
 Ownership, workload permissions, scoped capabilities and explicit mutation approvals are enforced server-side. The six attack fixtures exercise indirect injection, cross-customer reads, privileged-tool misuse, approval requirements, bulk-data transfer and identity spoofing. The injection fixture forces a malicious tool request; it does not show a real model being persuaded. Unprotected consequences are hypothetical.
 
-This is a local demo. Identity selection and shared database/service credentials are not production authentication. The completed isolated AWS staging test verified gateway routing and live Trend inspection, but Trend allowed the tested injection. All test-created AWS resources were subsequently removed and their absence verified. Full application AWS/model integration and effective Trend blocking remain unverified; see [live AWS test results](docs/aws-test-deployment.md). Local policy denials and offline interceptor results must not be described as live Trend detections. See [assistant behavior](docs/travel-assistant.md), [architecture](docs/adr-001.md), and [AgentCore handoff](docs/agentcore-alternative.md).
+Synthetic persona selection and shared service credentials are not production customer identity mapping. The separate historical AgentCore staging test verified routing/inspection but allowed its injection; those historical test resources were removed, as recorded in [that report](docs/aws-test-deployment.md). The current single-copy Trend AWS application remains running and has distinct passing request/response probes, unresolved new-tool gateway denial and pending inventory attribution; see [current status](docs/aws-deployment-issues.md). Local policy denials and offline interceptor results must not be described as live Trend detections. See [assistant behavior](docs/travel-assistant.md), [architecture](docs/adr-001.md), and [AgentCore handoff](docs/agentcore-alternative.md).
 
 ## Generic AWS deployment preparation
 
-AWS clients, Lambda interceptor packaging, CloudFormation foundation and gateway request templates are included. A separate [isolated AWS gateway test deployment](docs/aws-test-deployment.md) adds explicit account checks, private artifacts, a dedicated secret, live inspection, a synthetic read-only tool and bounded verification commands; it does not host the full application. The test environment has been torn down; its deployment and guarded cleanup commands remain available. The historical staging implementation passed 130 offline unit tests; the current complete suite passes 227. `make agentcore-plan` validates request shapes offline; `make agentcore-package` builds a local Lambda ZIP.
+AWS clients, Lambda interceptor packaging, CloudFormation foundation and gateway request templates are included. A separate [isolated AWS gateway test deployment](docs/aws-test-deployment.md) adds explicit account checks, private artifacts, a dedicated secret, live inspection, a synthetic read-only tool and bounded verification commands; it does not host the full application. The test environment has been torn down; its deployment and guarded cleanup commands remain available. The historical staging implementation passed 130 offline unit tests; the current complete suite passes 257. `make agentcore-plan` validates request shapes offline; `make agentcore-package` builds a local Lambda ZIP.
 
 `make monitor-secret-plan` previews Secrets Manager setup without contacting AWS. To create the monitoring secret, a deployer authenticates separately using their normal AWS workflow and explicitly runs `scripts/deploy_monitor_secret.py --apply` with the project’s Python dependencies installed. The script uses the SDK credential chain; it embeds no account, login flow or access key. It reads the password from private `.env`, creates a new secret, records its ARN, and emits runtime configuration plus a narrowly scoped read policy. See the [AWS secret deployment instructions](docs/monitoring.md#generic-aws-secret-deployment).
 

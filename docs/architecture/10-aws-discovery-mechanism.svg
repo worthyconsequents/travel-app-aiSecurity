@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1240" viewBox="0 0 1600 1240" role="img" aria-labelledby="title desc"><title id="title">AWS tool discovery: catalog, model route and tool execution</title><desc id="desc">The probe reads an MCP catalog, submits its definitions to a model request routed through an alias to the AWS mock, then separately executes the selected tool. Routing passed; AWS inventory verification and gateway new-tool denial remain incomplete.</desc><defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#176b70"/></marker></defs><rect width="1600" height="1240" fill="#f4f7fb"/><style>text{font-family:Arial,Helvetica,sans-serif;fill:#14283e}.title{font-size:32px;font-weight:700}.subtitle{font-size:18px;fill:#42566d}.head{font-size:22px;font-weight:700}.body{font-size:18px}.small{font-size:16px;fill:#42566d}.mono{font-family:Menlo,monospace;font-size:16px}.arrow{fill:none;stroke:#176b70;stroke-width:3;marker-end:url(#arrow)}</style>
+<text x="50" y="58" class="title">boring-travel | How AWS tool discovery works</text>
+<text x="50" y="94" class="subtitle">A fixed diagnostic with an inert mock provider. No paid LLM inference. All runtime services are in AWS.</text>
+<text x="50" y="143" class="head">A. Read the tool catalog — this is MCP traffic</text>
+<rect x="50" y="166" width="430" height="132" rx="14" fill="#ffffff" stroke="#c8d4e1"/>
+<text x="70" y="199" class="head">1  AWS diagnostic probe</text>
+<text x="70" y="230" class="small">Acquire a short fixture lease.</text>
+<text x="70" y="255" class="small">Request tools/list through Trend.</text>
+<rect x="585" y="166" width="430" height="132" rx="14" fill="#ffffff" stroke="#c8d4e1"/>
+<text x="605" y="199" class="head">Trend MCP proxy · port 8081</text>
+<text x="605" y="230" class="small">Application virtual key authenticates client.</text>
+<text x="605" y="255" class="small">MCP service key authenticates upstream.</text>
+<rect x="1120" y="166" width="430" height="132" rx="14" fill="#ffffff" stroke="#c8d4e1"/>
+<text x="1140" y="199" class="head">Private MCP fixture</text>
+<text x="1140" y="230" class="small">Baseline: fixture_status</text>
+<text x="1140" y="255" class="small">Added phase: also fixture_new_tool</text>
+<path d="M480 205 L585 205" class="arrow"/>
+<path d="M1015 205 L1120 205" class="arrow"/>
+<text x="50" y="333" class="body">2  Catalog definitions return to the probe: tool names + descriptions + JSON input schemas.</text>
+<text x="50" y="390" class="head">B. Submit those definitions in a model request — the route chooses the provider</text>
+<text x="50" y="424" class="body">3  Probe sends POST /v1/chat/completions with model = namespace-discovery-probe and tools[] = current definitions.</text>
+<rect x="50" y="452" width="270" height="135" rx="14" fill="#ffffff" stroke="#c8d4e1"/>
+<text x="70" y="485" class="head">Requested model</text>
+<text x="70" y="516" class="small">namespace-</text>
+<text x="70" y="541" class="small">discovery-probe</text>
+<rect x="360" y="452" width="270" height="135" rx="14" fill="#ffffff" stroke="#c8d4e1"/>
+<text x="380" y="485" class="head">Exact routing rule</text>
+<text x="380" y="516" class="small">Enabled exact match</text>
+<text x="380" y="541" class="small">Selects the AWS alias</text>
+<rect x="670" y="452" width="270" height="135" rx="14" fill="#ffffff" stroke="#c8d4e1"/>
+<text x="690" y="485" class="head">Alias</text>
+<text x="690" y="516" class="small">namespace-mock</text>
+<text x="690" y="541" class="small">AWS weight 1 / 100%</text>
+<rect x="980" y="452" width="270" height="135" rx="14" fill="#ffffff" stroke="#c8d4e1"/>
+<text x="1000" y="485" class="head">Provider + model</text>
+<text x="1000" y="516" class="small">Provider: namespace-mock</text>
+<text x="1000" y="541" class="small">Model: dannytran-mock-model</text>
+<rect x="1290" y="452" width="260" height="135" rx="14" fill="#ffffff" stroke="#c8d4e1"/>
+<text x="1310" y="485" class="head">4  AWS mock service</text>
+<text x="1310" y="516" class="small">mock-model-provider:8000</text>
+<text x="1310" y="541" class="small">Fixed response; no LLM SDK</text>
+<path d="M320 518 L360 518" class="arrow"/>
+<path d="M630 518 L670 518" class="arrow"/>
+<path d="M940 518 L980 518" class="arrow"/>
+<path d="M1250 518 L1290 518" class="arrow"/>
+<text x="50" y="623" class="mono">namespace = dannytran-boring-travel-trend-lab01-01</text>
+<text x="50" y="653" class="small">Local provider weight 0 = excluded. Fallback aliases empty. Provider key is separate from the application virtual key.</text>
+<text x="50" y="705" class="head">C. A model response selects a tool; a separate MCP request actually executes it</text>
+<rect x="50" y="730" width="430" height="145" rx="14" fill="#ffffff" stroke="#c8d4e1"/>
+<text x="70" y="763" class="head">5  Probe receives tool_calls</text>
+<text x="70" y="794" class="small">Mock selects fixture_status, or the new tool</text>
+<text x="70" y="819" class="small">when its definition is present.</text>
+<text x="70" y="844" class="small">The model response itself runs no tool.</text>
+<rect x="585" y="730" width="430" height="145" rx="14" fill="#ffffff" stroke="#c8d4e1"/>
+<text x="605" y="763" class="head">6  Trend MCP proxy</text>
+<text x="605" y="794" class="small">Probe submits tools/call independently.</text>
+<text x="605" y="819" class="small">Gateway access rules and inspection apply.</text>
+<text x="605" y="844" class="small">This is a controlled fixture test.</text>
+<rect x="1120" y="730" width="430" height="145" rx="14" fill="#ffffff" stroke="#c8d4e1"/>
+<text x="1140" y="763" class="head">Private MCP fixture</text>
+<text x="1140" y="794" class="small">Executes the selected synthetic tool.</text>
+<text x="1140" y="819" class="small">Records an independent backend receipt.</text>
+<text x="1140" y="844" class="small">Returns the tool result through Trend.</text>
+<path d="M480 796 L585 796" class="arrow"/>
+<path d="M1015 796 L1120 796" class="arrow"/>
+<text x="50" y="914" class="body">7  Probe verifies provider + backend receipts, releases the lease and restores the baseline.</text>
+<rect x="50" y="955" width="710" height="115" rx="14" fill="#e5f4ee" stroke="#c8d4e1"/>
+<text x="70" y="988" class="head">Verified in AWS</text>
+<text x="70" y="1019" class="small">Baseline + added-tool phases passed; HTTP 200.</text>
+<text x="70" y="1044" class="small">Matching provider/backend receipts. Zero paid model calls.</text>
+<rect x="800" y="955" width="750" height="115" rx="14" fill="#fff2d9" stroke="#c8d4e1"/>
+<text x="820" y="988" class="head">Separate acceptance still required</text>
+<text x="820" y="1019" class="small">Vision One inventory: AWS console attribution not yet confirmed.</text>
+<text x="820" y="1044" class="small">New-tool ACL: application denied; direct gateway call executed.</text>
+<text x="50" y="1118" class="body">Vision One can observe the tool definitions in model traffic. Observing a tool does not approve it.</text>
+<text x="50" y="1150" class="small">Earlier local inventory population was independently observed; AWS routing/execution now passes, but AWS inventory remains pending.</text>
+<text x="50" y="1183" class="small">Explicit catalog refresh is tested. Automatic listChanged notifications and real-model attack susceptibility are not verified.</text>
+</svg>
